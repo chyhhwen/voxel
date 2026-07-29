@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<style>
+  html,body{margin:0;height:100%;background:#111;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #c{width:100%;max-width:100vw;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#88ccfe}
+  #hud{position:fixed;top:8px;left:8px;color:#fff;font:12px/1.4 monospace;
+       text-shadow:0 1px 2px #000;pointer-events:none;opacity:.85}
+  #cross{position:fixed;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;
+         border:1px solid rgba(255,255,255,.7);border-radius:50%;pointer-events:none}
+  .btn{position:fixed;bottom:16px;width:56px;height:56px;border-radius:50%;
+       display:flex;align-items:center;justify-content:center;font:22px/1 monospace;
+       color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4);
+       user-select:none;touch-action:none;z-index:2}
+  #bd{right:88px;bottom:84px}#bp{right:16px;bottom:84px}
+  #bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+       display:flex;gap:6px;z-index:2}
+  .slot{width:42px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
+        position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);cursor:pointer;touch-action:none}
+  .slot.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
+  .slot span{position:absolute;top:1px;left:4px;font:10px monospace;color:#fff;text-shadow:0 1px 1px #000}
+  #clock{position:fixed;top:8px;right:10px;color:#fff;font:14px monospace;
+         text-shadow:0 1px 2px #000;pointer-events:none;opacity:.9}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c"></canvas></div>
+<div id="hud">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 挖 · 右鍵/E 放<br>
+選方塊:1–4 / 滾輪 / 點欄位 · 按住 T 快轉時間 · G 陰影開關<br>
+R 切換天氣(晴/雨/雪) · X 重置世界 · 世界自動存檔(下載後開啟才會保留)</div>
+<div id="cross"></div>
+<div id="clock">☀ 08:24</div>
+<div id="bd" class="btn">⛏</div>
+<div id="bp" class="btn">＋</div>
+<div id="bar"></div>
+<script>
+M=Math,S=M.sin,C=M.cos,A=M.abs,mn=M.min,mx=M.max,
+W=280,H=168,Z=32,hw=W/2,
+D=new Uint32Array(W*H),
+N=new ImageData(new Uint8ClampedArray(D.buffer),W,H),
+w=new Uint8Array(32768),
+P={x:16,y:20,z:16,a:0,b:0,g:0},
+J=0,dc=0,tod=.35,SHD=1,SC=new Int8Array(196608),wthr=0,wt=0,sv=8,PT=[],ts=[],K={},drag=0,
+T=c.getContext('2d'),
+I=(x,y,z)=>(y*32+z)*32+x,
+B=(x,y,z)=>(x|y|z)&~31?0:w[I(x,y,z)];
+c.width=W;c.height=H;
+
+// ---- world generation ----
+GEN=()=>{
+  w.fill(0);
+  for(i=1024;i--;){
+    X=i%Z;Y=i>>5;
+    h=12+4*S(X/4)*C(Y/4)|0;
+    for(y=Z;y--;)w[I(X,y,Y)]=y<h+3?2:y<h?1:0;
+    if(h<15&M.random()<.05){
+      Th=4+(M.random()*2|0);
+      for(k=Th;k--;)w[I(X,h+k,Y)]=3;                                   // trunk
+      for(k=27;k--;)if(M.random()<.85)
+        w[I(k%3+1+X,h+Th+2+(k/9|0),Y+(k/3|0)%3+1)]=4;                  // leaves
+    }
+  }
+  for(x=0;x<32;x++)for(z=0;z<32;z++)if(x==0|x==31|z==0|z==31)          // glass boundary walls
+    for(y=0;y<32;y++)if(!w[I(x,y,z)])w[I(x,y,z)]=5;
+};
+GEN();
+
+// ---- restore saved world (works when the file is opened directly; sandboxed previews may skip) ----
+try{
+  if(localStorage.voxelW){
+    ss=atob(localStorage.voxelW);for(i=0;i<32768;i++)w[i]=ss.charCodeAt(i);
+    pp=JSON.parse(localStorage.voxelP||'0');if(pp){P=pp;P.g=0;P.t=0;}
+    if(localStorage.voxelT)tod=+localStorage.voxelT;
+  }
+}catch(e){}
+
+// ---- DDA voxel raycast ----
+R=(p,d)=>{
+  X=p.x|0;Y=p.y|0;Z=p.z|0;
+  l=d.x;n=d.y;o=d.z;
+  a=A(1/l);b=A(1/n);e=A(1/o);
+  q=l>0?1:-1;r=n>0?1:-1;s=o>0?1:-1;
+  u=(X+(l>0)-p.x)/l;
+  v=(Y+(n>0)-p.y)/n;
+  t=(Z+(o>0)-p.z)/o;
+  gc=0;
+  for(i=24;i--;){
+    if(g=B(X,Y,Z)){
+      if(g!=5)return{h:1,n:f,b:g,gc:gc};                 // opaque hit
+      gc++;                                              // glass: tint & pass through
+    }
+    u<v?u<t?(u+=a,X+=q,f=0):(t+=e,Z+=s,f=2):v<t?(v+=b,Y+=r,f=1):(t+=e,Z+=s,f=2);
+  }
+  return{h:0,gc:gc};
+};
+
+// ---- AABB collision + gravity resolve ----
+U=(ax,v)=>{
+  r=.3;x0=P.x-r;x1=P.x+r;z0=P.z-r;z1=P.z+r;y0=P.y;y1=P.y+1.6;
+  for(i=y0|0;i<=y1|0;i++)
+   for(j=z0|0;j<=z1|0;j++)
+    for(k=x0|0;k<=x1|0;k++)
+     B(k,i,j)&&x1>k&&x0<k+1&&y1>i&&y0<i+1&&z1>j&&z0<j+1&&
+      (ax?ax-1?P.z=(v>0?j-r:j+1+r):(P.y=(v>0?i-1.6:i+1),P.g=0):(P.x=(v>0?k-r:k+1+r)));
+};
+
+// ---- targeting: raycast from eye through crosshair (reach = 7 blocks) ----
+target=()=>{
+  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);           // center ray = forward look dir
+  px=P.x;py=P.y+1.5;pz=P.z;
+  dxr=sx*cp;dyr=sp;dzr=cx*cp;
+  gx=px|0;gy=py|0;gz=pz|0;
+  stx=dxr>0?1:-1;sty=dyr>0?1:-1;stz=dzr>0?1:-1;
+  tdx=A(1/dxr);tdy=A(1/dyr);tdz=A(1/dzr);
+  tmx=(gx+(dxr>0)-px)/dxr;tmy=(gy+(dyr>0)-py)/dyr;tmz=(gz+(dzr>0)-pz)/dzr;
+  ax=gx;ay=gy;az=gz;                                  // adjacent (empty) cell = previous step
+  for(n2=7;n2--;){
+    if((bl=B(gx,gy,gz))&&bl!=5)return[gx,gy,gz,ax,ay,az];
+    ax=gx;ay=gy;az=gz;
+    tmx<tmy?tmx<tmz?(tmx+=tdx,gx+=stx):(tmz+=tdz,gz+=stz):tmy<tmz?(tmy+=tdy,gy+=sty):(tmz+=tdz,gz+=stz);
+  }
+  return 0;
+};
+dig=()=>{o=target();if(o)w[I(o[0],o[1],o[2])]=0;};
+place=()=>{o=target();if(o){
+  ax=o[3];ay=o[4];az=o[5];
+  if((ax|ay|az)&~31)return;                           // out of world
+  if(B(ax,ay,az))return;                              // occupied
+  if(ax+1>P.x-.3&ax<P.x+.3&az+1>P.z-.3&az<P.z+.3&ay+1>P.y&ay<P.y+1.6)return; // inside player
+  w[I(ax,ay,az)]=sel;
+}};
+
+// ---- project a world point to screen pixels (inverse of the ray map) ----
+// camera orthonormal basis: F=(sx*cp,sp,cx*cp)  right=(cx,0,-sx)  up=(-sx*sp,cp,-cx*sp)
+PR=(wx,wy,wz)=>{
+  vx=wx-P.x;vy=wy-(P.y+1.5);vz=wz-P.z;
+  fF=vx*sx*cp+vy*sp+vz*cx*cp;
+  if(fF<=.05)return 0;                               // behind camera
+  fR=vx*cx-vz*sx;
+  fU=-vx*sx*sp+vy*cp-vz*cx*sp;
+  return[(fR/fF+1)*hw,(.6-fU/fF)*hw];
+};
+
+// ---- shadow ray: from a point toward the sun, is the sky blocked? ----
+SH=(px,py,pz)=>{
+  gx=px|0;gy=py|0;gz=pz|0;
+  Sx=sdx>0?1:-1;Sy=sdy>0?1:-1;Sz=sdz>0?1:-1;
+  Tx=(gx+(sdx>0)-px)/sdx;Ty=(gy+(sdy>0)-py)/sdy;Tz=(gz+(sdz>0)-pz)/sdz;
+  Dx=A(1/sdx);Dy=A(1/sdy);Dz=A(1/sdz);
+  for(ns=16;ns--;){
+    Tx<Ty?Tx<Tz?(Tx+=Dx,gx+=Sx):(Tz+=Dz,gz+=Sz):Ty<Tz?(Ty+=Dy,gy+=Sy):(Tz+=Dz,gz+=Sz);
+    if((bl=B(gx,gy,gz))&&bl!=5)return 1;               // opaque block casts shadow
+  }
+  return 0;
+};
+
+// ---- input ----
+c.ontouchstart=c.ontouchmove=c.ontouchend=e=>(e.preventDefault(),ts=e.touches);
+bd=document.getElementById('bd');bp=document.getElementById('bp');clk=document.getElementById('clock');
+bd.ontouchstart=e=>{e.preventDefault();e.stopPropagation();dig();};
+bp.ontouchstart=e=>{e.preventDefault();e.stopPropagation();place();};
+bd.onclick=()=>dig();bp.onclick=()=>place();
+
+// ---- hotbar / block palette ----
+TY=[1,2,3,4];                                        // selectable block ids
+COL=['#F4D87E','#705030','#403020','#206020'];       // matching colours
+NM=['沙土','泥土','木頭','樹葉'];
+sel=2;slots=[];bar=document.getElementById('bar');
+TY.forEach((ty,si)=>{
+  el=document.createElement('div');
+  el.className='slot';el.style.background=COL[si];el.title=NM[si];
+  el.innerHTML='<span>'+(si+1)+'</span>';
+  el.onclick=()=>selBlock(ty);
+  el.ontouchstart=ev=>{ev.preventDefault();ev.stopPropagation();selBlock(ty);};
+  bar.appendChild(el);slots.push(el);
+});
+selBlock=t=>{sel=t;slots.forEach((s,si)=>s.classList.toggle('on',TY[si]==sel));};
+selBlock(2);
+onwheel=e=>{e.preventDefault();i2=(TY.indexOf(sel)+(e.deltaY>0?1:3))%4;selBlock(TY[i2]);};
+for(i=200;i--;)PT.push({x:M.random()*W,y:M.random()*H,ph:M.random()*6.28}); // rain/snow
+
+onkeydown=e=>{K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();if(e.key>='1'&&e.key<='4')selBlock(+e.key);
+  if(e.key=='g')SHD^=1;
+  if(e.key=='r')wthr=(wthr+1)%3;
+  if(e.key=='x'){GEN();P.x=16;P.y=30;P.z=16;P.g=0;try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');}catch(e){}}
+};
+onkeyup=e=>K[e.key.toLowerCase()]=0;
+c.oncontextmenu=e=>e.preventDefault();
+c.onmousedown=e=>{
+  if(document.pointerLockElement==c){e.button==2?place():dig();}
+  else{drag=1;c.requestPointerLock&&c.requestPointerLock();}
+};
+onmouseup=()=>drag=0;
+onmousemove=e=>{
+  if(document.pointerLockElement==c||drag){
+    P.a+=e.movementX*.003;
+    P.b=mx(-1.5,mn(1.5,P.b-e.movementY*.003));
+  }
+};
+
+// ---- main loop ----
+(L=tm=>{
+  dt=mn((tm-P.t||0)/1e3,.1);P.t=tm;
+  mu=mv=ma=mb=0;lc=rc=0;cw=c.clientWidth;ch=c.clientHeight;
+  for(tt of ts){
+    X=tt.clientX;Y=tt.clientY;
+    if(X<cw/2){mu=(X-cw/4)/50;mv=(Y-ch/2)/50;lc++;}
+    else{ma=(X-cw*.75)/50;mb=(Y-ch/2)/50;rc++;}
+  }
+  if(K.w)mv=1;if(K.s)mv=-1;if(K.a)mu=-1;if(K.d)mu=1;
+  kj=K[' ']?1:0;
+  mu=mx(-1,mn(1,mu));mv=mx(-1,mn(1,mv));
+  J=mx(0,J-dt);
+  dc=mx(0,dc-dt);
+  if((K.f||K.e)&&dc==0){K.f?dig():place();dc=.15;}
+  if(((lc>0&&rc>0)||kj)&&P.g==0&&J==0){P.g=8;J=.35;}
+  sp=5*dt;
+  P.g-=18*dt;
+  P.a+=ma*dt;
+  P.b=mx(-1.5,mn(1.5,P.b+mb*dt));
+  cx=C(P.a);sx=S(P.a);
+  vx=(mu*cx+mv*sx)*sp;
+  vz=(-mu*sx+mv*cx)*sp;
+  P.x+=vx;U(0,vx);
+  P.z+=vz;U(2,vz);
+  P.y+=P.g*dt;U(1,P.g);
+  if(P.y<-10){P.x=16;P.y=30;P.z=16;P.g=0;}
+  // ---- day / night cycle ----
+  tod=(tod+dt/1440*(K.t?100:1))%1;                   // full day = 24 min (hold T = 100x preview)
+  sunA=(tod-.25)*6.2832;sunEl=S(sunA);               // sun elevation -1..1
+  sdx=C(sunA);sdy=sunEl;sdz=.15;sl=M.sqrt(sdx*sdx+sdy*sdy+sdz*sdz);
+  sdx/=sl;sdy/=sl;sdz/=sl;                            // normalized sun direction
+  light=mx(.22,mn(1,sunEl*1.4+.5));                   // ambient brightness
+  dayf=mx(0,mn(1,sunEl*1.6+.5));
+  zR=8+62*dayf;zG=12+128*dayf;zB=35+200*dayf;         // zenith colour
+  hR=22+150*dayf;hG=32+170*dayf;hB=58+190*dayf;       // horizon colour
+  tw=mx(0,1-A(sunEl)*3);                              // twilight (near horizon crossing)
+  hR+=(250-hR)*tw*.8;hG+=(145-hG)*tw*.8;hB+=(88-hB)*tw*.8;
+  wt+=dt*.35;                                        // cloud drift
+  oc=wthr?.72:1;light*=oc;                           // overcast dims everything
+  zR*=oc;zG*=oc;zB*=oc;hR*=oc;hG*=oc;hB*=oc;
+  ct=wthr?-.1:.42;                                   // cloud threshold (lower = more cloud)
+  cbr=(wthr?140:70)+(wthr?70:180)*dayf;              // cloud brightness
+  cp=C(P.b);sp=S(P.b);
+  if(SHD)SC.fill(-1);                                 // reset per-face shadow cache for this frame
+  for(k=W*H;k--;){
+    x=k%W;y=k/W|0;
+    dx=x/hw-1;dy=.6-y/hw;
+    d={x:sx*cp+cx*dx-sx*sp*dy,y:sp+cp*dy,z:cx*cp-sx*dx-cx*sp*dy};
+    h=R({x:P.x,y:P.y+1.5,z:P.z},d);
+    if(h.h){
+      Q=[0,16046206,7360560,4206624,2121760][h.b];
+      h.n==0?(nrx=-q,nry=0,nrz=0):h.n==1?(nrx=0,nry=-r,nrz=0):(nrx=0,nry=0,nrz=-s); // face normal
+      diff=mx(0,nrx*sdx+nry*sdy+nrz*sdz);             // how much the face faces the sun
+      if(SHD&&dayf>.02&&diff>0){                       // shadow (cached per block-face)
+        fi=I(X,Y,Z)*6+h.n*2+(nrx+nry+nrz>0?1:0);
+        sc=SC[fi];if(sc<0)sc=SC[fi]=SH(X+.5+nrx,Y+.5+nry,Z+.5+nrz);
+        if(sc)diff=0;
+      }
+      m=light*(.6+.22*mx(0,nry))+diff*dayf*.8;        // sky ambient (top-lit) + sun
+      cr=(Q>>16)*m;cg=((Q>>8)&255)*m;cb=(Q&255)*m;
+    }else{                                            // ---- sky ----
+      rx=d.x;ry=d.y;rz=d.z;rl=M.sqrt(rx*rx+ry*ry+rz*rz);
+      up=mx(0,mn(1,ry/rl*1.6+.25));
+      cr=hR+(zR-hR)*up;cg=hG+(zG-hG)*up;cb=hB+(zB-hB)*up;
+      dts=(rx*sdx+ry*sdy+rz*sdz)/rl;                  // cos(angle to sun)
+      if(sunEl>-.06&&dts>.9965){cr=255;cg=250;cb=225;}          // sun disk
+      else if(sunEl>-.06&&dts>.9){gl=(dts-.9)/.1;gl*=gl;cr+=(255-cr)*gl*.5;cg+=(238-cg)*gl*.5;cb+=(180-cb)*gl*.4;} // sun glow
+      else if(sunEl<.12&&-dts>.9975){cr=235;cg=240;cb=250;}     // moon disk
+      if(sunEl<.06){                                             // ---- stars ----
+        nf=mx(0,mn(1,-sunEl*4));snx=rx/rl;sny=ry/rl;snz=rz/rl;
+        if(sny>.03){
+          qx=snx*92|0;qy=sny*92|0;qz=snz*92|0;
+          hs=(qx*1836311903^qy*2109839^qz*971)&2047;
+          if(hs<3){tk=.6+.4*S(hs*3+tod*60);st=210*nf*tk;cr+=st;cg+=st;cb+=st+8;}
+        }
+      }
+      if(ry>.05){                                                // ---- clouds ----
+        cfx=P.x+rx/ry*20;cfz=P.z+rz/ry*20;                       // project onto cloud plane
+        nv=S(cfx*.15+wt)*C(cfz*.13-wt*.5);
+        cov=mx(0,mn(1,(nv-ct)*2))*mx(0,mn(1,(ry-.05)*5));
+        cr+=(cbr-cr)*cov;cg+=(cbr-cg)*cov;cb+=(cbr+6-cb)*cov;
+      }
+    }
+    if(h.gc){                                         // glass tint toward sky
+      aG=mn(.6,h.gc*.24);
+      cr+=(hR-cr)*aG;cg+=(hG-cg)*aG;cb+=(hB-cb)*aG;
+    }
+    cr=cr>255?255:cr;cg=cg>255?255:cg;cb=cb>255?255:cb;
+    D[k]=0xFF000000|(cb&255)<<16|(cg&255)<<8|cr&255;
+  }
+  T.putImageData(N,0,0);
+  // ---- highlight the face the crosshair points at ----
+  TG=target();
+  if(TG&&(TG[0]-TG[3]|TG[1]-TG[4]|TG[2]-TG[5])){
+    gx=TG[0];gy=TG[1];gz=TG[2];
+    dfx=gx-TG[3];dfy=gy-TG[4];dfz=gz-TG[5];
+    C4=dfx?[[gx+(dfx<0),gy,gz],[gx+(dfx<0),gy+1,gz],[gx+(dfx<0),gy+1,gz+1],[gx+(dfx<0),gy,gz+1]]
+      :dfy?[[gx,gy+(dfy<0),gz],[gx+1,gy+(dfy<0),gz],[gx+1,gy+(dfy<0),gz+1],[gx,gy+(dfy<0),gz+1]]
+      :[[gx,gy,gz+(dfz<0)],[gx+1,gy,gz+(dfz<0)],[gx+1,gy+1,gz+(dfz<0)],[gx,gy+1,gz+(dfz<0)]];
+    bad=0;T.beginPath();
+    for(m=0;m<4;m++){p=PR(C4[m][0],C4[m][1],C4[m][2]);if(!p){bad=1;break;}m?T.lineTo(p[0],p[1]):T.moveTo(p[0],p[1]);}
+    if(!bad){T.closePath();T.lineWidth=1.5;T.strokeStyle='rgba(0,0,0,.7)';T.stroke();T.lineWidth=.8;T.strokeStyle='#fff';T.stroke();}
+  }
+  // ---- precipitation overlay ----
+  if(wthr){
+    if(wthr==1){T.strokeStyle='rgba(190,215,255,.5)';T.lineWidth=1;T.beginPath();}
+    else T.fillStyle='rgba(255,255,255,.9)';
+    for(pt of PT){
+      if(wthr==1){pt.y+=420*dt;pt.x+=45*dt;}else{pt.y+=72*dt;pt.x+=S(pt.y*.05+pt.ph)*22*dt+9*dt;}
+      if(pt.y>H+2){pt.y=-4;pt.x=M.random()*W;}
+      if(pt.x>W+2)pt.x-=W+6;
+      if(wthr==1){T.moveTo(pt.x,pt.y);T.lineTo(pt.x-5,pt.y-11);}else T.fillRect(pt.x,pt.y,1.6,1.6);
+    }
+    if(wthr==1)T.stroke();
+  }
+  // ---- autosave (silently skipped in sandboxed previews) ----
+  sv-=dt;
+  if(sv<=0){sv=8;try{ss='';for(i=0;i<32768;i++)ss+=String.fromCharCode(w[i]);
+    localStorage.voxelW=btoa(ss);localStorage.voxelP=JSON.stringify({x:P.x,y:P.y,z:P.z,a:P.a,b:P.b,g:0});localStorage.voxelT=tod;}catch(e){}}
+  hh=tod*24|0;mm=(tod*24-hh)*60|0;
+  clk.textContent=(sunEl>.12?'☀':sunEl<-.12?'🌙':'🌆')+(wthr==1?'🌧':wthr==2?'❄':'')+' '+(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+  requestAnimationFrame(L);
+})(0);
+</script>
+</body>
+</html>
