@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>連線可行性測試</title>
+<style>
+  :root{--bg:#0f1216;--fg:#e6e9ef;--dim:#8b95a5;--line:#252b34;
+        --ok:#5ec27a;--bad:#e2686b;--warn:#e0b355;--info:#6aa9e0}
+  *{box-sizing:border-box}
+  body{margin:0;padding:24px 18px 60px;background:var(--bg);color:var(--fg);
+       font:14px/1.65 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  main{max-width:820px;margin:0 auto}
+  h1{font-size:19px;margin:0 0 4px;letter-spacing:.02em}
+  .sub{color:var(--dim);margin:0 0 28px;font-size:13px}
+  section{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:0 0 14px;
+          background:#131820}
+  h2{font-size:14px;margin:0 0 10px;font-weight:600}
+  h2 .n{color:var(--dim);font-weight:400;margin-right:8px}
+  .note{color:var(--dim);font-size:12.5px;margin:0 0 10px}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+  input[type=text]{flex:1 1 200px;min-width:0;background:#0b0e13;color:var(--fg);
+       border:1px solid var(--line);border-radius:5px;padding:7px 9px;font:inherit;font-size:13px}
+  button{background:#1d2530;color:var(--fg);border:1px solid #33404f;border-radius:5px;
+       padding:7px 14px;font:inherit;font-size:13px;cursor:pointer}
+  button:hover:not(:disabled){background:#26313f}
+  button:disabled{opacity:.4;cursor:default}
+  textarea{width:100%;height:76px;background:#0b0e13;color:var(--dim);border:1px solid var(--line);
+       border-radius:5px;padding:8px;font:inherit;font-size:11.5px;resize:vertical}
+  .out{white-space:pre-wrap;word-break:break-all;font-size:12.5px;margin-top:8px}
+  .t{display:inline-block;min-width:52px;padding:0 6px;border-radius:3px;font-size:11.5px;
+     text-align:center;margin-right:8px}
+  .t.ok{background:rgba(94,194,122,.15);color:var(--ok)}
+  .t.bad{background:rgba(226,104,107,.15);color:var(--bad)}
+  .t.warn{background:rgba(224,179,85,.15);color:var(--warn)}
+  .t.info{background:rgba(106,169,224,.15);color:var(--info)}
+  .t.wait{background:#1d2530;color:var(--dim)}
+  .l{display:block;margin:3px 0}
+  code{background:#0b0e13;padding:1px 5px;border-radius:3px;font-size:12.5px}
+  .verdict{border-left:3px solid var(--line);padding:10px 0 10px 14px;margin-top:12px;font-size:13px}
+  label{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<main>
+<h1>連線可行性測試</h1>
+<p class="sub">把這個檔案放進 GitHub Pages 的 repo,從 https 網址開啟才有意義。<br>
+測試 1–5 單機就能跑;測試 6 需要兩台機器(建議在 Radmin 連線狀態下做)。</p>
+
+<section>
+  <h2><span class="n">1</span>環境</h2>
+  <div id="o1" class="out"></div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>ws:// 混合內容封鎖</h2>
+  <p class="note">填一個區網或 Radmin 的 <code>IP:port</code>。不用真的有伺服器在聽——我們只看瀏覽器是否在建構階段就丟出 SecurityError。</p>
+  <div class="row">
+    <input type="text" id="h2i" value="192.168.1.10:8080" spellcheck="false">
+    <button id="b2">測試</button>
+  </div>
+  <div id="o2" class="out"></div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>ws://127.0.0.1 回環例外</h2>
+  <p class="note">部分瀏覽器把回環位址當成可信來源,允許 https 頁面連 ws://。這只影響主機自己那台。</p>
+  <div class="row"><button id="b3">測試 127.0.0.1 與 localhost</button></div>
+  <div id="o3" class="out"></div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>ICE candidate 掃描</h2>
+  <p class="note">這是選項 3 的關鍵。看你的本機位址是以真實 IP 還是 mDNS <code>.local</code> 名稱出現,以及 Radmin 的虛擬網卡有沒有被列進去。</p>
+  <div class="row">
+    <label><input type="checkbox" id="stun"> 加入 Google STUN(測 srflx)</label>
+    <button id="b4">掃描(約 5 秒)</button>
+  </div>
+  <div id="o4" class="out"></div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>DataChannel 本機回環</h2>
+  <p class="note">在同一頁開兩個 RTCPeerConnection 互連,確認 https 來源開 DataChannel 完全沒被擋。</p>
+  <div class="row"><button id="b5">測試</button></div>
+  <div id="o5" class="out"></div>
+</section>
+
+<section>
+  <h2><span class="n">6</span>兩台機器 WebRTC 實測(手動交換)</h2>
+  <p class="note">不依賴任何 signalling 伺服器,所以測到的就是純粹的 WebRTC 連通性。
+  A 機按「建立 offer」,把文字傳給 B(Discord 之類都行);B 貼上後按「產生 answer」,把結果傳回 A;A 貼上按「完成連線」。</p>
+  <div class="row">
+    <label><input type="checkbox" id="stun6"> 加入 Google STUN</label>
+    <button id="b6a">A:建立 offer</button>
+    <button id="b6b">B:產生 answer</button>
+    <button id="b6c">A:完成連線</button>
+  </div>
+  <textarea id="sdpOut" placeholder="這裡會出現要複製給對方的文字" spellcheck="false"></textarea>
+  <div class="row"><button id="b6copy">複製</button></div>
+  <textarea id="sdpIn" placeholder="把對方給你的文字貼在這裡" spellcheck="false"></textarea>
+  <div id="o6" class="out"></div>
+</section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const TAG={ok:'通過',bad:'失敗',warn:'注意',info:'資訊',wait:'進行中'};
+function line(el,kind,text){
+  const d=document.createElement('span');
+  d.className='l';
+  d.innerHTML='<span class="t '+kind+'">'+TAG[kind]+'</span>';
+  d.appendChild(document.createTextNode(text));
+  el.appendChild(d);
+  return d;
+}
+function clear(el){el.textContent='';}
+const hasRTC=typeof RTCPeerConnection==='function';
+
+/* ---- 1. environment ---- */
+(function(){
+  const o=$('o1');
+  const https=location.protocol==='https:';
+  line(o,https?'ok':'warn','protocol = '+location.protocol+(https?'(https,符合 GitHub Pages 的情況)':'(不是 https,測試 2 的結果不具代表性)'));
+  line(o,'info','origin = '+location.origin);
+  line(o,window.isSecureContext?'ok':'warn','isSecureContext = '+window.isSecureContext);
+  line(o,hasRTC?'ok':'bad','RTCPeerConnection = '+(hasRTC?'可用':'不存在'));
+  line(o,'info','UA = '+navigator.userAgent);
+})();
+
+/* ---- 2 & 3. websocket mixed content ---- */
+function wsProbe(url,o){
+  let ws;
+  try{ ws=new WebSocket(url); }
+  catch(e){
+    line(o,'bad',url+' → 建構就被拒絕:'+e.name+' — '+e.message);
+    return;
+  }
+  const d=line(o,'wait',url+' → 建構成功(政策允許),等待連線結果…');
+  let done=false;
+  const settle=(kind,msg)=>{
+    if(done)return; done=true;
+    d.innerHTML='<span class="t '+kind+'">'+TAG[kind]+'</span>';
+    d.appendChild(document.createTextNode(url+' → '+msg));
+  };
+  ws.onopen=()=>{settle('ok','連上了,而且有伺服器在聽');ws.close();};
+  ws.onerror=()=>settle('info','政策允許,但連不上(沒有伺服器在聽 / 被防火牆擋)— 這仍代表 mixed content 沒有封鎖');
+  setTimeout(()=>{settle('info','政策允許,逾時未連上(通常是沒東西在聽)');try{ws.close();}catch(e){}},6000);
+}
+$('b2').onclick=()=>{
+  const o=$('o2');clear(o);
+  const h=$('h2i').value.trim();
+  if(!h){line(o,'warn','請先填 IP:port');return;}
+  wsProbe('ws://'+h,o);
+  const v=$('o2');
+  setTimeout(()=>{
+    const blocked=v.querySelector('.t.bad');
+    const d=document.createElement('div');
+    d.className='verdict';
+    d.textContent=blocked
+      ? '結論:ws:// 被封鎖 → GitHub Pages 上不能用純 WebSocket。走選項 1(Node 自己發網頁)、2(瀏覽器例外)、3(WebRTC)或 4(wss 憑證)。'
+      : '結論:這個瀏覽器沒有封鎖 ws://(少見,可能是非 https 開啟或已設過例外)。請確認網址列是 https。';
+    v.appendChild(d);
+  },300);
+};
+$('b3').onclick=()=>{
+  const o=$('o3');clear(o);
+  wsProbe('ws://127.0.0.1:8080',o);
+  wsProbe('ws://localhost:8080',o);
+};
+
+/* ---- 4. ICE candidate scan ---- */
+$('b4').onclick=async()=>{
+  const o=$('o4');clear(o);
+  if(!hasRTC){line(o,'bad','這個瀏覽器沒有 RTCPeerConnection');return;}
+  const cfg={iceServers:$('stun').checked?[{urls:'stun:stun.l.google.com:19302'}]:[]};
+  let pc;
+  try{ pc=new RTCPeerConnection(cfg); }
+  catch(e){ line(o,'bad','建立 RTCPeerConnection 失敗:'+e.message); return; }
+  const seen=[],addrs=new Set();
+  let mdns=0,realLocal=0,srflx=0;
+  pc.onicecandidate=e=>{
+    if(!e.candidate){line(o,'info','candidate 蒐集結束');summary();return;}
+    const c=e.candidate;
+    const key=c.candidateType+'|'+c.address+'|'+c.port;
+    if(seen.indexOf(key)>=0)return;
+    seen.push(key);
+    const isM=c.address&&/\.local$/i.test(c.address);
+    if(c.candidateType==='host'){ isM?mdns++:realLocal++; }
+    if(c.candidateType==='srflx')srflx++;
+    if(c.address)addrs.add(c.address);
+    line(o,isM?'warn':'info','typ '+c.candidateType+'  '+c.address+':'+c.port+'  ('+c.protocol+')'+(isM?'  ← mDNS 遮蔽':''));
+  };
+  const dc=pc.createDataChannel('probe');
+  try{
+    const off=await pc.createOffer();
+    await pc.setLocalDescription(off);
+  }catch(e){ line(o,'bad','createOffer 失敗:'+e.message); return; }
+  const t=setTimeout(summary,5000);
+  let summarised=false;
+  function summary(){
+    if(summarised)return; summarised=true; clearTimeout(t);
+    try{pc.close();}catch(e){}
+    const d=document.createElement('div');
+    d.className='verdict';
+    let txt='';
+    if(!seen.length){
+      txt='沒有蒐集到任何 candidate,WebRTC 可能被瀏覽器政策或擴充套件關掉了。';
+    }else if(realLocal>0){
+      txt='本機位址以真實 IP 出現('+[...addrs].filter(a=>!/\.local$/i.test(a)).join('、')+
+          ')。請對照 Radmin 面板上的虛擬 IP 是否在其中:在的話,選項 3 幾乎可以確定通,不需要 TURN。';
+    }else if(mdns>0){
+      txt='本機位址全部被換成 mDNS .local 名稱('+mdns+' 個)。這不代表不能連——對方仍可能解析得出來——'+
+          '但這正是需要用測試 6 驗證的情況。若測試 6 連不上,mDNS 沒穿過 Radmin 虛擬網卡就是原因。';
+    }else{
+      txt='沒有 host candidate,只有 '+srflx+' 個 srflx。這種情況下兩台機器要連上會依賴 NAT 打洞,Radmin 的優勢用不到。';
+    }
+    d.textContent='結論:'+txt;
+    o.appendChild(d);
+  }
+};
+
+/* ---- 5. local datachannel loopback ---- */
+$('b5').onclick=async()=>{
+  const o=$('o5');clear(o);
+  if(!hasRTC){line(o,'bad','這個瀏覽器沒有 RTCPeerConnection');return;}
+  let a,b;
+  try{
+    a=new RTCPeerConnection({iceServers:[]});
+    b=new RTCPeerConnection({iceServers:[]});
+  }catch(e){ line(o,'bad','建立失敗:'+e.message); return; }
+  const cleanup=()=>{try{a.close();b.close();}catch(e){}};
+  a.onicecandidate=e=>e.candidate&&b.addIceCandidate(e.candidate).catch(()=>{});
+  b.onicecandidate=e=>e.candidate&&a.addIceCandidate(e.candidate).catch(()=>{});
+  const dc=a.createDataChannel('t');
+  let ok=false;
+  const t0=performance.now();
+  b.ondatachannel=e=>{
+    e.channel.onmessage=ev=>{
+      ok=true;
+      line(o,'ok','DataChannel 雙向通了,收到:"'+ev.data+'"(耗時 '+(performance.now()-t0|0)+' ms)');
+      const d=document.createElement('div');d.className='verdict';
+      d.textContent='結論:https 來源開 DataChannel 沒有被 mixed content 規則影響。選項 3 在傳輸層是合法的。';
+      o.appendChild(d);
+      cleanup();
+    };
+  };
+  dc.onopen=()=>dc.send('hello');
+  try{
+    const off=await a.createOffer(); await a.setLocalDescription(off);
+    await b.setRemoteDescription(off);
+    const ans=await b.createAnswer(); await b.setLocalDescription(ans);
+    await a.setRemoteDescription(ans);
+    line(o,'wait','offer/answer 交換完成,等 DataChannel 開啟…');
+  }catch(e){ line(o,'bad','交換失敗:'+e.message); cleanup(); return; }
+  setTimeout(()=>{ if(!ok){line(o,'bad','逾時:DataChannel 沒開起來');cleanup();} },8000);
+};
+
+/* ---- 6. two-machine manual WebRTC ---- */
+let P=null,PDC=null;
+function mkPC(){
+  const cfg={iceServers:$('stun6').checked?[{urls:'stun:stun.l.google.com:19302'}]:[]};
+  const pc=new RTCPeerConnection(cfg);
+  pc.oniceconnectionstatechange=()=>line($('o6'),'info','ICE 狀態:'+pc.iceConnectionState);
+  return pc;
+}
+function gathered(pc){
+  return new Promise(res=>{
+    if(pc.iceGatheringState==='complete')return res();
+    const t=setTimeout(res,5000);          // 別無限等
+    pc.onicegatheringstatechange=()=>{
+      if(pc.iceGatheringState==='complete'){clearTimeout(t);res();}
+    };
+  });
+}
+function wire(dc,o){
+  PDC=dc;
+  dc.onopen=async()=>{
+    line(o,'ok','DataChannel 開啟,連線成功');
+    dc.send(JSON.stringify({t:'ping',at:Date.now()}));
+    await report(o);
+  };
+  dc.onmessage=e=>{
+    let m; try{m=JSON.parse(e.data);}catch(err){return;}
+    if(m.t==='ping')dc.send(JSON.stringify({t:'pong',at:m.at}));
+    else if(m.t==='pong')line(o,'ok','應用層來回延遲:'+(Date.now()-m.at)+' ms');
+  };
+  dc.onclose=()=>line(o,'info','DataChannel 關閉');
+}
+async function report(o){
+  if(!P)return;
+  let stats; try{stats=await P.getStats();}catch(e){return;}
+  let pair=null;
+  stats.forEach(r=>{ if(r.type==='candidate-pair'&&r.state==='succeeded'&&(r.selected||r.nominated))pair=r; });
+  if(!pair)stats.forEach(r=>{ if(r.type==='transport'&&r.selectedCandidatePairId)pair=stats.get(r.selectedCandidatePairId); });
+  if(!pair){line(o,'warn','拿不到 selected candidate pair(瀏覽器實作差異)');return;}
+  const L=stats.get(pair.localCandidateId),R=stats.get(pair.remoteCandidateId);
+  const f=c=>c?(c.candidateType+' '+(c.address||c.ip||'?')+':'+(c.port||'?')):'?';
+  line(o,'ok','實際使用的路徑:本地 '+f(L)+'  ↔  對方 '+f(R));
+  if(pair.currentRoundTripTime!=null)line(o,'info','ICE RTT:'+Math.round(pair.currentRoundTripTime*1000)+' ms');
+  const d=document.createElement('div');d.className='verdict';
+  const relayed=(L&&L.candidateType==='relay')||(R&&R.candidateType==='relay');
+  d.textContent=relayed
+    ? '結論:走了 relay。但這個測試沒有設定任何 TURN,理論上不該發生,請回頭確認設定。'
+    : '結論:兩台機器在沒有 TURN 的情況下直接連通了 → 選項 3(GitHub Pages + WebRTC + Radmin)可行。';
+  $('o6').appendChild(d);
+}
+$('b6a').onclick=async()=>{
+  const o=$('o6');clear(o);
+  if(!hasRTC){line(o,'bad','這個瀏覽器沒有 RTCPeerConnection');return;}
+  try{
+    P=mkPC();
+    wire(P.createDataChannel('game'),o);
+    await P.setLocalDescription(await P.createOffer());
+    line(o,'wait','蒐集 candidate…(最多 5 秒)');
+    await gathered(P);
+    $('sdpOut').value=JSON.stringify(P.localDescription);
+    line(o,'ok','offer 已產生,複製下面那段給 B 機');
+  }catch(e){ line(o,'bad','建立 offer 失敗:'+e.message); }
+};
+$('b6b').onclick=async()=>{
+  const o=$('o6');clear(o);
+  if(!hasRTC){line(o,'bad','這個瀏覽器沒有 RTCPeerConnection');return;}
+  let off;
+  try{ off=JSON.parse($('sdpIn').value); }
+  catch(e){ line(o,'bad','貼上的 offer 不是有效 JSON'); return; }
+  try{
+    P=mkPC();
+    P.ondatachannel=e=>wire(e.channel,o);
+    await P.setRemoteDescription(off);
+    await P.setLocalDescription(await P.createAnswer());
+    line(o,'wait','蒐集 candidate…(最多 5 秒)');
+    await gathered(P);
+    $('sdpOut').value=JSON.stringify(P.localDescription);
+    line(o,'ok','answer 已產生,複製下面那段傳回 A 機');
+  }catch(e){ line(o,'bad','產生 answer 失敗:'+e.message); }
+};
+$('b6c').onclick=async()=>{
+  const o=$('o6');
+  if(!P){line(o,'bad','請先在這台按「A:建立 offer」');return;}
+  let ans;
+  try{ ans=JSON.parse($('sdpIn').value); }
+  catch(e){ line(o,'bad','貼上的 answer 不是有效 JSON'); return; }
+  try{
+    await P.setRemoteDescription(ans);
+    line(o,'wait','已套用 answer,等 DataChannel 開啟…');
+  }catch(e){ line(o,'bad','套用 answer 失敗:'+e.message); }
+};
+$('b6copy').onclick=()=>{
+  const t=$('sdpOut');
+  if(!t.value)return;
+  t.select();
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t.value).catch(()=>{});
+  else try{document.execCommand('copy');}catch(e){}
+};
+</script>
+</body>
+</html>

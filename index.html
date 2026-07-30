@@ -73,7 +73,7 @@ R 切換天氣(晴/雨/雪) · X 重置世界 · 世界自動存檔(下載後開
 <div id="ghost"></div>
 <script>
 M=Math,S=M.sin,C=M.cos,A=M.abs,mn=M.min,mx=M.max,
-W=280,H=168,Z=32,hw=W/2,
+W=280,H=168,WS=32,WM=WS-1,hw=W/2,      // WS = world size per axis (NOT named Z: R() overwrites Z every ray)
 D=new Uint32Array(W*H),
 N=new ImageData(new Uint8ClampedArray(D.buffer),W,H),
 w=new Uint8Array(32768),LG=new Uint8Array(32768),LQ=[],
@@ -87,10 +87,10 @@ c.width=W;c.height=H;
 // ---- world generation ----
 GEN=()=>{
   w.fill(0);
-  for(i=1024;i--;){
-    X=i%Z;Y=i>>5;
+  for(i=WS*WS;i--;){
+    X=i%WS;Y=i/WS|0;
     h=12+4*S(X/4)*C(Y/4)|0;
-    for(y=Z;y--;)w[I(X,y,Y)]=y<h+3?2:y<h?1:0;
+    for(y=WS;y--;)w[I(X,y,Y)]=y<h?1:y<h+3?2:0;                         // sand base, 3 blocks of dirt on top
     if(h<15&M.random()<.05){
       Th=4+(M.random()*2|0);
       for(k=Th;k--;)w[I(X,h+k,Y)]=3;                                   // trunk
@@ -98,8 +98,8 @@ GEN=()=>{
         w[I(k%3+1+X,h+Th+2+(k/9|0),Y+(k/3|0)%3+1)]=4;                  // leaves
     }
   }
-  for(x=0;x<32;x++)for(z=0;z<32;z++)if(x==0|x==31|z==0|z==31)          // glass boundary walls
-    for(y=0;y<32;y++)if(!w[I(x,y,z)])w[I(x,y,z)]=5;
+  for(x=0;x<WS;x++)for(z=0;z<WS;z++)if(!x|x==WM|!z|z==WM)              // glass boundary walls
+    for(y=0;y<WS;y++)if(!w[I(x,y,z)])w[I(x,y,z)]=5;
 };
 GEN();
 
@@ -137,7 +137,7 @@ try{
 }catch(e){}
 LGT();
 
-// ---- DDA voxel raycast ----
+// ---- DDA voxel raycast (scaling note: world dims are hard-coded in I() and B() below) ----
 R=(p,d)=>{
   X=p.x|0;Y=p.y|0;Z=p.z|0;
   l=d.x;n=d.y;o=d.z;
