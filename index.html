@@ -43,19 +43,33 @@
   #invg .slot.src{opacity:.35}
   #ghost{position:fixed;width:46px;height:46px;border-radius:6px;pointer-events:none;
          z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6)}
-  #craft button{font:12px monospace;color:#fff;background:rgba(255,255,255,.12);
-       border:1px solid rgba(255,255,255,.45);border-radius:5px;padding:5px 12px;cursor:pointer}
-  #craft button:disabled{opacity:.35;cursor:default}
+  #hp{position:fixed;left:8px;bottom:70px;display:flex;gap:3px;z-index:2;pointer-events:none}
+  #hp b{width:11px;height:11px;border-radius:2px;background:#3a1520;
+        box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+  #hp b.f{background:#e2455c}
+  #hp b.h{background:linear-gradient(90deg,#e2455c 50%,#3a1520 50%)}
+  #dmg{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;
+       background:radial-gradient(ellipse at center,transparent 35%,rgba(190,20,40,.55) 100%)}
+  #dead{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;
+        align-items:center;justify-content:center;gap:14px;color:#fff;
+        font:15px/1.7 monospace;background:rgba(60,6,14,.72);text-align:center}
+  #dead.on{display:flex}
+  #dead button{font:14px monospace;color:#fff;background:rgba(255,255,255,.14);
+        border:1px solid rgba(255,255,255,.5);border-radius:6px;padding:8px 20px;cursor:pointer}
+  #craft{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:340px}
+  #craft button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);
+       border:1px solid rgba(255,255,255,.45);border-radius:5px;padding:5px 9px;cursor:pointer}
+  #craft button:disabled{opacity:.3;cursor:default}
   #invx{opacity:.6}
 </style>
 </head>
 <body>
 <div id="wrap"><canvas id="c"></canvas></div>
-<div id="hud">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 挖 · 右鍵/E 放<br>
-手機:左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏挖 ＋放 🎒背包<br>
-選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(拖曳搬移) · C 切換生存↔創造<br>
-按住 T 快轉時間 · G 陰影開關 · 火把會發光,背包裡用木頭合成<br>
-R 切換天氣(晴/雨/雪) · X 重置世界 · 世界自動存檔(下載後開啟才會保留)</div>
+<div id="hud">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭<br>
+手機:左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
+選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(可合成武器) · C 切換生存↔創造<br>
+夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
+按住 T 快轉時間 · G 陰影開關 · R 切換天氣(晴/雨/雪) · X 重置世界</div>
 <div id="cross"></div>
 <div id="clock">☀ 08:24</div>
 <div id="bd" class="btn">⛏</div>
@@ -64,11 +78,18 @@ R 切換天氣(晴/雨/雪) · X 重置世界 · 世界自動存檔(下載後開
 <div id="bi" class="btn">🎒</div>
 <div id="stk"><div id="knb"></div></div>
 <div id="bar"></div>
+<div id="hp"></div>
+<div id="dmg"></div>
 <div id="inv">
   <div id="invt">背包 — 拖曳搬移方塊,第一排是快捷欄</div>
   <div id="invg"></div>
-  <div id="craft">合成:木頭 ×1 → 火把 ×4 <button id="craftb">製作</button></div>
+  <div id="craft"></div>
   <div id="invx">I / Tab / Esc 關閉 · C 切換生存↔創造</div>
+</div>
+<div id="dead">
+  <div>你被擊倒了</div>
+  <div style="opacity:.7;font-size:13px">背包會保留,重生在出生點</div>
+  <button id="rb">重生</button>
 </div>
 <div id="ghost"></div>
 <script>
@@ -188,16 +209,208 @@ dig=()=>{o=target();if(o){
   di=I(o[0],o[1],o[2]);bk=w[di];w[di]=0;LGT();
   if(!CRE)give(bk,1);                                 // survival: the block goes in the bag
 }};
+USE1=()=>{if(PDEAD)return;if(MELEE())return;dig();};   // left: hit a mob, else dig
+USE2=()=>{if(PDEAD)return;                             // right: shoot if holding a bow, else place
+  if((IT[WEP()]||0).bow){SHOOT();return;}
+  place();};
 place=()=>{o=target();if(o){
   sel=CRE?PAL[selI]:INV[selI].id;
-  if(!sel)return;                                     // empty hand
+  if(!sel||!BLK(sel))return;                          // empty hand, or holding a tool
   ax=o[3];ay=o[4];az=o[5];
-  if((ax|ay|az)&~31)return;                           // out of world
+  if((ax|ay|az)&~WM)return;                           // out of world
   if(B(ax,ay,az))return;                              // occupied
   if(sel!=6&ax+1>P.x-.3&ax<P.x+.3&az+1>P.z-.3&az<P.z+.3&ay+1>P.y&ay<P.y+1.6)return; // inside player
   w[I(ax,ay,az)]=sel;LGT();
   if(!CRE){if(!--INV[selI].n)INV[selI].id=0;drawBar();if(invOpen)drawInv();}
 }};
+
+// ---- entities: mobs and arrows ----
+// mob: x,y,z world pos | vy vertical velocity | hp | gr grounded | ht hurt flash
+//      ck attack cooldown | jc jump cooldown | bn burning-in-sun timer
+MOB=[];ARW=[];PHP=20;PMX=20;PHURT=0;PDEAD=0;PREG=0;SWG=0;SHK=0;MOBMAX=14;
+QG=(qa,qb,qc)=>{qd=B(qa|0,qb|0,qc|0);return qd&&qd!=6;};   // solid? (torches don't block)
+
+// axis-resolved AABB move, shared by mobs and used like the player's U()
+EMV=(qo,qa,qb,qc)=>{
+  qo.x+=qa;if(EHIT(qo))qo.x-=qa;
+  qo.z+=qc;if(EHIT(qo))qo.z-=qc;
+  qo.y+=qb;
+  if(EHIT(qo)){qo.y-=qb;if(qb<0){qo.gr=1;qo.vy=0;}else qo.vy=0;}
+  else qo.gr=0;
+};
+EHIT=qo=>{                                            // eu/ev/ew are private: callers keep ql/qk/qn
+  for(ev=(qo.y)|0;ev<=(qo.y+1.6)|0;ev++)
+   for(ew=(qo.z-.3)|0;ew<=(qo.z+.3)|0;ew++)
+    for(eu=(qo.x-.3)|0;eu<=(qo.x+.3)|0;eu++)
+     if(QG(eu,ev,ew))return 1;
+  return 0;
+};
+
+// spawn: night only, on solid ground, in the dark, away from the player
+ESPAWN=()=>{
+  if(MOB.length>=MOBMAX)return;
+  for(qp=8;qp--;){
+    qa=1+M.random()*(WS-2)|0;qc=1+M.random()*(WS-2)|0;
+    qb=-1;for(qk=WS-2;qk>0;qk--)if(QG(qa,qk,qc)&&!QG(qa,qk+1,qc)&&!QG(qa,qk+2,qc)){qb=qk+1;break;}
+    if(qb<0)continue;
+    if(LV(qa,qb,qc)>6)continue;                       // torchlight keeps them away
+    qd=qa+.5-P.x;qf=qc+.5-P.z;
+    if(qd*qd+qf*qf<100)continue;                      // not on top of the player
+    if(qd*qd+qf*qf>900)continue;                      // not absurdly far
+    MOB.push({x:qa+.5,y:qb,z:qc+.5,vy:0,hp:12,gr:0,ht:0,ck:0,jc:0,bn:0});
+    return;
+  }
+};
+
+EHURT=(qo,qa)=>{                                      // damage a mob, with knockback
+  qo.hp-=qa;qo.ht=.25;
+  qd=qo.x-P.x;qf=qo.z-P.z;ql=M.sqrt(qd*qd+qf*qf)||1;
+  qo.x+=qd/ql*.45;qo.z+=qf/ql*.45;
+  if(EHIT(qo)){qo.x-=qd/ql*.45;qo.z-=qf/ql*.45;}
+  if(qo.hp<=0){give(103,1+(M.random()<.35?1:0));return 1;}
+  return 0;
+};
+
+PHIT=qa=>{                                            // damage the player
+  if(CRE||PDEAD)return;
+  PHP-=qa;PHURT=.35;PREG=0;SHK=.3;
+  if(PHP<=0){PHP=0;PDEAD=1;}
+};
+
+// ---- weapon use ----
+WEP=()=>CRE?0:INV[selI].id;                           // what's in hand
+MELEE=()=>{                                           // swing at the nearest mob in the crosshair cone
+  qw=WEP();qv=(IT[qw]||0).dmg||1;                     // bare hands still hurt a little
+  SWG=.18;
+  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
+  qu=sx*cp;qt=sp;qs=cx*cp;                            // look direction
+  qg=-1;qe=1e9;
+  for(qi=0;qi<MOB.length;qi++){
+    qo=MOB[qi];
+    qd=qo.x-P.x;qb=qo.y+.8-(P.y+1.5);qf=qo.z-P.z;
+    ql=M.sqrt(qd*qd+qb*qb+qf*qf);
+    if(ql>3.2)continue;                               // melee reach
+    if((qd*qu+qb*qt+qf*qs)/ql<.55)continue;           // roughly in front
+    if(ql<qe){qe=ql;qg=qi;}
+  }
+  if(qg<0)return 0;
+  if(EHURT(MOB[qg],qv))MOB.splice(qg,1);
+  return 1;
+};
+SHOOT=()=>{
+  if(!CRE){if(!has(102,1))return 0;take(102,1);}
+  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
+  ARW.push({x:P.x,y:P.y+1.4,z:P.z,vx:sx*cp*24,vy:sp*24+2,vz:cx*cp*24,life:4});
+  drawBar();if(invOpen)drawInv();
+  return 1;
+};
+
+// ---- per-frame entity update ----
+ETICK=qr=>{
+  // mobs
+  for(qi=MOB.length;qi--;){
+    qo=MOB[qi];
+    qo.ht=mx(0,qo.ht-qr);qo.ck=mx(0,qo.ck-qr);qo.jc=mx(0,qo.jc-qr);
+    qd=P.x-qo.x;qf=P.z-qo.z;qb=P.y-qo.y;
+    ql=M.sqrt(qd*qd+qf*qf);
+    // daylight burns them
+    if(dayf>.5&&sunEl>.15&&!SH(qo.x,qo.y+1.7,qo.z)){
+      qo.bn+=qr;if(qo.bn>1.6){qo.hp-=6;qo.bn=0;qo.ht=.25;if(qo.hp<=0){MOB.splice(qi,1);continue;}}
+    }else qo.bn=0;
+    if(ql<16&&!PDEAD&&!CRE){                          // chase
+      qu=qd/(ql||1);qs=qf/(ql||1);
+      qe=ql>1.4?2.6:0;
+      qa=qu*qe*qr;qc=qs*qe*qr;
+      qo.px=qo.x;qo.pz=qo.z;
+      qo.vy-=18*qr;
+      EMV(qo,qa,qo.vy*qr,qc);
+      // blocked horizontally and on the ground -> hop
+      if(qo.gr&&!qo.jc&&A(qo.x-qo.px)+A(qo.z-qo.pz)<A(qa)+A(qc)-1e-4){qo.vy=7.4;qo.jc=.6;}
+      if(ql<1.5&&A(qb)<2&&!qo.ck){qo.ck=1;PHIT(3);}   // attack
+    }else{
+      qo.vy-=18*qr;EMV(qo,0,qo.vy*qr,0);
+    }
+    if(qo.y<-8)MOB.splice(qi,1);
+  }
+  // arrows
+  for(qi=ARW.length;qi--;){
+    qo=ARW[qi];qo.life-=qr;
+    if(qo.life<=0){ARW.splice(qi,1);continue;}
+    qo.vy-=16*qr;
+    qa=qo.x+qo.vx*qr;qb=qo.y+qo.vy*qr;qc=qo.z+qo.vz*qr;
+    if((qa|qb|qc)&~WM||QG(qa,qb,qc)){ARW.splice(qi,1);continue;}
+    qg=0;
+    for(qp=MOB.length;qp--;){
+      qm=MOB[qp];
+      if(A(qm.x-qa)<.45&&A(qm.z-qc)<.45&&qb>qm.y-.2&&qb<qm.y+1.9){
+        if(EHURT(qm,7))MOB.splice(qp,1);
+        qg=1;break;
+      }
+    }
+    if(qg){ARW.splice(qi,1);continue;}
+    qo.x=qa;qo.y=qb;qo.z=qc;
+  }
+  // player state
+  PHURT=mx(0,PHURT-qr);SWG=mx(0,SWG-qr);SHK=mx(0,SHK-qr);
+  if(!PDEAD&&PHP<PMX){PREG+=qr;if(PREG>4){PREG=0;PHP=mn(PMX,PHP+1);}}
+  if(CRE&&PHP<PMX)PHP=PMX;
+  // spawning
+  HZ-=qr;
+  if(HZ<=0){HZ=2.5;if(dayf<.25&&!CRE)ESPAWN();}
+  if(dayf>.6&&MOB.length&&M.random()<qr*.15)MOB.pop();
+};
+HZ=2.5;lastHP=-1;
+
+// ---- draw entities as billboards, back to front, with an occlusion ray ----
+EDRAW=()=>{
+  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
+  qw=[];
+  for(qi=0;qi<MOB.length;qi++){qo=MOB[qi];qw.push([qo,0]);}
+  for(qi=0;qi<ARW.length;qi++){qo=ARW[qi];qw.push([qo,1]);}
+  for(qi=0;qi<qw.length;qi++){
+    qo=qw[qi][0];
+    qd=qo.x-P.x;qb=(qo.y+(qw[qi][1]?0:.85))-(P.y+1.5);qf=qo.z-P.z;
+    qw[qi][2]=qd*qd+qb*qb+qf*qf;
+  }
+  qw.sort((qa,qc)=>qc[2]-qa[2]);                      // far first
+  for(qi=0;qi<qw.length;qi++){
+    qo=qw[qi][0];qp=qw[qi][1];qe=M.sqrt(qw[qi][2]);
+    if(qe>26)continue;
+    qm=PR(qo.x,qo.y+(qp?0:.85),qo.z);
+    if(!qm)continue;
+    if(EBLOCKED(qo.x,qo.y+(qp?0:.85),qo.z,qe))continue;
+    qn=hw/mx(.4,qe);                                  // pixels per world unit
+    if(qp){                                           // arrow: a short dark dash
+      T.fillStyle='#2b2118';
+      T.fillRect(qm[0]-qn*.06,qm[1]-qn*.06,mx(1,qn*.12),mx(1,qn*.12));
+      continue;
+    }
+    qa=qn*.62;qc=qn*1.7;                              // body width / height
+    T.fillStyle=qo.ht?'#ff9a9a':'#3a2b50';
+    T.fillRect(qm[0]-qa/2,qm[1]-qc*.55,qa,qc*.72);    // torso
+    T.fillStyle=qo.ht?'#ffbdbd':'#4a3768';
+    T.fillRect(qm[0]-qa*.42,qm[1]-qc*.95,qa*.84,qc*.42); // head
+    if(qn>7){                                         // eyes only when close enough to matter
+      T.fillStyle='#ff5a3c';
+      qg=mx(1,qn*.1);
+      T.fillRect(qm[0]-qa*.3,qm[1]-qc*.8,qg,qg);
+      T.fillRect(qm[0]+qa*.3-qg,qm[1]-qc*.8,qg,qg);
+    }
+    if(qo.hp<12&&qn>5){                               // tiny health pip
+      T.fillStyle='#000';T.fillRect(qm[0]-qa/2,qm[1]-qc*1.12,qa,mx(1,qn*.07));
+      T.fillStyle='#6ee27a';T.fillRect(qm[0]-qa/2,qm[1]-qc*1.12,qa*(qo.hp/12),mx(1,qn*.07));
+    }
+  }
+};
+// is the line from the eye to this point interrupted by an opaque block?
+EBLOCKED=(qa,qb,qc,qe)=>{
+  qu=(qa-P.x)/qe;qt=(qb-(P.y+1.5))/qe;qs=(qc-P.z)/qe;
+  for(ql=.5;ql<qe-.35;ql+=.45){
+    qd=B(P.x+qu*ql|0,P.y+1.5+qt*ql|0,P.z+qs*ql|0);
+    if(qd&&qd!=5&&qd!=6)return 1;
+  }
+  return 0;
+};
 
 // ---- project a world point to screen pixels (inverse of the ray map) ----
 // camera orthonormal basis: F=(sx*cp,sp,cx*cp)  right=(cx,0,-sx)  up=(-sx*sp,cp,-cx*sp)
@@ -226,10 +439,10 @@ SH=(px,py,pz)=>{
 // ---- input ----
 bd=document.getElementById('bd');bp=document.getElementById('bp');clk=document.getElementById('clock');
 bj=document.getElementById('bj');STK=document.getElementById('stk');KNB=document.getElementById('knb');
-bd.ontouchstart=e=>{e.preventDefault();e.stopPropagation();dig();};
-bp.ontouchstart=e=>{e.preventDefault();e.stopPropagation();place();};
+bd.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE1();};
+bp.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE2();};
 bj.ontouchstart=e=>{e.preventDefault();e.stopPropagation();jmp=1;};
-bd.onclick=()=>dig();bp.onclick=()=>place();bj.onclick=()=>jmp=1;
+bd.onclick=()=>USE1();bp.onclick=()=>USE2();bj.onclick=()=>jmp=1;
 
 // ---- touch: left half = floating stick (relative to where you touched down),
 //              right half = drag to look (delta based, same feel as the mouse) ----
@@ -264,34 +477,79 @@ wrap.ontouchend=wrap.ontouchcancel=e=>{e.preventDefault();
   }};
 
 // ---- hotbar / inventory ----
-BC=[0,'#F4D87E','#705030','#403020','#206020','#BFE6FF','#FFC24A'];  // colour by block id
-BN=['','沙土','泥土','木頭','樹葉','玻璃','火把'];
+// ---- item table: ids 1-6 are placeable blocks, 100+ are items ----
+// c=colour  n=name  dmg=melee damage  bow=1 shoots arrows  st=max stack
+IT={1:{c:'#F4D87E',n:'沙土'},2:{c:'#705030',n:'泥土'},3:{c:'#403020',n:'木頭'},
+    4:{c:'#206020',n:'樹葉'},5:{c:'#BFE6FF',n:'玻璃'},6:{c:'#FFC24A',n:'火把'},
+    100:{c:'#C8CDD6',n:'木劍',dmg:5,st:1},101:{c:'#8A6A3A',n:'弓',bow:1,st:1},
+    102:{c:'#D9D2C0',n:'箭'},103:{c:'#7B4FA8',n:'暗核'}};
+BC=i2=>(IT[i2]||0).c||'';                            // colour by id
+BN=i2=>(IT[i2]||0).n||'';                            // name by id
+BLK=i2=>i2>0&&i2<100;                                // placeable?
+MAXS=i2=>(IT[i2]||0).st||64;                         // max stack size (STK is the joystick element)
 PAL=[1,2,3,4,5,6];                                   // creative palette (infinite)
 selI=0;CRE=0;invOpen=0;dragI=-1;
 bar=document.getElementById('bar');ig=document.getElementById('invg');
 ivp=document.getElementById('inv');gh=document.getElementById('ghost');
-cbt=document.getElementById('craftb');ivt=document.getElementById('invt');bi=document.getElementById('bi');
+bi=document.getElementById('bi');
 
 CH=(it,i,num,onf)=>'<div class="slot'+(it.id?'':' e')+(num?' hb':'')+(onf?' on':'')+(i==dragI?' src':'')+
-  '" data-i="'+i+'" title="'+(BN[it.id]||'')+'" style="background:'+(it.id?BC[it.id]:'')+'">'+
-  (num?'<span>'+(i+1)+'</span>':'')+(it.id?'<i>'+(it.n<0?'∞':it.n)+'</i>':'')+'</div>';
+  '" data-i="'+i+'" title="'+BN(it.id)+'" style="background:'+BC(it.id)+'">'+
+  (num?'<span>'+(i+1)+'</span>':'')+(it.id?'<i>'+(it.n<0?'∞':it.n>1?it.n:'')+'</i>':'')+'</div>';
 drawBar=()=>{s2='';for(bj=0;bj<6;bj++)s2+=CH(CRE?{id:PAL[bj],n:-1}:INV[bj],bj,1,bj==selI);bar.innerHTML=s2;};
-drawInv=()=>{s2='';for(bj=0;bj<24;bj++)s2+=CH(INV[bj],bj,bj<6,bj==selI);ig.innerHTML=s2;cbt.disabled=!has(3,1);
+drawInv=()=>{s2='';for(bj=0;bj<24;bj++)s2+=CH(INV[bj],bj,bj<6,bj==selI);ig.innerHTML=s2;
+  RCP.forEach((rc,ri)=>cbt[ri].disabled=!rc[0].every(ing=>has(ing[0],ing[1])));
   ivt.textContent=CRE?'背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動':'背包 — 拖曳搬移方塊,第一排就是快捷欄';};
 selBlock=v=>{selI=v;drawBar();if(invOpen)drawInv();};
 
 // ---- stacking helpers (64 per stack) ----
 give=(id,n)=>{
   if(!id)return;
-  for(gi=0;gi<24;gi++)if(INV[gi].id==id&&INV[gi].n<64){kk=mn(64-INV[gi].n,n);INV[gi].n+=kk;n-=kk;if(!n)break;}
-  if(n)for(gi=0;gi<24;gi++)if(!INV[gi].id){kk=mn(64,n);INV[gi]={id:id,n:kk};n-=kk;if(!n)break;}
+  gm=MAXS(id);
+  for(gi=0;gi<24;gi++)if(INV[gi].id==id&&INV[gi].n<gm){kk=mn(gm-INV[gi].n,n);INV[gi].n+=kk;n-=kk;if(!n)break;}
+  if(n)for(gi=0;gi<24;gi++)if(!INV[gi].id){kk=mn(gm,n);INV[gi]={id:id,n:kk};n-=kk;if(!n)break;}
   drawBar();if(invOpen)drawInv();                     // leftover when full is simply lost
 };
 has=(id,n)=>{c3=0;for(gi=0;gi<24;gi++)if(INV[gi].id==id)c3+=INV[gi].n;return c3>=n;};
 take=(id,n)=>{if(!has(id,n))return 0;
   for(gi=0;gi<24&&n;gi++)if(INV[gi].id==id){kk=mn(INV[gi].n,n);INV[gi].n-=kk;n-=kk;if(!INV[gi].n)INV[gi].id=0;}
   return 1;};
-cbt.onclick=()=>{if(take(3,1))give(6,4);};            // 1 wood -> 4 torches
+// ---- recipes: [[ingredient id, count]...] -> [result id, count] ----
+RCP=[[[[3,1]],[6,4],'木頭×1 → 火把×4'],
+     [[[3,2]],[100,1],'木頭×2 → 木劍'],
+     [[[3,2],[4,2]],[101,1],'木頭×2+樹葉×2 → 弓'],
+     [[[3,1]],[102,4],'木頭×1 → 箭×4'],
+     [[[103,1]],[6,8],'暗核×1 → 火把×8']];
+cbt=[];cw2=document.getElementById('craft');
+RCP.forEach((rc,ri)=>{
+  qb2=document.createElement('button');
+  qb2.textContent=rc[2];
+  qb2.onclick=()=>{
+    if(!rc[0].every(ing=>has(ing[0],ing[1])))return;
+    rc[0].forEach(ing=>take(ing[0],ing[1]));
+    give(rc[1][0],rc[1][1]);
+    drawInv();
+  };
+  cw2.appendChild(qb2);cbt.push(qb2);
+});
+ivt=document.getElementById('invt');
+hpEl=document.getElementById('hp');dmgEl=document.getElementById('dmg');
+deadEl=document.getElementById('dead');
+drawHP=()=>{
+  qs2='';
+  for(qi2=0;qi2<10;qi2++){
+    qv2=PHP-qi2*2;
+    qs2+='<b class="'+(qv2>=2?'f':qv2>0?'h':'')+'"></b>';
+  }
+  hpEl.innerHTML=qs2;
+};
+RESPAWN=()=>{
+  PHP=PMX;PDEAD=0;PHURT=0;PREG=0;
+  P.x=16;P.y=30;P.z=16;P.g=0;
+  MOB.length=0;ARW.length=0;
+  deadEl.classList.remove('on');drawHP();
+};
+document.getElementById('rb').onclick=()=>RESPAWN();
 
 // ---- open / close ----
 tog=v=>{invOpen=v?1:0;ivp.classList.toggle('on',!!v);dragI=-1;gh.style.display='none';
@@ -324,13 +582,13 @@ ig.onpointerup=e=>{
   n4=n4&&n4.closest&&n4.closest('.slot');
   if(n4&&(dj=+n4.dataset.i)!=dragI){
     a3=INV[dragI];b3=INV[dj];
-    if(a3.id&&a3.id==b3.id&&b3.n<64){                 // same block -> merge stacks
-      kk=mn(64-b3.n,a3.n);b3.n+=kk;a3.n-=kk;if(!a3.n)INV[dragI]={id:0,n:0};
+    if(a3.id&&a3.id==b3.id&&b3.n<MAXS(a3.id)){        // same item -> merge stacks
+      kk=mn(MAXS(a3.id)-b3.n,a3.n);b3.n+=kk;a3.n-=kk;if(!a3.n)INV[dragI]={id:0,n:0};
     }else{INV[dragI]=b3;INV[dj]=a3;}                  // otherwise swap
   }
   dragI=-1;drawInv();drawBar();
 };
-drawBar();
+drawBar();drawHP();
 onwheel=e=>{e.preventDefault();selBlock((selI+(e.deltaY>0?1:5))%6);};
 for(i=200;i--;)PT.push({x:M.random()*W,y:M.random()*H,ph:M.random()*6.28}); // rain/snow
 
@@ -340,13 +598,13 @@ onkeydown=e=>{K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();if(e.key
   if(e.key=='c'){CRE^=1;drawBar();if(invOpen)drawInv();}      // survival <-> creative
   if(e.key=='g')SHD^=1;
   if(e.key=='r')wthr=(wthr+1)%3;
-  if(e.key=='x'){GEN();LGT();KIT();drawBar();if(invOpen)drawInv();P.x=16;P.y=30;P.z=16;P.g=0;
+  if(e.key=='x'){GEN();LGT();KIT();drawBar();if(invOpen)drawInv();RESPAWN();
     try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');localStorage.removeItem('voxelI');}catch(e){}}
 };
 onkeyup=e=>K[e.key.toLowerCase()]=0;
 c.oncontextmenu=e=>e.preventDefault();
 c.onmousedown=e=>{
-  if(document.pointerLockElement==c){e.button==2?place():dig();}
+  if(document.pointerLockElement==c){e.button==2?USE2():USE1();}
   else{drag=1;c.requestPointerLock&&c.requestPointerLock();}
 };
 onmouseup=()=>drag=0;
@@ -359,15 +617,16 @@ onmousemove=e=>{
 
 // ---- main loop ----
 (L=tm=>{
+  requestAnimationFrame(L);                           // schedule first: one bad frame won't freeze the game
   dt=mn((tm-P.t||0)/1e3,.1);P.t=tm;
   mu=mvu;mv=mvv;
   if(K.w)mv=1;if(K.s)mv=-1;if(K.a)mu=-1;if(K.d)mu=1;
   kj=K[' ']||jmp?1:0;jmp=0;
-  if(invOpen){mu=mv=0;kj=0;lkx=lky=0;}              // bag open = hands off the world
+  if(invOpen||PDEAD){mu=mv=0;kj=0;lkx=lky=0;}        // bag open or dead = hands off the world
   mu=mx(-1,mn(1,mu));mv=mx(-1,mn(1,mv));
   J=mx(0,J-dt);
   dc=mx(0,dc-dt);
-  if((K.f||K.e)&&dc==0&&!invOpen){K.f?dig():place();dc=.15;}
+  if((K.f||K.e)&&dc==0&&!invOpen){K.f?USE1():USE2();dc=.15;}
   if(kj&&P.g==0&&J==0){P.g=8;J=.35;}
   sp=5*dt;
   P.g-=18*dt;
@@ -380,7 +639,7 @@ onmousemove=e=>{
   P.x+=vx;U(0,vx);
   P.z+=vz;U(2,vz);
   P.y+=P.g*dt;U(1,P.g);
-  if(P.y<-10){P.x=16;P.y=30;P.z=16;P.g=0;}
+  if(P.y<-10){P.x=16;P.y=30;P.z=16;P.g=0;PHIT(4);}
   // ---- day / night cycle ----
   tod=(tod+dt/1440*(K.t?100:1))%1;                   // full day = 24 min (hold T = 100x preview)
   sunA=(tod-.25)*6.2832;sunEl=S(sunA);               // sun elevation -1..1
@@ -398,6 +657,11 @@ onmousemove=e=>{
   zR*=oc;zG*=oc;zB*=oc;hR*=oc;hG*=oc;hB*=oc;
   ct=wthr?-.1:.42;                                   // cloud threshold (lower = more cloud)
   cbr=(wthr?140:70)+(wthr?70:180)*dayf;              // cloud brightness
+  ETICK(dt);                                          // mobs, arrows, health (needs dayf/sunEl above)
+  if(PDEAD&&!deadEl.classList.contains('on')){deadEl.classList.add('on');if(invOpen)tog(0);}
+  dmgEl.style.opacity=PDEAD?.55:PHURT>0?(PHURT/.35*.6).toFixed(2):(PHP<7?.16+.05*S(tm*.006):0);
+  if(PHP!=lastHP){lastHP=PHP;drawHP();}
+  c.style.transform=SHK>0?'translate('+((M.random()-.5)*SHK*9).toFixed(1)+'px,'+((M.random()-.5)*SHK*9).toFixed(1)+'px)':'';
   cp=C(P.b);sp=S(P.b);
   if(SHD)SC.fill(-1);                                 // reset per-face shadow cache for this frame
   for(k=W*H;k--;){
@@ -453,6 +717,7 @@ onmousemove=e=>{
     D[k]=0xFF000000|(cb&255)<<16|(cg&255)<<8|cr&255;
   }
   T.putImageData(N,0,0);
+  EDRAW();                                            // mobs and arrows, over the voxel pass
   // ---- highlight the face the crosshair points at ----
   TG=target();
   if(TG&&(TG[0]-TG[3]|TG[1]-TG[4]|TG[2]-TG[5])){
@@ -464,6 +729,23 @@ onmousemove=e=>{
     bad=0;T.beginPath();
     for(m=0;m<4;m++){p=PR(C4[m][0],C4[m][1],C4[m][2]);if(!p){bad=1;break;}m?T.lineTo(p[0],p[1]):T.moveTo(p[0],p[1]);}
     if(!bad){T.closePath();T.lineWidth=1.5;T.strokeStyle='rgba(0,0,0,.7)';T.stroke();T.lineWidth=.8;T.strokeStyle='#fff';T.stroke();}
+  }
+  // ---- held weapon in the corner ----
+  qh2=WEP()||(CRE?PAL[selI]:0);
+  if(qh2&&!PDEAD){
+    qy2=SWG>0?1-SWG/.18:1;                            // 0 at swing start, 1 at rest
+    qo2=SWG>0?S(qy2*3.14)*14:0;                       // arc through the swing
+    T.fillStyle=BC(qh2)||'#888';
+    if((IT[qh2]||0).dmg){                             // sword: a diagonal blade
+      T.save();T.translate(W-38+qo2*.6,H-6+qo2*.5);T.rotate(-.6-qo2*.055);
+      T.fillRect(-3,-30,6,32);T.fillStyle='#5c4326';T.fillRect(-5,-2,10,8);T.restore();
+    }else if((IT[qh2]||0).bow){
+      T.save();T.translate(W-34+qo2*.4,H-8);T.fillRect(-2,-26,4,28);
+      T.fillStyle='#e8e0cc';T.fillRect(-1,-22,2,18);T.restore();
+    }else{                                            // block in hand
+      T.save();T.translate(W-34,H-4+qo2*.7);T.fillRect(-11,-22,22,22);
+      T.strokeStyle='rgba(0,0,0,.45)';T.lineWidth=1;T.strokeRect(-11,-22,22,22);T.restore();
+    }
   }
   // ---- precipitation overlay ----
   if(wthr){
@@ -484,7 +766,6 @@ onmousemove=e=>{
     localStorage.voxelT=tod;localStorage.voxelI=JSON.stringify(INV);}catch(e){}}
   hh=tod*24|0;mm=(tod*24-hh)*60|0;
   clk.textContent=(sunEl>.12?'☀':sunEl<-.12?'🌙':'🌆')+(wthr==1?'🌧':wthr==2?'❄':'')+' '+(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+(CRE?' ∞':'');
-  requestAnimationFrame(L);
 })(0);
 </script>
 </body>

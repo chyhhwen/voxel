@@ -179,27 +179,11 @@ $('b4').onclick=async()=>{
   catch(e){ line(o,'bad','建立 RTCPeerConnection 失敗:'+e.message); return; }
   const seen=[],addrs=new Set();
   let mdns=0,realLocal=0,srflx=0;
-  pc.onicecandidate=e=>{
-    if(!e.candidate){line(o,'info','candidate 蒐集結束');summary();return;}
-    const c=e.candidate;
-    const key=c.candidateType+'|'+c.address+'|'+c.port;
-    if(seen.indexOf(key)>=0)return;
-    seen.push(key);
-    const isM=c.address&&/\.local$/i.test(c.address);
-    if(c.candidateType==='host'){ isM?mdns++:realLocal++; }
-    if(c.candidateType==='srflx')srflx++;
-    if(c.address)addrs.add(c.address);
-    line(o,isM?'warn':'info','typ '+c.candidateType+'  '+c.address+':'+c.port+'  ('+c.protocol+')'+(isM?'  ← mDNS 遮蔽':''));
-  };
-  const dc=pc.createDataChannel('probe');
-  try{
-    const off=await pc.createOffer();
-    await pc.setLocalDescription(off);
-  }catch(e){ line(o,'bad','createOffer 失敗:'+e.message); return; }
-  const t=setTimeout(summary,5000);
-  let summarised=false;
+  // 這些必須宣告在 await 之前:ICE candidate 可能在 await 期間就送達
+  let summarised=false,timer=null;
   function summary(){
-    if(summarised)return; summarised=true; clearTimeout(t);
+    if(summarised)return; summarised=true;
+    if(timer)clearTimeout(timer);
     try{pc.close();}catch(e){}
     const d=document.createElement('div');
     d.className='verdict';
@@ -218,6 +202,24 @@ $('b4').onclick=async()=>{
     d.textContent='結論:'+txt;
     o.appendChild(d);
   }
+  pc.onicecandidate=e=>{
+    if(!e.candidate){line(o,'info','candidate 蒐集結束');summary();return;}
+    const c=e.candidate;
+    const key=c.candidateType+'|'+c.address+'|'+c.port;
+    if(seen.indexOf(key)>=0)return;
+    seen.push(key);
+    const isM=c.address&&/\.local$/i.test(c.address);
+    if(c.candidateType==='host'){ isM?mdns++:realLocal++; }
+    if(c.candidateType==='srflx')srflx++;
+    if(c.address)addrs.add(c.address);
+    line(o,isM?'warn':'info','typ '+c.candidateType+'  '+c.address+':'+c.port+'  ('+c.protocol+')'+(isM?'  ← mDNS 遮蔽':''));
+  };
+  const dc=pc.createDataChannel('probe');
+  try{
+    const off=await pc.createOffer();
+    await pc.setLocalDescription(off);
+  }catch(e){ line(o,'bad','createOffer 失敗:'+e.message); return; }
+  timer=setTimeout(summary,5000);
 };
 
 /* ---- 5. local datachannel loopback ---- */
