@@ -56,7 +56,8 @@
   #dead.on{display:flex}
   #dead button{font:14px monospace;color:#fff;background:rgba(255,255,255,.14);
         border:1px solid rgba(255,255,255,.5);border-radius:6px;padding:8px 20px;cursor:pointer}
-  #craft{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:340px}
+  #craft{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:340px;
+       max-height:118px;overflow-y:auto;padding:2px}
   #craft button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);
        border:1px solid rgba(255,255,255,.45);border-radius:5px;padding:5px 9px;cursor:pointer}
   #craft button:disabled{opacity:.3;cursor:default}
@@ -89,8 +90,9 @@
 <div id="wrap"><canvas id="c"></canvas></div>
 <div id="hud">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭<br>
 手機:左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
-選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(可合成武器) · C 切換生存↔創造<br>
+選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
 夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
+按住左鍵/F 持續挖掘 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<br>
 按住 T 快轉時間 · G 陰影 · R 天氣 · X 重置世界 · Esc 或 ⚙ 開選單/設定</div>
 <div id="cross"></div>
 <div id="clock">☀ 08:24</div>
@@ -146,7 +148,7 @@ D=new Uint32Array(W*H),
 N=new ImageData(new Uint8ClampedArray(D.buffer),W,H),
 w=new Uint8Array(32768),LG=new Uint8Array(32768),LQ=[],
 P={x:16,y:20,z:16,a:0,b:0,g:0},
-J=0,dc=0,tod=.35,SHD=1,SC=new Int8Array(196608),wthr=0,wt=0,sv=8,PT=[],K={},drag=0,
+J=0,dc=0,f=0,tod=.35,SHD=1,SC=new Int8Array(196608),wthr=0,wt=0,sv=8,PT=[],K={},drag=0,
 T=c.getContext('2d'),
 I=(x,y,z)=>(y*32+z)*32+x,
 B=(x,y,z)=>(x|y|z)&~31?0:w[I(x,y,z)];
@@ -158,7 +160,18 @@ GEN=()=>{
   for(i=WS*WS;i--;){
     X=i%WS;Y=i/WS|0;
     h=12+4*S(X/4)*C(Y/4)|0;
-    for(y=WS;y--;)w[I(X,y,Y)]=y<h?1:y<h+3?2:0;                         // sand base, 3 blocks of dirt on top
+    for(y=WS;y--;){
+      if(y>=h+3)w[I(X,y,Y)]=0;                                         // air
+      else if(y>=h)w[I(X,y,Y)]=2;                                      // 3 blocks of dirt
+      else if(y>=h-4)w[I(X,y,Y)]=1;                                    // sand
+      else{                                                            // stone with ores
+        qr2=M.random();
+        w[I(X,y,Y)]=qr2<(y<5?.014:0)?10                                // diamond: deep only
+                   :qr2<(y<8?.05:.012)?9                               // iron: mostly deep
+                   :qr2<.09?8                                          // coal: everywhere
+                   :7;
+      }
+    }
     if(h<15&M.random()<.05){
       Th=4+(M.random()*2|0);
       for(k=Th;k--;)w[I(X,h+k,Y)]=3;                                   // trunk
@@ -252,16 +265,44 @@ target=()=>{
   }
   return 0;
 };
-dig=()=>{o=target();if(o){
-  di=I(o[0],o[1],o[2]);bk=w[di];w[di]=0;LGT();
-  if(!CRE)give(bk,1);                                 // survival: the block goes in the bag
+// ---- mining: hold to break, gated by tool tier ----
+MTGT=-1;MPRG=0;MHINT='';MHT=0;hold1=0;mdn=0;pF=0;
+TIER=()=>{qk2=IT[WEP()]||0;return qk2.tier||0;};       // tier of the held tool (0 = bare hand)
+SPD=qb2=>{                                             // how fast the held tool breaks this block
+  qk2=IT[WEP()]||0;qc2=IT[qb2]||0;
+  return qk2.kind&&qk2.kind==qc2.tl?qk2.spd:1;         // right tool = fast, wrong/none = 1x
+};
+MINE=qd2=>{
+  o=target();
+  if(!o){MTGT=-1;MPRG=0;return;}
+  qi2=I(o[0],o[1],o[2]);qb2=w[qi2];
+  if(!qb2){MTGT=-1;MPRG=0;return;}
+  if(qi2!=MTGT){MTGT=qi2;MPRG=0;}
+  if(CRE){w[qi2]=0;LGT();MTGT=-1;MPRG=0;return;}       // creative breaks instantly
+  qc2=IT[qb2]||0;
+  if((qc2.tr||0)>TIER()){                              // not a good enough tool
+    MPRG=0;MHINT='需要'+(TMAT[qc2.tr]||0).n+'質以上的'+(qc2.tl=='p'?'鎬':'工具');MHT=1.2;return;
+  }
+  MPRG+=qd2*SPD(qb2)/(qc2.hd||.5);
+  if(MPRG>=1){
+    w[qi2]=0;LGT();
+    give(qc2.dp||qb2,1);                               // ores drop their material
+    MPRG=0;MTGT=-1;
+  }
+};
+dig=()=>{o=target();if(o){                             // single-shot break (creative / scripted)
+  qi2=I(o[0],o[1],o[2]);qb2=w[qi2];qc2=IT[qb2]||0;
+  if(!CRE&&(qc2.tr||0)>TIER())return;
+  w[qi2]=0;LGT();
+  if(!CRE)give(qc2.dp||qb2,1);
 }};
-USE1=()=>{if(PDEAD||PAUSED)return;if(MELEE())return;dig();};   // left: hit a mob, else dig
+USE1=()=>{if(PDEAD||PAUSED)return;if(MELEE())return;hold1=1;};  // left: hit a mob, else start mining
+USE1UP=()=>{hold1=0;MPRG=0;MTGT=-1;};
 USE2=()=>{if(PDEAD||PAUSED)return;                     // right: shoot if holding a bow, else place
   if((IT[WEP()]||0).bow){SHOOT();return;}
   place();};
 place=()=>{o=target();if(o){
-  sel=CRE?PAL[selI]:INV[selI].id;
+  sel=CRE?PAL[(CPG*6+selI)%PAL.length]:INV[selI].id;
   if(!sel||!BLK(sel))return;                          // empty hand, or holding a tool
   ax=o[3];ay=o[4];az=o[5];
   if((ax|ay|az)&~WM)return;                           // out of world
@@ -314,7 +355,7 @@ EHURT=(qo,qa)=>{                                      // damage a mob, with knoc
   qd=qo.x-P.x;qf=qo.z-P.z;ql=M.sqrt(qd*qd+qf*qf)||1;
   qo.x+=qd/ql*.45;qo.z+=qf/ql*.45;
   if(EHIT(qo)){qo.x-=qd/ql*.45;qo.z-=qf/ql*.45;}
-  if(qo.hp<=0){give(103,1+(M.random()<.35?1:0));return 1;}
+  if(qo.hp<=0){give(102,1+(M.random()<.35?1:0));return 1;}
   return 0;
 };
 
@@ -325,7 +366,7 @@ PHIT=qa=>{                                            // damage the player
 };
 
 // ---- weapon use ----
-WEP=()=>CRE?0:INV[selI].id;                           // what's in hand
+WEP=()=>CRE?0:INV[selI].id;   // creative uses the palette, not the bag                           // what's in hand
 MELEE=()=>{                                           // swing at the nearest mob in the crosshair cone
   qw=WEP();qv=(IT[qw]||0).dmg||1;                     // bare hands still hurt a little
   SWG=.18;
@@ -345,7 +386,7 @@ MELEE=()=>{                                           // swing at the nearest mo
   return 1;
 };
 SHOOT=()=>{
-  if(!CRE){if(!has(102,1))return 0;take(102,1);}
+  if(!CRE){if(!has(101,1))return 0;take(101,1);}
   cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
   ARW.push({x:P.x,y:P.y+1.4,z:P.z,vx:sx*cp*24,vy:sp*24+2,vz:cx*cp*24,life:4});
   drawBar();if(invOpen)drawInv();
@@ -487,6 +528,7 @@ SH=(px,py,pz)=>{
 bd=document.getElementById('bd');bp=document.getElementById('bp');clk=document.getElementById('clock');
 bj=document.getElementById('bj');STK=document.getElementById('stk');KNB=document.getElementById('knb');
 bd.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE1();};
+bd.ontouchend=bd.ontouchcancel=e=>{e.preventDefault();USE1UP();};
 bp.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE2();};
 bj.ontouchstart=e=>{e.preventDefault();e.stopPropagation();jmp=1;};
 bd.onclick=()=>USE1();bp.onclick=()=>USE2();bj.onclick=()=>jmp=1;
@@ -525,17 +567,35 @@ wrap.ontouchend=wrap.ontouchcancel=e=>{e.preventDefault();
   }};
 
 // ---- hotbar / inventory ----
-// ---- item table: ids 1-6 are placeable blocks, 100+ are items ----
-// c=colour  n=name  dmg=melee damage  bow=1 shoots arrows  st=max stack
-IT={1:{c:'#F4D87E',n:'沙土'},2:{c:'#705030',n:'泥土'},3:{c:'#403020',n:'木頭'},
-    4:{c:'#206020',n:'樹葉'},5:{c:'#BFE6FF',n:'玻璃'},6:{c:'#FFC24A',n:'火把'},
-    100:{c:'#C8CDD6',n:'木劍',dmg:5,st:1},101:{c:'#8A6A3A',n:'弓',bow:1,st:1},
-    102:{c:'#D9D2C0',n:'箭'},103:{c:'#7B4FA8',n:'暗核'}};
+// ---- item table ----
+// blocks 1-10 | materials 100-106 | tools 110+ (kind: p=鎬 a=斧 s=鏟 w=劍)
+// blocks also carry: hd=秒數 tl=需要的工具類 tr=需要的等級 dp=掉落物
+IT={1:{c:'#F4D87E',n:'沙土',hd:.55,tl:'s'},2:{c:'#705030',n:'泥土',hd:.55,tl:'s'},
+    3:{c:'#403020',n:'木頭',hd:1.3,tl:'a'},4:{c:'#206020',n:'樹葉',hd:.3},
+    5:{c:'#BFE6FF',n:'玻璃',hd:.4},6:{c:'#FFC24A',n:'火把',hd:.1},
+    7:{c:'#8A8A8E',n:'石頭',hd:1.6,tl:'p',tr:1},
+    8:{c:'#39393E',n:'煤礦',hd:2.2,tl:'p',tr:1,dp:104},
+    9:{c:'#C99A6E',n:'鐵礦',hd:2.8,tl:'p',tr:2,dp:105},
+    10:{c:'#5FE0D8',n:'鑽石礦',hd:4.2,tl:'p',tr:3,dp:106},
+    100:{c:'#8A6A3A',n:'弓',bow:1,st:1},101:{c:'#D9D2C0',n:'箭'},
+    102:{c:'#7B4FA8',n:'暗核'},103:{c:'#9B7B4A',n:'木棒'},
+    104:{c:'#2C2C30',n:'煤炭'},105:{c:'#D8B08C',n:'鐵錠'},106:{c:'#6FF0E6',n:'鑽石'}};
+// tool tiers: 1 木 2 石 3 鐵 4 鑽石
+TMAT=[0,{m:3,n:'木'},{m:7,n:'石'},{m:105,n:'鐵'},{m:106,n:'鑽石'}];
+TKIND=[{k:'p',n:'鎬',b:110,c:3,d:2,tiers:4},{k:'w',n:'劍',b:120,c:2,d:4,tiers:4},
+       {k:'a',n:'斧',b:130,c:3,d:3,tiers:3},{k:'s',n:'鏟',b:140,c:1,d:1,tiers:3}];
+TCOL=['','#C8A06A','#9AA0A6','#E0BE9A','#7FF0E6'];   // tool colour by tier
+TKIND.forEach(tk=>{for(qt2=1;qt2<=tk.tiers;qt2++)
+  IT[tk.b+qt2-1]={c:TCOL[qt2],n:TMAT[qt2].n+tk.n,st:1,kind:tk.k,tier:qt2,
+                  spd:+(1+qt2*1.9).toFixed(1),dmg:tk.d+qt2*1.4|0};});
+VCOL=new Uint32Array(16);                            // voxel render colour, parsed from IT
+for(qv2=1;qv2<16;qv2++)if(IT[qv2])VCOL[qv2]=parseInt(IT[qv2].c.slice(1),16);
+VCOL[2]=7360560;VCOL[3]=4206624;VCOL[4]=2121760;VCOL[1]=16046206;  // keep the original terrain palette
 BC=i2=>(IT[i2]||0).c||'';                            // colour by id
 BN=i2=>(IT[i2]||0).n||'';                            // name by id
 BLK=i2=>i2>0&&i2<100;                                // placeable?
 MAXS=i2=>(IT[i2]||0).st||64;                         // max stack size (STK is the joystick element)
-PAL=[1,2,3,4,5,6];                                   // creative palette (infinite)
+PAL=[1,2,3,4,5,6,7,8,9,10];                          // creative palette (infinite)
 selI=0;CRE=0;invOpen=0;dragI=-1;
 bar=document.getElementById('bar');ig=document.getElementById('invg');
 ivp=document.getElementById('inv');gh=document.getElementById('ghost');
@@ -544,7 +604,8 @@ bi=document.getElementById('bi');
 CH=(it,i,num,onf)=>'<div class="slot'+(it.id?'':' e')+(num?' hb':'')+(onf?' on':'')+(i==dragI?' src':'')+
   '" data-i="'+i+'" title="'+BN(it.id)+'" style="background:'+BC(it.id)+'">'+
   (num?'<span>'+(i+1)+'</span>':'')+(it.id?'<i>'+(it.n<0?'∞':it.n>1?it.n:'')+'</i>':'')+'</div>';
-drawBar=()=>{s2='';for(bj=0;bj<6;bj++)s2+=CH(CRE?{id:PAL[bj],n:-1}:INV[bj],bj,1,bj==selI);bar.innerHTML=s2;};
+CPG=0;                                               // creative palette page
+drawBar=()=>{s2='';for(bj=0;bj<6;bj++)s2+=CH(CRE?{id:PAL[(CPG*6+bj)%PAL.length],n:-1}:INV[bj],bj,1,bj==selI);bar.innerHTML=s2;};
 drawInv=()=>{s2='';for(bj=0;bj<24;bj++)s2+=CH(INV[bj],bj,bj<6,bj==selI);ig.innerHTML=s2;
   RCP.forEach((rc,ri)=>cbt[ri].disabled=!rc[0].every(ing=>has(ing[0],ing[1])));
   ivt.textContent=CRE?'背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動':'背包 — 拖曳搬移方塊,第一排就是快捷欄';};
@@ -564,10 +625,16 @@ take=(id,n)=>{if(!has(id,n))return 0;
   return 1;};
 // ---- recipes: [[ingredient id, count]...] -> [result id, count] ----
 RCP=[[[[3,1]],[6,4],'木頭×1 → 火把×4'],
-     [[[3,2]],[100,1],'木頭×2 → 木劍'],
-     [[[3,2],[4,2]],[101,1],'木頭×2+樹葉×2 → 弓'],
-     [[[3,1]],[102,4],'木頭×1 → 箭×4'],
-     [[[103,1]],[6,8],'暗核×1 → 火把×8']];
+     [[[3,1]],[103,4],'木頭×1 → 木棒×4'],
+     [[[3,1]],[101,4],'木頭×1 → 箭×4'],
+     [[[3,2],[4,2]],[100,1],'木頭×2+樹葉×2 → 弓'],
+     [[[102,1]],[6,8],'暗核×1 → 火把×8'],
+     [[[104,1],[103,1]],[6,4],'煤炭×1+木棒×1 → 火把×4']];
+TKIND.forEach(tk=>{for(qt2=1;qt2<=tk.tiers;qt2++){
+  qm2=TMAT[qt2].m;qn2=tk.b+qt2-1;
+  RCP.push([[[qm2,tk.c],[103,2]],[qn2,1],
+            TMAT[qt2].n+'×'+tk.c+'+棒×2 → '+IT[qn2].n]);
+}});
 cbt=[];cw2=document.getElementById('craft');
 RCP.forEach((rc,ri)=>{
   qb2=document.createElement('button');
@@ -680,7 +747,13 @@ ig.onpointerup=e=>{
   dragI=-1;drawInv();drawBar();
 };
 drawBar();drawHP();
-onwheel=e=>{e.preventDefault();selBlock((selI+(e.deltaY>0?1:5))%6);};
+onwheel=e=>{e.preventDefault();
+  qw2=selI+(e.deltaY>0?1:-1);
+  if(CRE&&PAL.length>6){                              // wrap onto the next palette page
+    if(qw2>5){CPG=(CPG+1)%M.ceil(PAL.length/6);qw2=0;}
+    else if(qw2<0){CPG=(CPG+M.ceil(PAL.length/6)-1)%M.ceil(PAL.length/6);qw2=5;}
+  }else qw2=(qw2+6)%6;
+  selBlock(qw2);};
 for(i=200;i--;)PT.push({x:M.random()*W,y:M.random()*H,ph:M.random()*6.28}); // rain/snow
 
 onkeydown=e=>{
@@ -703,10 +776,10 @@ onkeyup=e=>K[e.key.toLowerCase()]=0;
 c.oncontextmenu=e=>e.preventDefault();
 c.onmousedown=e=>{
   if(PAUSED)return;                                   // menu is showing; let the buttons work
-  if(document.pointerLockElement==c){e.button==2?USE2():USE1();}
+  if(document.pointerLockElement==c){if(e.button==2)USE2();else{mdn=1;USE1();}}
   else{drag=1;c.requestPointerLock&&c.requestPointerLock();}
 };
-onmouseup=()=>drag=0;
+onmouseup=()=>{drag=0;mdn=0;USE1UP();};
 onmousemove=e=>{
   if(document.pointerLockElement==c||drag){
     P.a+=e.movementX*MSENS;
@@ -726,7 +799,9 @@ onmousemove=e=>{
   mu=mx(-1,mn(1,mu));mv=mx(-1,mn(1,mv));
   J=mx(0,J-dt);
   dc=mx(0,dc-dt);
-  if((K.f||K.e)&&dc==0&&!invOpen){K.f?USE1():USE2();dc=.15;}
+  if(K.f&&!pF&&!invOpen&&!PAUSED&&!PDEAD)MELEE();      // F pressed = swing at mobs
+  pF=K.f?1:0;
+  if(K.e&&dc==0&&!invOpen){USE2();dc=.15;}
   if(kj&&P.g==0&&J==0){P.g=8;J=.35;}
   sp=5*dt;
   P.g-=18*dt;
@@ -757,6 +832,8 @@ onmousemove=e=>{
   zR*=oc;zG*=oc;zB*=oc;hR*=oc;hG*=oc;hB*=oc;
   ct=wthr?-.1:.42;                                   // cloud threshold (lower = more cloud)
   cbr=(wthr?140:70)+(wthr?70:180)*dayf;              // cloud brightness
+  if((hold1||K.f)&&!invOpen&&!PAUSED&&!PDEAD)MINE(dt);else{MPRG=0;MTGT=-1;}   // hold to mine
+  MHT=mx(0,MHT-dt);
   ETICK(dt);                                          // mobs, arrows, health (needs dayf/sunEl above)
   if(PDEAD&&!deadEl.classList.contains('on')){deadEl.classList.add('on');if(invOpen)tog(0);}
   dmgEl.style.opacity=PDEAD?.55:PHURT>0?(PHURT/.35*.6).toFixed(2):(PHP<7?.16+.05*S(tm*.006):0);
@@ -770,7 +847,7 @@ onmousemove=e=>{
     d={x:sx*cp+cx*dx-sx*sp*dy,y:sp+cp*dy,z:cx*cp-sx*dx-cx*sp*dy};
     h=R({x:P.x,y:P.y+1.5,z:P.z},d);
     if(h.h){
-      Q=[0,16046206,7360560,4206624,2121760,0,0xFFC24A][h.b];
+      Q=VCOL[h.b];
       h.n==0?(nrx=-q,nry=0,nrz=0):h.n==1?(nrx=0,nry=-r,nrz=0):(nrx=0,nry=0,nrz=-s); // face normal
       if(h.b==6){                                      // torch itself: emissive, never dark
         m=1.18*flk;cr=(Q>>16)*m;cg=((Q>>8)&255)*m;cb=(Q&255)*m;
@@ -828,10 +905,22 @@ onmousemove=e=>{
       :[[gx,gy,gz+(dfz<0)],[gx+1,gy,gz+(dfz<0)],[gx+1,gy+1,gz+(dfz<0)],[gx,gy+1,gz+(dfz<0)]];
     bad=0;T.beginPath();
     for(m=0;m<4;m++){p=PR(C4[m][0],C4[m][1],C4[m][2]);if(!p){bad=1;break;}m?T.lineTo(p[0],p[1]):T.moveTo(p[0],p[1]);}
-    if(!bad){T.closePath();T.lineWidth=1.5;T.strokeStyle='rgba(0,0,0,.7)';T.stroke();T.lineWidth=.8;T.strokeStyle='#fff';T.stroke();}
+    if(!bad){T.closePath();
+      if(MPRG>0){T.fillStyle='rgba(0,0,0,'+(MPRG*.55).toFixed(2)+')';T.fill();}   // crack darkening
+      T.lineWidth=1.5;T.strokeStyle='rgba(0,0,0,.7)';T.stroke();T.lineWidth=.8;T.strokeStyle='#fff';T.stroke();}
+  }
+  // ---- mining progress + tool hint ----
+  if(MPRG>0){
+    T.fillStyle='rgba(0,0,0,.55)';T.fillRect(hw-26,H*.62,52,4);
+    T.fillStyle='#8fe0a0';T.fillRect(hw-25,H*.62+1,50*mn(1,MPRG),2);
+  }
+  if(MHT>0&&MHINT){
+    T.fillStyle='rgba(0,0,0,.5)';T.fillRect(hw-52,H*.68,104,11);
+    T.fillStyle='#ffd9a0';T.font='8px monospace';T.textAlign='center';
+    T.fillText(MHINT,hw,H*.68+8);T.textAlign='left';
   }
   // ---- held weapon in the corner ----
-  qh2=WEP()||(CRE?PAL[selI]:0);
+  qh2=WEP()||(CRE?PAL[(CPG*6+selI)%PAL.length]:0);
   if(qh2&&!PDEAD){
     qy2=SWG>0?1-SWG/.18:1;                            // 0 at swing start, 1 at rest
     qo2=SWG>0?S(qy2*3.14)*14:0;                       // arc through the swing
