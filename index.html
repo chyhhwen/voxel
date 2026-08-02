@@ -60,7 +60,29 @@
   #craft button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);
        border:1px solid rgba(255,255,255,.45);border-radius:5px;padding:5px 9px;cursor:pointer}
   #craft button:disabled{opacity:.3;cursor:default}
-  #invx{opacity:.6}
+  #mnu{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;
+       align-items:center;justify-content:center;gap:10px;color:#fff;
+       font:13px/1.7 monospace;background:rgba(8,11,16,.82);backdrop-filter:blur(4px)}
+  #mnu h1{font:600 26px/1.2 monospace;letter-spacing:.14em;margin:0 0 2px}
+  #mnu .tag{opacity:.55;font-size:12px;margin:0 0 18px}
+  #mnu button{font:14px monospace;color:#fff;background:rgba(255,255,255,.1);
+       border:1px solid rgba(255,255,255,.42);border-radius:7px;padding:10px 30px;
+       cursor:pointer;min-width:190px}
+  #mnu button:hover{background:rgba(255,255,255,.2)}
+  #setp{display:none;flex-direction:column;gap:13px;width:min(340px,86vw);
+        border:1px solid rgba(255,255,255,.16);border-radius:9px;padding:16px 18px;
+        background:rgba(255,255,255,.04)}
+  #setp.on{display:flex}
+  #mnu.cfg #home{display:none}
+  .st{display:flex;flex-direction:column;gap:5px}
+  .st .lab{display:flex;justify-content:space-between;font-size:12px;opacity:.85}
+  .st .lab b{font-weight:400;opacity:.7}
+  .st input[type=range]{width:100%;accent-color:#7fb2e5}
+  .tog{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.9}
+  .tog button{min-width:74px!important;padding:5px 10px!important;font-size:12px!important}
+  #bm{position:fixed;top:6px;right:78px;width:32px;height:32px;border-radius:6px;z-index:3;
+      display:flex;align-items:center;justify-content:center;font:15px/1 monospace;color:#fff;
+      background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.35);cursor:pointer;user-select:none}
 </style>
 </head>
 <body>
@@ -69,7 +91,7 @@
 手機:左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
 選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(可合成武器) · C 切換生存↔創造<br>
 夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
-按住 T 快轉時間 · G 陰影開關 · R 切換天氣(晴/雨/雪) · X 重置世界</div>
+按住 T 快轉時間 · G 陰影 · R 天氣 · X 重置世界 · Esc 或 ⚙ 開選單/設定</div>
 <div id="cross"></div>
 <div id="clock">☀ 08:24</div>
 <div id="bd" class="btn">⛏</div>
@@ -92,6 +114,31 @@
   <button id="rb">重生</button>
 </div>
 <div id="ghost"></div>
+<div id="bm">⚙</div>
+<div id="mnu">
+  <div id="home">
+    <h1>VOXEL</h1>
+    <p class="tag">方塊世界 · 日夜 · 天氣 · 怪物</p>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <button id="bstart">開始遊戲</button>
+      <button id="bset">設定</button>
+      <button id="bres">重新產生世界</button>
+    </div>
+  </div>
+  <div id="setp">
+    <div class="st">
+      <div class="lab"><span>滑鼠靈敏度</span><b id="vMs">6</b></div>
+      <input type="range" id="sMs" min="1" max="20" step="1" value="6">
+    </div>
+    <div class="st">
+      <div class="lab"><span>觸控靈敏度</span><b id="vTs">6</b></div>
+      <input type="range" id="sTs" min="1" max="20" step="1" value="6">
+    </div>
+    <div class="tog"><span>Y 軸反轉</span><button id="sIy">關</button></div>
+    <div class="tog"><span>陰影</span><button id="sSh">開</button></div>
+    <button id="bback" style="margin-top:4px">返回</button>
+  </div>
+</div>
 <script>
 M=Math,S=M.sin,C=M.cos,A=M.abs,mn=M.min,mx=M.max,
 W=280,H=168,WS=32,WM=WS-1,hw=W/2,      // WS = world size per axis (NOT named Z: R() overwrites Z every ray)
@@ -209,8 +256,8 @@ dig=()=>{o=target();if(o){
   di=I(o[0],o[1],o[2]);bk=w[di];w[di]=0;LGT();
   if(!CRE)give(bk,1);                                 // survival: the block goes in the bag
 }};
-USE1=()=>{if(PDEAD)return;if(MELEE())return;dig();};   // left: hit a mob, else dig
-USE2=()=>{if(PDEAD)return;                             // right: shoot if holding a bow, else place
+USE1=()=>{if(PDEAD||PAUSED)return;if(MELEE())return;dig();};   // left: hit a mob, else dig
+USE2=()=>{if(PDEAD||PAUSED)return;                     // right: shoot if holding a bow, else place
   if((IT[WEP()]||0).bow){SHOOT();return;}
   place();};
 place=()=>{o=target();if(o){
@@ -446,7 +493,8 @@ bd.onclick=()=>USE1();bp.onclick=()=>USE2();bj.onclick=()=>jmp=1;
 
 // ---- touch: left half = floating stick (relative to where you touched down),
 //              right half = drag to look (delta based, same feel as the mouse) ----
-mvId=-1;lkId=-1;mvu=0;mvv=0;lkx=0;lky=0;jmp=0;RAD=52;LKS=.0042;
+mvId=-1;lkId=-1;mvu=0;mvv=0;lkx=0;lky=0;jmp=0;RAD=52;
+LKS=.0042;MSENS=.003;INVY=1;PAUSED=1;MSV=6;TSV=6;      // look settings (PAUSED until 開始遊戲)
 Treset=()=>{mvId=lkId=-1;mvu=mvv=lkx=lky=0;STK.style.display='none';};
 wrap.ontouchstart=e=>{e.preventDefault();
   for(tt of e.changedTouches){
@@ -551,6 +599,49 @@ RESPAWN=()=>{
 };
 document.getElementById('rb').onclick=()=>RESPAWN();
 
+// ---- start menu + settings ----
+mnuEl=document.getElementById('mnu');setpEl=document.getElementById('setp');
+SAPPLY=()=>{                                          // slider values -> live constants
+  MSENS=.0005*MSV;LKS=.0007*TSV;
+  vMs.textContent=MSV;vTs.textContent=TSV;
+  sMs.value=MSV;sTs.value=TSV;
+  sIy.textContent=INVY<0?'開':'關';
+  sSh.textContent=SHD?'開':'關';
+};
+SSAVE=()=>{try{localStorage.voxelS=JSON.stringify({m:MSV,t:TSV,i:INVY,s:SHD});}catch(e){}};
+try{
+  if(localStorage.voxelS){
+    qj=JSON.parse(localStorage.voxelS);
+    if(qj){MSV=qj.m||6;TSV=qj.t||6;INVY=qj.i<0?-1:1;SHD=qj.s?1:0;}
+  }
+}catch(e){}
+SAPPLY();
+MENU=v=>{                                             // open/close the menu (pauses the world)
+  PAUSED=v?1:0;
+  mnuEl.style.display=v?'flex':'none';
+  if(v){
+    Treset();K={};                                    // drop any held keys/touches
+    document.exitPointerLock&&document.exitPointerLock();
+    if(invOpen)tog(0);
+  }
+};
+CFG=v=>{                                              // settings sub-page
+  setpEl.classList.toggle('on',!!v);
+  mnuEl.classList.toggle('cfg',!!v);
+};
+bstart.onclick=()=>MENU(0);
+bset.onclick=()=>CFG(1);
+bback.onclick=()=>{CFG(0);SSAVE();};
+bres.onclick=()=>{GEN();LGT();KIT();drawBar();RESPAWN();MENU(0);
+  try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');localStorage.removeItem('voxelI');}catch(e){}};
+sMs.oninput=()=>{MSV=+sMs.value;SAPPLY();};
+sTs.oninput=()=>{TSV=+sTs.value;SAPPLY();};
+sIy.onclick=()=>{INVY=-INVY;SAPPLY();SSAVE();};
+sSh.onclick=()=>{SHD^=1;SAPPLY();SSAVE();};
+bm.onclick=()=>MENU(1);
+bm.ontouchstart=e=>{e.preventDefault();e.stopPropagation();MENU(1);};
+MENU(1);
+
 // ---- open / close ----
 tog=v=>{invOpen=v?1:0;ivp.classList.toggle('on',!!v);dragI=-1;gh.style.display='none';
   bar.style.display=invOpen?'none':'flex';            // first grid row already is the hotbar
@@ -592,11 +683,18 @@ drawBar();drawHP();
 onwheel=e=>{e.preventDefault();selBlock((selI+(e.deltaY>0?1:5))%6);};
 for(i=200;i--;)PT.push({x:M.random()*W,y:M.random()*H,ph:M.random()*6.28}); // rain/snow
 
-onkeydown=e=>{K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();if(e.key>='1'&&e.key<='6')selBlock(+e.key-1);
+onkeydown=e=>{
+  if(e.key=='Escape'){                                // Esc: bag first, then the menu
+    if(invOpen)tog(0);else MENU(!PAUSED);
+    if(!PAUSED)CFG(0);
+    return;
+  }
+  K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();
+  if(PAUSED)return;                                   // menu open: no gameplay hotkeys
+  if(e.key>='1'&&e.key<='6')selBlock(+e.key-1);
   if(e.key=='i'||e.key=='Tab'){e.preventDefault();tog(!invOpen);}
-  if(e.key=='Escape'&&invOpen)tog(0);
   if(e.key=='c'){CRE^=1;drawBar();if(invOpen)drawInv();}      // survival <-> creative
-  if(e.key=='g')SHD^=1;
+  if(e.key=='g'){SHD^=1;SAPPLY();SSAVE();}
   if(e.key=='r')wthr=(wthr+1)%3;
   if(e.key=='x'){GEN();LGT();KIT();drawBar();if(invOpen)drawInv();RESPAWN();
     try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');localStorage.removeItem('voxelI');}catch(e){}}
@@ -604,14 +702,15 @@ onkeydown=e=>{K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();if(e.key
 onkeyup=e=>K[e.key.toLowerCase()]=0;
 c.oncontextmenu=e=>e.preventDefault();
 c.onmousedown=e=>{
+  if(PAUSED)return;                                   // menu is showing; let the buttons work
   if(document.pointerLockElement==c){e.button==2?USE2():USE1();}
   else{drag=1;c.requestPointerLock&&c.requestPointerLock();}
 };
 onmouseup=()=>drag=0;
 onmousemove=e=>{
   if(document.pointerLockElement==c||drag){
-    P.a+=e.movementX*.003;
-    P.b=mx(-1.5,mn(1.5,P.b-e.movementY*.003));
+    P.a+=e.movementX*MSENS;
+    P.b=mx(-1.5,mn(1.5,P.b-e.movementY*MSENS*INVY));
   }
 };
 
@@ -619,10 +718,11 @@ onmousemove=e=>{
 (L=tm=>{
   requestAnimationFrame(L);                           // schedule first: one bad frame won't freeze the game
   dt=mn((tm-P.t||0)/1e3,.1);P.t=tm;
+  if(PAUSED)dt=0;                                     // menu open: render, but nothing advances
   mu=mvu;mv=mvv;
   if(K.w)mv=1;if(K.s)mv=-1;if(K.a)mu=-1;if(K.d)mu=1;
   kj=K[' ']||jmp?1:0;jmp=0;
-  if(invOpen||PDEAD){mu=mv=0;kj=0;lkx=lky=0;}        // bag open or dead = hands off the world
+  if(invOpen||PDEAD||PAUSED){mu=mv=0;kj=0;lkx=lky=0;} // bag, death or menu = hands off the world
   mu=mx(-1,mn(1,mu));mv=mx(-1,mn(1,mv));
   J=mx(0,J-dt);
   dc=mx(0,dc-dt);
@@ -631,7 +731,7 @@ onmousemove=e=>{
   sp=5*dt;
   P.g-=18*dt;
   P.a+=lkx*LKS;                                     // drag right = turn right
-  P.b=mx(-1.5,mn(1.5,P.b-lky*LKS));                 // drag down = look down (matches the mouse)
+  P.b=mx(-1.5,mn(1.5,P.b-lky*LKS*INVY));            // drag down = look down (matches the mouse)
   lkx=lky=0;
   cx=C(P.a);sx=S(P.a);
   vx=(mu*cx+mv*sx)*sp;
