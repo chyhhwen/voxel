@@ -1,38 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>VOXEL</title>
 <style>
-  html,body{margin:0;height:100%;background:#111;overflow:hidden}
-  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-  #c{width:100%;max-width:100vw;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#88ccfe}
-  #hud{position:fixed;top:8px;left:8px;color:#fff;font:12px/1.4 monospace;
-       text-shadow:0 1px 2px #000;pointer-events:none;opacity:.85}
+  :root{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
+        --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
+  html,body{margin:0;height:100%;background:#111;overflow:hidden;overscroll-behavior:none;
+       -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none}
+  #c{display:block;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#000}
+  #hud{position:fixed;top:calc(8px + var(--st));left:calc(8px + var(--sl));right:calc(128px + var(--sr));
+       color:#fff;font:12px/1.4 monospace;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.85}
+  #hud.off{display:none}
+  /* help lines: keyboard lines on desktop, touch lines on phones/tablets, both on touch laptops */
+  #hud .tc{display:none}
+  body.touch #hud .tc{display:inline}
+  @media (any-pointer:coarse){#hud .tc{display:inline}}
+  @media (pointer:coarse){#hud .kb{display:none}}
   #cross{position:fixed;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;
          border:1px solid rgba(255,255,255,.7);border-radius:50%;pointer-events:none}
-  .btn{position:fixed;bottom:16px;width:56px;height:56px;border-radius:50%;
+  .btn{position:fixed;width:56px;height:56px;border-radius:50%;
        display:flex;align-items:center;justify-content:center;font:22px/1 monospace;
        color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4);
-       user-select:none;touch-action:none;z-index:2}
-  #bd{right:88px;bottom:84px}#bp{right:16px;bottom:84px}
-  #bj{right:88px;bottom:152px}#bi{right:16px;bottom:152px;z-index:6}
-  #wrap{touch-action:none}
+       user-select:none;touch-action:none;z-index:2;cursor:pointer}
+  #bd{right:calc(88px + var(--sr));bottom:calc(84px + var(--sb))}
+  #bp{right:calc(16px + var(--sr));bottom:calc(84px + var(--sb))}
+  #bj{right:calc(88px + var(--sr));bottom:calc(152px + var(--sb))}
+  #bi{right:calc(16px + var(--sr));bottom:calc(152px + var(--sb));z-index:6}
+  /* touch-only buttons stay hidden on mouse-only devices */
+  #bd,#bp,#bj{display:none}
+  body.touch #bd,body.touch #bp,body.touch #bj{display:flex}
+  @media (any-pointer:coarse){#bd,#bp,#bj{display:flex}}
   #stk{position:fixed;width:104px;height:104px;border-radius:50%;display:none;z-index:3;
        border:2px solid rgba(255,255,255,.28);background:rgba(0,0,0,.22);pointer-events:none}
   #knb{position:absolute;width:36px;height:36px;border-radius:50%;
        background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.65)}
-  #bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  #bar{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);
        display:flex;gap:6px;z-index:2}
   .slot{width:42px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
         position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);cursor:pointer;touch-action:none}
   .slot.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
   .slot span{position:absolute;top:1px;left:4px;font:10px monospace;color:#fff;text-shadow:0 1px 1px #000}
-  #clock{position:fixed;top:8px;right:10px;color:#fff;font:14px monospace;
-         text-shadow:0 1px 2px #000;pointer-events:none;opacity:.9}
   .slot i{position:absolute;right:3px;bottom:0;font:11px/1.4 monospace;font-style:normal;
           color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
   .slot.e{background:rgba(255,255,255,.07)!important}
+  #clock{position:fixed;top:calc(8px + var(--st));right:calc(10px + var(--sr));color:#fff;font:14px monospace;
+         text-shadow:0 1px 2px #000;pointer-events:none;opacity:.9}
+  #fps{position:fixed;top:calc(44px + var(--st));right:calc(10px + var(--sr));color:#fff;font:11px monospace;
+       text-shadow:0 1px 2px #000;pointer-events:none;opacity:.8;display:none;white-space:nowrap}
+  #fps.on{display:block}
   #inv{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;
        align-items:center;justify-content:center;gap:12px;color:#fff;font:12px/1.6 monospace;
        background:rgba(8,10,14,.8);backdrop-filter:blur(3px)}
@@ -43,7 +62,7 @@
   #invg .slot.src{opacity:.35}
   #ghost{position:fixed;width:46px;height:46px;border-radius:6px;pointer-events:none;
          z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6)}
-  #hp{position:fixed;left:8px;bottom:70px;display:flex;gap:3px;z-index:2;pointer-events:none}
+  #hp{position:fixed;left:calc(8px + var(--sl));bottom:calc(70px + var(--sb));display:flex;gap:3px;z-index:2;pointer-events:none}
   #hp b{width:11px;height:11px;border-radius:2px;background:#3a1520;
         box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
   #hp b.f{background:#e2455c}
@@ -74,6 +93,11 @@
         border:1px solid rgba(255,255,255,.16);border-radius:9px;padding:16px 18px;
         background:rgba(255,255,255,.04)}
   #setp.on{display:flex}
+  #setp{max-height:calc(100vh - 24px);overflow-y:auto;box-sizing:border-box}
+  @media (max-height:480px){                  /* landscape phones: two columns so it fits */
+    #setp.on{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;width:min(620px,94vw);padding:12px 16px}
+    #setp #bback{grid-column:1/-1;margin-top:0!important;padding:7px 30px}
+  }
   #mnu.cfg #home{display:none}
   .st{display:flex;flex-direction:column;gap:5px}
   .st .lab{display:flex;justify-content:space-between;font-size:12px;opacity:.85}
@@ -81,21 +105,23 @@
   .st input[type=range]{width:100%;accent-color:#7fb2e5}
   .tog{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.9}
   .tog button{min-width:74px!important;padding:5px 10px!important;font-size:12px!important}
-  #bm{position:fixed;top:6px;right:78px;width:32px;height:32px;border-radius:6px;z-index:3;
+  #bm{position:fixed;top:calc(6px + var(--st));right:calc(78px + var(--sr));width:32px;height:32px;border-radius:6px;z-index:3;
       display:flex;align-items:center;justify-content:center;font:15px/1 monospace;color:#fff;
       background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.35);cursor:pointer;user-select:none}
 </style>
 </head>
 <body>
 <div id="wrap"><canvas id="c"></canvas></div>
-<div id="hud">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭<br>
-手機:左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
-選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
-夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
-按住左鍵/F 持續挖掘 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<br>
-按住 T 快轉時間 · G 陰影 · R 天氣 · X 重置世界 · Esc 或 ⚙ 開選單/設定</div>
+<div id="hud"><span class="kb">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭<br>
+</span><span class="tc">左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
+</span><span class="kb">選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
+</span><span class="tc">選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明)<br>
+</span>夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
+按住挖掘持續挖 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<span class="kb"><br>
+按住 T 快轉時間 · G 陰影 · R 天氣 · X(按兩次)重置世界 · H 隱藏說明 · Esc 或 ⚙ 開選單/設定</span></div>
 <div id="cross"></div>
 <div id="clock">☀ 08:24</div>
+<div id="fps"></div>
 <div id="bd" class="btn">⛏</div>
 <div id="bp" class="btn">＋</div>
 <div id="bj" class="btn">⤒</div>
@@ -138,824 +164,1153 @@
     </div>
     <div class="tog"><span>Y 軸反轉</span><button id="sIy">關</button></div>
     <div class="tog"><span>陰影</span><button id="sSh">開</button></div>
+    <div class="tog"><span>畫質</span><button id="sQ">自動</button></div>
+    <div class="tog"><span>顯示 FPS</span><button id="sFp">關</button></div>
+    <div class="tog"><span>操作說明</span><button id="sHp">開</button></div>
+    <div class="tog"><span>模式</span><button id="sCr">生存</button></div>
     <button id="bback" style="margin-top:4px">返回</button>
   </div>
 </div>
 <script>
-M=Math,S=M.sin,C=M.cos,A=M.abs,mn=M.min,mx=M.max,
-W=280,H=168,WS=32,WM=WS-1,hw=W/2,      // WS = world size per axis (NOT named Z: R() overwrites Z every ray)
-D=new Uint32Array(W*H),
-N=new ImageData(new Uint8ClampedArray(D.buffer),W,H),
-w=new Uint8Array(32768),LG=new Uint8Array(32768),LQ=[],
-P={x:16,y:20,z:16,a:0,b:0,g:0},
-J=0,dc=0,f=0,tod=.35,SHD=1,SC=new Int8Array(196608),wthr=0,wt=0,sv=8,PT=[],K={},drag=0,
-T=c.getContext('2d'),
-I=(x,y,z)=>(y*32+z)*32+x,
-B=(x,y,z)=>(x|y|z)&~31?0:w[I(x,y,z)];
-c.width=W;c.height=H;
+'use strict';
+// =============================================================================
+//  VOXEL — a software-raycast voxel sandbox in one file, no libraries.
+//  Every pixel casts one DDA ray into a 32³ block world; the frame is written
+//  straight into an ImageData buffer. Sections, in order:
+//    DOM · world · torch light · items · save/load · player · mining ·
+//    entities · renderer · overlays · HUD & inventory · menu & settings ·
+//    input · main loop · boot
+// =============================================================================
 
-// ---- world generation ----
-GEN=()=>{
-  w.fill(0);
-  for(i=WS*WS;i--;){
-    X=i%WS;Y=i/WS|0;
-    h=12+4*S(X/4)*C(Y/4)|0;
-    for(y=WS;y--;){
-      if(y>=h+3)w[I(X,y,Y)]=0;                                         // air
-      else if(y>=h)w[I(X,y,Y)]=2;                                      // 3 blocks of dirt
-      else if(y>=h-4)w[I(X,y,Y)]=1;                                    // sand
-      else{                                                            // stone with ores
-        qr2=M.random();
-        w[I(X,y,Y)]=qr2<(y<5?.014:0)?10                                // diamond: deep only
-                   :qr2<(y<8?.05:.012)?9                               // iron: mostly deep
-                   :qr2<.09?8                                          // coal: everywhere
-                   :7;
+// ---- DOM ---------------------------------------------------------------------
+const $ = id => document.getElementById(id);
+const canvas = $('c'), g2d = canvas.getContext('2d', { alpha: false });
+const hudEl = $('hud'), clockEl = $('clock'), fpsEl = $('fps'), barEl = $('bar'), hpEl = $('hp'),
+      dmgEl = $('dmg'), deadEl = $('dead'), menuEl = $('mnu'), setpEl = $('setp'),
+      invEl = $('inv'), invGrid = $('invg'), invTitle = $('invt'), ghostEl = $('ghost'),
+      stickEl = $('stk'), knobEl = $('knb');
+
+// ---- world -------------------------------------------------------------------
+// WS³ cells, index = (y*WS + z)*WS + x. The save format and the bit shifts used
+// below (<<5, <<10, &31) both assume WS = 32.
+const WS = 32, WM = WS - 1, VOL = WS * WS * WS;
+const AIR = 0, SAND = 1, DIRT = 2, WOOD = 3, LEAF = 4, GLASS = 5, TORCH = 6,
+      STONE = 7, COAL = 8, IRON = 9, DIAMOND = 10;
+const world = new Uint8Array(VOL);            // block id per cell
+const torch = new Uint8Array(VOL);            // torch light 0..14 per cell
+const idx = (x, y, z) => (y * WS + z) * WS + x;
+const blockAt = (x, y, z) => (x | y | z) & ~WM ? AIR : world[idx(x, y, z)];
+const lightAt = (x, y, z) => (x | y | z) & ~WM ? 0 : torch[idx(x, y, z)];
+const solidAt = (x, y, z) => { const b = blockAt(x | 0, y | 0, z | 0); return b !== AIR && b !== TORCH; };
+let worldVer = 0;                             // bumped on every edit: invalidates the shadow cache
+let worldDirty = false;                       // world differs from the last save
+
+function setBlock(i, id) {
+  world[i] = id; worldVer++; worldDirty = true;
+  relight();
+}
+
+function generateWorld() {
+  world.fill(AIR);
+  for (let i = WS * WS; i--;) {                                      // terrain, one column at a time
+    const X = i % WS, Z = i / WS | 0;
+    const h = 12 + 4 * Math.sin(X / 4) * Math.cos(Z / 4) | 0;        // 8..16
+    for (let y = h + 3; y--;) {
+      let id;
+      if (y >= h) id = DIRT;                                         // 3 blocks of dirt on top
+      else if (y >= h - 4) id = SAND;                                // then sand
+      else {                                                         // stone with ores
+        const r = Math.random();
+        id = r < (y < 5 ? .014 : 0) ? DIAMOND                        // diamond: deep only
+           : r < (y < 8 ? .05 : .012) ? IRON                         // iron: mostly deep
+           : r < .09 ? COAL : STONE;                                 // coal: everywhere
       }
-    }
-    if(h<15&M.random()<.05){
-      Th=4+(M.random()*2|0);
-      for(k=Th;k--;)w[I(X,h+k,Y)]=3;                                   // trunk
-      for(k=27;k--;)if(M.random()<.85)
-        w[I(k%3+1+X,h+Th+2+(k/9|0),Y+(k/3|0)%3+1)]=4;                  // leaves
+      world[idx(X, y, Z)] = id;
     }
   }
-  for(x=0;x<WS;x++)for(z=0;z<WS;z++)if(!x|x==WM|!z|z==WM)              // glass boundary walls
-    for(y=0;y<WS;y++)if(!w[I(x,y,z)])w[I(x,y,z)]=5;
-};
-GEN();
+  for (let i = WS * WS; i--;) {                                      // trees, after all terrain so no column erases a canopy
+    const X = i % WS, Z = i / WS | 0;
+    if (X < 2 || X > WS - 3 || Z < 2 || Z > WS - 3) continue;        // canopies stay off the glass wall
+    if (Math.abs(X - 16) < 3 && Math.abs(Z - 16) < 3) continue;      // keep the spawn point clear
+    let g = WM;                                                      // g = first air cell above the ground
+    while (g > 0 && world[idx(X, g - 1, Z)] === AIR) g--;
+    if (g >= 18 || world[idx(X, g - 1, Z)] !== DIRT || Math.random() >= .05) continue;
+    const top = g + 4 + (Math.random() * 2 | 0);                     // trunk is 4–5 tall
+    for (let y = g; y < top; y++) world[idx(X, y, Z)] = WOOD;
+    for (let k = 0; k < 27; k++) {                                   // 3×3×3 canopy around the trunk top
+      const j = idx(X - 1 + k % 3, top - 2 + (k / 9 | 0), Z - 1 + (k / 3 | 0) % 3);
+      if (world[j] === AIR && (k === 22 || Math.random() < .85)) world[j] = LEAF;   // k 22 = crown centre
+    }
+  }
+  for (let x = 0; x < WS; x++) for (let z = 0; z < WS; z++)          // glass boundary walls
+    if (!x || x === WM || !z || z === WM)
+      for (let y = 0; y < WS; y++) if (world[idx(x, y, z)] === AIR) world[idx(x, y, z)] = GLASS;
+  worldVer++; worldDirty = true;
+}
 
-// ---- torch light: BFS flood fill through air/glass, 1 level lost per block ----
-LV=(x,y,z)=>(x|y|z)&~31?0:LG[I(x,y,z)];
-LGT=()=>{
-  LG.fill(0);LQ.length=0;
-  for(li=0;li<32768;li++)if(w[li]==6){LG[li]=14;LQ.push(li);}   // torch = emitter
-  for(lh=0;lh<LQ.length;lh++){
-    li=LQ[lh];lv=LG[li]-1;if(lv<1)continue;
-    lx=li&31;lz=li>>5&31;ly=li>>10;
-    for(ld=6;ld--;){
-      nx=lx+(ld==0)-(ld==1);ny=ly+(ld==2)-(ld==3);nz=lz+(ld==4)-(ld==5);
-      if((nx|ny|nz)&~31)continue;
-      ni=I(nx,ny,nz);bq=w[ni];
-      if(bq&&bq!=5&&bq!=6)continue;                              // opaque blocks stop light
-      if(LG[ni]>=lv)continue;
-      LG[ni]=lv;LQ.push(ni);
+// ---- torch light: BFS flood through air / glass / torches, one level lost per block ----
+const lightQ = new Int32Array(VOL);           // each cell is enqueued at most once
+function relight() {
+  torch.fill(0);
+  let tail = 0;
+  for (let i = 0; i < VOL; i++) if (world[i] === TORCH) { torch[i] = 14; lightQ[tail++] = i; }
+  for (let head = 0; head < tail; head++) {
+    const i = lightQ[head], lv = torch[i] - 1;
+    if (lv < 1) continue;
+    const x = i & WM, z = i >> 5 & WM, y = i >> 10;
+    for (let d = 0; d < 6; d++) {
+      const nx = x + (d === 0) - (d === 1), ny = y + (d === 2) - (d === 3), nz = z + (d === 4) - (d === 5);
+      if ((nx | ny | nz) & ~WM) continue;
+      const ni = ny << 10 | nz << 5 | nx, b = world[ni];
+      if (b !== AIR && b !== GLASS && b !== TORCH) continue;         // opaque blocks stop light
+      if (torch[ni] >= lv) continue;
+      torch[ni] = lv; lightQ[tail++] = ni;
     }
   }
+}
+
+// ---- items -------------------------------------------------------------------
+// ids: blocks 1–10 · materials 100–106 · tools 110+ (kind p=鎬 w=劍 a=斧 s=鏟)
+// fields: c colour · n name · hd seconds to break by hand · tl tool kind that is fast on it ·
+//         tr tool tier needed · dp drop · st max stack · bow · kind/tier/spd/dmg for tools
+const NONE = {};
+const IT = {
+  1: { c: '#F4D87E', n: '沙土', hd: .55, tl: 's' },  2: { c: '#705030', n: '泥土', hd: .55, tl: 's' },
+  3: { c: '#403020', n: '木頭', hd: 1.3, tl: 'a' },  4: { c: '#206020', n: '樹葉', hd: .3 },
+  5: { c: '#BFE6FF', n: '玻璃', hd: .4 },             6: { c: '#FFC24A', n: '火把', hd: .1 },
+  7: { c: '#8A8A8E', n: '石頭', hd: 1.6, tl: 'p', tr: 1 },
+  8: { c: '#39393E', n: '煤礦', hd: 2.2, tl: 'p', tr: 1, dp: 104 },
+  9: { c: '#C99A6E', n: '鐵礦', hd: 2.8, tl: 'p', tr: 2, dp: 105 },
+  10: { c: '#5FE0D8', n: '鑽石礦', hd: 4.2, tl: 'p', tr: 3, dp: 106 },
+  100: { c: '#8A6A3A', n: '弓', bow: 1, st: 1 }, 101: { c: '#D9D2C0', n: '箭' },
+  102: { c: '#7B4FA8', n: '暗核' },               103: { c: '#9B7B4A', n: '木棒' },
+  104: { c: '#2C2C30', n: '煤炭' }, 105: { c: '#D8B08C', n: '鐵錠' }, 106: { c: '#6FF0E6', n: '鑽石' },
 };
+const TMAT = [0, { m: WOOD, n: '木' }, { m: STONE, n: '石' }, { m: 105, n: '鐵' }, { m: 106, n: '鑽石' }]; // tiers 1..4
+const TKIND = [{ k: 'p', n: '鎬', b: 110, c: 3, d: 2, tiers: 4 }, { k: 'w', n: '劍', b: 120, c: 2, d: 4, tiers: 4 },
+               { k: 'a', n: '斧', b: 130, c: 3, d: 3, tiers: 3 }, { k: 's', n: '鏟', b: 140, c: 1, d: 1, tiers: 3 }];
+const TCOL = ['', '#C8A06A', '#9AA0A6', '#E0BE9A', '#7FF0E6'];      // tool colour by tier
+for (const tk of TKIND) for (let t = 1; t <= tk.tiers; t++)
+  IT[tk.b + t - 1] = { c: TCOL[t], n: TMAT[t].n + tk.n, st: 1, kind: tk.k, tier: t,
+                       spd: +(1 + t * 1.9).toFixed(1), dmg: tk.d + t * 1.4 | 0 };
+const info = id => IT[id] || NONE;
+const colorOf = id => info(id).c || '';
+const nameOf = id => info(id).n || '';
+const placeable = id => id > 0 && id < 100;
+const maxStack = id => info(id).st || 64;
+const PAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];  // creative palette (infinite)
+const COL = new Int32Array(16);               // 0xRRGGBB per block id, for the renderer
+for (let i = 1; i < 16; i++) if (IT[i]) COL[i] = parseInt(IT[i].c.slice(1), 16);
+
+// recipes: [[ingredient id, count]...], [result id, count], label
+const RCP = [
+  [[[WOOD, 1]], [TORCH, 4], '木頭×1 → 火把×4'],
+  [[[WOOD, 1]], [103, 4], '木頭×1 → 木棒×4'],
+  [[[WOOD, 1]], [101, 4], '木頭×1 → 箭×4'],
+  [[[WOOD, 2], [LEAF, 2]], [100, 1], '木頭×2+樹葉×2 → 弓'],
+  [[[102, 1]], [TORCH, 8], '暗核×1 → 火把×8'],
+  [[[104, 1], [103, 1]], [TORCH, 4], '煤炭×1+木棒×1 → 火把×4'],
+];
+for (const tk of TKIND) for (let t = 1; t <= tk.tiers; t++) {
+  const out = tk.b + t - 1;
+  RCP.push([[[TMAT[t].m, tk.c], [103, 2]], [out, 1], TMAT[t].n + '×' + tk.c + '+棒×2 → ' + IT[out].n]);
+}
 
 // ---- inventory: 24 slots, the first 6 are the hotbar ----
-KIT=()=>{INV=[];for(ki=0;ki<24;ki++)INV.push({id:0,n:0});INV[0]={id:2,n:16};INV[1]={id:6,n:8};};
-KIT();
-
-// ---- restore saved world (works when the file is opened directly; sandboxed previews may skip) ----
-try{
-  if(localStorage.voxelI){qi=JSON.parse(localStorage.voxelI);if(qi&&qi.length==24)INV=qi;}
-  if(localStorage.voxelW){
-    ss=atob(localStorage.voxelW);for(i=0;i<32768;i++)w[i]=ss.charCodeAt(i);
-    pp=JSON.parse(localStorage.voxelP||'0');if(pp){P=pp;P.g=0;P.t=0;}
-    if(localStorage.voxelT)tod=+localStorage.voxelT;
+let INV = [];
+function newKit() {
+  INV = [];
+  for (let i = 0; i < 24; i++) INV.push({ id: 0, n: 0 });
+  INV[0] = { id: DIRT, n: 16 }; INV[1] = { id: TORCH, n: 8 };
+}
+function give(id, n) {                        // leftovers when the bag is full are lost
+  if (!id) return;
+  const m = maxStack(id);
+  for (let i = 0; i < 24 && n; i++) if (INV[i].id === id && INV[i].n < m) { const k = Math.min(m - INV[i].n, n); INV[i].n += k; n -= k; }
+  for (let i = 0; i < 24 && n; i++) if (!INV[i].id) { const k = Math.min(m, n); INV[i] = { id, n: k }; n -= k; }
+  drawBar(); if (invOpen) drawInv();
+}
+function has(id, n) { let c = 0; for (const s of INV) if (s.id === id) c += s.n; return c >= n; }
+function take(id, n) {
+  if (!has(id, n)) return false;
+  for (let i = 0; i < 24 && n; i++) if (INV[i].id === id) {
+    const k = Math.min(INV[i].n, n); INV[i].n -= k; n -= k;
+    if (!INV[i].n) INV[i].id = 0;
   }
-}catch(e){}
-LGT();
+  return true;
+}
 
-// ---- DDA voxel raycast (scaling note: world dims are hard-coded in I() and B() below) ----
-R=(p,d)=>{
-  X=p.x|0;Y=p.y|0;Z=p.z|0;
-  l=d.x;n=d.y;o=d.z;
-  a=A(1/l);b=A(1/n);e=A(1/o);
-  q=l>0?1:-1;r=n>0?1:-1;s=o>0?1:-1;
-  u=(X+(l>0)-p.x)/l;
-  v=(Y+(n>0)-p.y)/n;
-  t=(Z+(o>0)-p.z)/o;
-  gc=0;
-  for(i=24;i--;){
-    if(g=B(X,Y,Z)){
-      if(g!=5)return{h:1,n:f,b:g,gc:gc};                 // opaque hit
-      gc++;                                              // glass: tint & pass through
+// ---- game state ----------------------------------------------------------------
+// P: feet position x,y,z · a yaw · b pitch · g vertical speed
+let P = { x: 16, y: 20, z: 16, a: 0, b: 0, g: 0 };
+let tod = .35;                                // time of day 0..1 (.25 sunrise · .5 noon · .75 sunset)
+let weather = 0;                              // 0 clear · 1 rain · 2 snow
+let paused = true, started = false, invOpen = false, creative = false;
+let selI = 0, palPage = 0, dragI = -1;
+const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1 };  // quality -1 = auto
+const K = {};                                 // keys held, by name ('w', ' ', 'tab'…)
+const tapped = {};                            // keys pressed since the last frame, so a quick tap is never lost
+
+// ---- save / load (same localStorage keys and format as v1, so old saves load) ----
+function saveGame() {
+  try {
+    if (worldDirty) {
+      let s = '';
+      for (let i = 0; i < VOL; i += 8192) s += String.fromCharCode.apply(null, world.subarray(i, i + 8192));
+      localStorage.voxelW = btoa(s);
+      worldDirty = false;
     }
-    u<v?u<t?(u+=a,X+=q,f=0):(t+=e,Z+=s,f=2):v<t?(v+=b,Y+=r,f=1):(t+=e,Z+=s,f=2);
-  }
-  return{h:0,gc:gc};
-};
+    localStorage.voxelP = JSON.stringify({ x: P.x, y: P.y, z: P.z, a: P.a, b: P.b, g: 0 });
+    localStorage.voxelT = tod;
+    localStorage.voxelI = JSON.stringify(INV);
+  } catch (e) {}                              // storage may be blocked (private mode, sandboxed preview)
+}
+function loadGame() {
+  try {
+    const inv = JSON.parse(localStorage.voxelI || 'null');
+    if (Array.isArray(inv) && inv.length === 24 && inv.every(s => s && Number.isInteger(s.id) && Number.isInteger(s.n))) INV = inv;
+    const s = localStorage.voxelW ? atob(localStorage.voxelW) : '';
+    if (s.length !== VOL) return false;
+    for (let i = 0; i < VOL; i++) world[i] = s.charCodeAt(i);
+    const p = JSON.parse(localStorage.voxelP || 'null');
+    if (p && [p.x, p.y, p.z, p.a, p.b].every(Number.isFinite)) P = { x: p.x, y: p.y, z: p.z, a: p.a, b: p.b, g: 0 };
+    const t = +localStorage.voxelT;
+    if (t >= 0 && t < 1) tod = t;
+    worldVer++; worldDirty = false;
+    return true;
+  } catch (e) { return false; }
+}
 
-// ---- AABB collision + gravity resolve ----
-U=(ax,v)=>{
-  r=.3;x0=P.x-r;x1=P.x+r;z0=P.z-r;z1=P.z+r;y0=P.y;y1=P.y+1.6;
-  for(i=y0|0;i<=y1|0;i++)
-   for(j=z0|0;j<=z1|0;j++)
-    for(k=x0|0;k<=x1|0;k++)
-     (bq=B(k,i,j))&&bq!=6&&x1>k&&x0<k+1&&y1>i&&y0<i+1&&z1>j&&z0<j+1&&
-      (ax?ax-1?P.z=(v>0?j-r:j+1+r):(P.y=(v>0?i-1.6:i+1),P.g=0):(P.x=(v>0?k-r:k+1+r)));
-};
+// ---- player physics --------------------------------------------------------------
+const EYE = 1.5, PW = .3, PH = 1.6;           // eye height, half width, body height
+function collide(axis, v) {                   // push the player out of any block they overlap on this axis
+  const x0 = P.x - PW, x1 = P.x + PW, z0 = P.z - PW, z1 = P.z + PW, y0 = P.y, y1 = P.y + PH;
+  for (let y = y0 | 0; y <= (y1 | 0); y++)
+    for (let z = z0 | 0; z <= (z1 | 0); z++)
+      for (let x = x0 | 0; x <= (x1 | 0); x++) {
+        const b = blockAt(x, y, z);
+        if (b === AIR || b === TORCH || !(x1 > x && x0 < x + 1 && y1 > y && y0 < y + 1 && z1 > z && z0 < z + 1)) continue;
+        if (axis === 0) P.x = v > 0 ? x - PW : x + 1 + PW;
+        else if (axis === 2) P.z = v > 0 ? z - PW : z + 1 + PW;
+        else { P.y = v > 0 ? y - PH : y + 1; P.g = 0; }
+      }
+}
+function movePlayer(h, mu, mv) {              // one physics sub-step of h seconds
+  const s = 5 * h, cx = Math.cos(P.a), sx = Math.sin(P.a);
+  P.g = Math.max(P.g - 18 * h, -40);
+  const vx = (mu * cx + mv * sx) * s, vz = (-mu * sx + mv * cx) * s;
+  P.x += vx; collide(0, vx);
+  P.z += vz; collide(2, vz);
+  P.y += P.g * h; collide(1, P.g);
+}
 
-// ---- targeting: raycast from eye through crosshair (reach = 7 blocks) ----
-target=()=>{
-  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);           // center ray = forward look dir
-  px=P.x;py=P.y+1.5;pz=P.z;
-  dxr=sx*cp;dyr=sp;dzr=cx*cp;
-  gx=px|0;gy=py|0;gz=pz|0;
-  stx=dxr>0?1:-1;sty=dyr>0?1:-1;stz=dzr>0?1:-1;
-  tdx=A(1/dxr);tdy=A(1/dyr);tdz=A(1/dzr);
-  tmx=(gx+(dxr>0)-px)/dxr;tmy=(gy+(dyr>0)-py)/dyr;tmz=(gz+(dzr>0)-pz)/dzr;
-  ax=gx;ay=gy;az=gz;                                  // adjacent (empty) cell = previous step
-  for(n2=7;n2--;){
-    if((bl=B(gx,gy,gz))&&(bl!=5||gx&&gz&&gx!=31&&gz!=31))return[gx,gy,gz,ax,ay,az]; // glass diggable, cage isn't
-    ax=gx;ay=gy;az=gz;
-    tmx<tmy?tmx<tmz?(tmx+=tdx,gx+=stx):(tmz+=tdz,gz+=stz):tmy<tmz?(tmy+=tdy,gy+=sty):(tmz+=tdz,gz+=stz);
+// ---- targeting: ray from the eye through the crosshair, reach 7 cells ----
+// returns [hit x,y,z, previous (empty) x,y,z] or null
+function target() {
+  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
+  const px = P.x, py = P.y + EYE, pz = P.z, dx = sx * cp, dy = sp, dz = cx * cp;
+  let gx = px | 0, gy = py | 0, gz = pz | 0;
+  const stx = dx > 0 ? 1 : -1, sty = dy > 0 ? 1 : -1, stz = dz > 0 ? 1 : -1;
+  const tdx = Math.abs(1 / dx), tdy = Math.abs(1 / dy), tdz = Math.abs(1 / dz);
+  let tmx = dx ? (gx + (dx > 0) - px) / dx : Infinity,              // a zero component never steps on that axis
+      tmy = dy ? (gy + (dy > 0) - py) / dy : Infinity,
+      tmz = dz ? (gz + (dz > 0) - pz) / dz : Infinity;
+  let ax = gx, ay = gy, az = gz;
+  for (let n = 7; n--;) {
+    const b = blockAt(gx, gy, gz);
+    if (b && (b !== GLASS || gx && gz && gx !== WM && gz !== WM)) return [gx, gy, gz, ax, ay, az];  // the cage can't be dug
+    ax = gx; ay = gy; az = gz;
+    if (tmx < tmy) { if (tmx < tmz) { tmx += tdx; gx += stx; } else { tmz += tdz; gz += stz; } }
+    else if (tmy < tmz) { tmy += tdy; gy += sty; } else { tmz += tdz; gz += stz; }
   }
-  return 0;
-};
-// ---- mining: hold to break, gated by tool tier ----
-MTGT=-1;MPRG=0;MHINT='';MHT=0;hold1=0;mdn=0;pF=0;
-TIER=()=>{qk2=IT[WEP()]||0;return qk2.tier||0;};       // tier of the held tool (0 = bare hand)
-SPD=qb2=>{                                             // how fast the held tool breaks this block
-  qk2=IT[WEP()]||0;qc2=IT[qb2]||0;
-  return qk2.kind&&qk2.kind==qc2.tl?qk2.spd:1;         // right tool = fast, wrong/none = 1x
-};
-MINE=qd2=>{
-  o=target();
-  if(!o){MTGT=-1;MPRG=0;return;}
-  qi2=I(o[0],o[1],o[2]);qb2=w[qi2];
-  if(!qb2){MTGT=-1;MPRG=0;return;}
-  if(qi2!=MTGT){MTGT=qi2;MPRG=0;}
-  if(CRE){w[qi2]=0;LGT();MTGT=-1;MPRG=0;return;}       // creative breaks instantly
-  qc2=IT[qb2]||0;
-  if((qc2.tr||0)>TIER()){                              // not a good enough tool
-    MPRG=0;MHINT='需要'+(TMAT[qc2.tr]||0).n+'質以上的'+(qc2.tl=='p'?'鎬':'工具');MHT=1.2;return;
+  return null;
+}
+
+// ---- mining (hold to break, gated by tool tier) and placing ----
+let mineIdx = -1, mineProg = 0, holdMine = false, creativeCD = 0;
+let hint = '', hintT = 0;
+const showHint = (s, t) => { hint = s; hintT = t; };
+const heldItem = () => creative ? 0 : INV[selI].id;                 // creative uses the palette, not the bag
+const heldTier = () => info(heldItem()).tier || 0;
+function breakSpeed(b) { const t = info(heldItem()); return t.kind && t.kind === info(b).tl ? t.spd : 1; }
+function mine(dt) {
+  const o = target();
+  if (!o) { mineIdx = -1; mineProg = 0; return; }
+  const i = idx(o[0], o[1], o[2]), b = world[i];
+  if (!b) { mineIdx = -1; mineProg = 0; return; }
+  if (i !== mineIdx) { mineIdx = i; mineProg = 0; }
+  if (creative) {                                                    // instant, but not one block per frame
+    if (creativeCD <= 0) { setBlock(i, AIR); creativeCD = .2; }
+    mineIdx = -1; return;
   }
-  MPRG+=qd2*SPD(qb2)/(qc2.hd||.5);
-  if(MPRG>=1){
-    w[qi2]=0;LGT();
-    give(qc2.dp||qb2,1);                               // ores drop their material
-    MPRG=0;MTGT=-1;
+  const bi = info(b);
+  if ((bi.tr || 0) > heldTier()) {
+    mineProg = 0; showHint('需要' + TMAT[bi.tr].n + '質以上的' + (bi.tl === 'p' ? '鎬' : '工具'), 1.2); return;
   }
-};
-dig=()=>{o=target();if(o){                             // single-shot break (creative / scripted)
-  qi2=I(o[0],o[1],o[2]);qb2=w[qi2];qc2=IT[qb2]||0;
-  if(!CRE&&(qc2.tr||0)>TIER())return;
-  w[qi2]=0;LGT();
-  if(!CRE)give(qc2.dp||qb2,1);
-}};
-USE1=()=>{if(PDEAD||PAUSED)return;if(MELEE())return;hold1=1;};  // left: hit a mob, else start mining
-USE1UP=()=>{hold1=0;MPRG=0;MTGT=-1;};
-USE2=()=>{if(PDEAD||PAUSED)return;                     // right: shoot if holding a bow, else place
-  if((IT[WEP()]||0).bow){SHOOT();return;}
-  place();};
-place=()=>{o=target();if(o){
-  sel=CRE?PAL[(CPG*6+selI)%PAL.length]:INV[selI].id;
-  if(!sel||!BLK(sel))return;                          // empty hand, or holding a tool
-  ax=o[3];ay=o[4];az=o[5];
-  if((ax|ay|az)&~WM)return;                           // out of world
-  if(B(ax,ay,az))return;                              // occupied
-  if(sel!=6&ax+1>P.x-.3&ax<P.x+.3&az+1>P.z-.3&az<P.z+.3&ay+1>P.y&ay<P.y+1.6)return; // inside player
-  w[I(ax,ay,az)]=sel;LGT();
-  if(!CRE){if(!--INV[selI].n)INV[selI].id=0;drawBar();if(invOpen)drawInv();}
-}};
+  mineProg += dt * breakSpeed(b) / (bi.hd || .5);
+  if (mineProg >= 1) { setBlock(i, AIR); give(bi.dp || b, 1); mineProg = 0; mineIdx = -1; }
+}
+function place() {
+  const o = target();
+  if (!o) return;
+  const sel = creative ? PAL[(palPage * 6 + selI) % PAL.length] : INV[selI].id;
+  if (!placeable(sel)) return;                                       // empty hand, or holding a tool
+  const ax = o[3], ay = o[4], az = o[5];
+  if ((ax | ay | az) & ~WM || blockAt(ax, ay, az)) return;           // outside the world, or occupied
+  if (sel !== TORCH && ax + 1 > P.x - PW && ax < P.x + PW && az + 1 > P.z - PW && az < P.z + PW &&
+      ay + 1 > P.y && ay < P.y + PH) return;                         // inside the player
+  setBlock(idx(ax, ay, az), sel);
+  if (!creative) { if (!--INV[selI].n) INV[selI].id = 0; drawBar(); if (invOpen) drawInv(); }
+}
+function use1() { if (dead || paused) return; if (!melee()) holdMine = true; }   // hit a mob, else start mining
+function use1Up() { holdMine = false; mineProg = 0; mineIdx = -1; }
+function use2() {                                                    // shoot when holding a bow, else place
+  if (dead || paused) return;
+  if (info(heldItem()).bow) shoot(); else place();
+}
 
 // ---- entities: mobs and arrows ----
-// mob: x,y,z world pos | vy vertical velocity | hp | gr grounded | ht hurt flash
-//      ck attack cooldown | jc jump cooldown | bn burning-in-sun timer
-MOB=[];ARW=[];PHP=20;PMX=20;PHURT=0;PDEAD=0;PREG=0;SWG=0;SHK=0;MOBMAX=14;
-QG=(qa,qb,qc)=>{qd=B(qa|0,qb|0,qc|0);return qd&&qd!=6;};   // solid? (torches don't block)
+// mob: x,y,z · vy vertical speed · hp · gr grounded · ht hurt flash · ck attack cooldown ·
+//      jc jump cooldown · bn burning-in-sun timer
+const mobs = [], arrows = [], MOB_MAX = 14, HP_MAX = 20;
+let hp = HP_MAX, dead = false, hurtT = 0, regenT = 0, swingT = 0, shakeT = 0, spawnT = 2.5;
 
-// axis-resolved AABB move, shared by mobs and used like the player's U()
-EMV=(qo,qa,qb,qc)=>{
-  qo.x+=qa;if(EHIT(qo))qo.x-=qa;
-  qo.z+=qc;if(EHIT(qo))qo.z-=qc;
-  qo.y+=qb;
-  if(EHIT(qo)){qo.y-=qb;if(qb<0){qo.gr=1;qo.vy=0;}else qo.vy=0;}
-  else qo.gr=0;
-};
-EHIT=qo=>{                                            // eu/ev/ew are private: callers keep ql/qk/qn
-  for(ev=(qo.y)|0;ev<=(qo.y+1.6)|0;ev++)
-   for(ew=(qo.z-.3)|0;ew<=(qo.z+.3)|0;ew++)
-    for(eu=(qo.x-.3)|0;eu<=(qo.x+.3)|0;eu++)
-     if(QG(eu,ev,ew))return 1;
-  return 0;
-};
-
-// spawn: night only, on solid ground, in the dark, away from the player
-ESPAWN=()=>{
-  if(MOB.length>=MOBMAX)return;
-  for(qp=8;qp--;){
-    qa=1+M.random()*(WS-2)|0;qc=1+M.random()*(WS-2)|0;
-    qb=-1;for(qk=WS-2;qk>0;qk--)if(QG(qa,qk,qc)&&!QG(qa,qk+1,qc)&&!QG(qa,qk+2,qc)){qb=qk+1;break;}
-    if(qb<0)continue;
-    if(LV(qa,qb,qc)>6)continue;                       // torchlight keeps them away
-    qd=qa+.5-P.x;qf=qc+.5-P.z;
-    if(qd*qd+qf*qf<100)continue;                      // not on top of the player
-    if(qd*qd+qf*qf>900)continue;                      // not absurdly far
-    MOB.push({x:qa+.5,y:qb,z:qc+.5,vy:0,hp:12,gr:0,ht:0,ck:0,jc:0,bn:0});
+function mobHits(m) {
+  for (let y = m.y | 0; y <= (m.y + 1.6 | 0); y++)
+    for (let z = m.z - .3 | 0; z <= (m.z + .3 | 0); z++)
+      for (let x = m.x - .3 | 0; x <= (m.x + .3 | 0); x++)
+        if (solidAt(x, y, z)) return true;
+  return false;
+}
+function mobMove(m, dx, dy, dz) {             // axis-separated AABB move
+  m.x += dx; if (mobHits(m)) m.x -= dx;
+  m.z += dz; if (mobHits(m)) m.z -= dz;
+  m.y += dy;
+  if (mobHits(m)) { m.y -= dy; if (dy < 0) m.gr = 1; m.vy = 0; }
+  else m.gr = 0;
+}
+function spawnMob() {                         // night only, on solid ground, in the dark, away from the player
+  if (mobs.length >= MOB_MAX) return;
+  for (let tries = 8; tries--;) {
+    const x = 1 + Math.random() * (WS - 2) | 0, z = 1 + Math.random() * (WS - 2) | 0;
+    let y = -1;
+    for (let k = WS - 2; k > 0; k--) if (solidAt(x, k, z) && !solidAt(x, k + 1, z) && !solidAt(x, k + 2, z)) { y = k + 1; break; }
+    if (y < 0 || lightAt(x, y, z) > 6) continue;                    // torchlight keeps them away
+    const dx = x + .5 - P.x, dz = z + .5 - P.z, d2 = dx * dx + dz * dz;
+    if (d2 < 100 || d2 > 900) continue;                              // not on top of the player, not absurdly far
+    mobs.push({ x: x + .5, y, z: z + .5, vy: 0, hp: 12, gr: 0, ht: 0, ck: 0, jc: 0, bn: 0 });
     return;
   }
-};
-
-EHURT=(qo,qa)=>{                                      // damage a mob, with knockback
-  qo.hp-=qa;qo.ht=.25;
-  qd=qo.x-P.x;qf=qo.z-P.z;ql=M.sqrt(qd*qd+qf*qf)||1;
-  qo.x+=qd/ql*.45;qo.z+=qf/ql*.45;
-  if(EHIT(qo)){qo.x-=qd/ql*.45;qo.z-=qf/ql*.45;}
-  if(qo.hp<=0){give(102,1+(M.random()<.35?1:0));return 1;}
-  return 0;
-};
-
-PHIT=qa=>{                                            // damage the player
-  if(CRE||PDEAD)return;
-  PHP-=qa;PHURT=.35;PREG=0;SHK=.3;
-  if(PHP<=0){PHP=0;PDEAD=1;}
-};
-
-// ---- weapon use ----
-WEP=()=>CRE?0:INV[selI].id;   // creative uses the palette, not the bag                           // what's in hand
-MELEE=()=>{                                           // swing at the nearest mob in the crosshair cone
-  qw=WEP();qv=(IT[qw]||0).dmg||1;                     // bare hands still hurt a little
-  SWG=.18;
-  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
-  qu=sx*cp;qt=sp;qs=cx*cp;                            // look direction
-  qg=-1;qe=1e9;
-  for(qi=0;qi<MOB.length;qi++){
-    qo=MOB[qi];
-    qd=qo.x-P.x;qb=qo.y+.8-(P.y+1.5);qf=qo.z-P.z;
-    ql=M.sqrt(qd*qd+qb*qb+qf*qf);
-    if(ql>3.2)continue;                               // melee reach
-    if((qd*qu+qb*qt+qf*qs)/ql<.55)continue;           // roughly in front
-    if(ql<qe){qe=ql;qg=qi;}
+}
+function hurtMob(m, dmg) {                    // damage with knockback; true when it dies
+  m.hp -= dmg; m.ht = .25;
+  const dx = m.x - P.x, dz = m.z - P.z, l = Math.sqrt(dx * dx + dz * dz) || 1;
+  m.x += dx / l * .45; m.z += dz / l * .45;
+  if (mobHits(m)) { m.x -= dx / l * .45; m.z -= dz / l * .45; }
+  if (m.hp <= 0) { give(102, 1 + (Math.random() < .35 ? 1 : 0)); return true; }
+  return false;
+}
+function hurtPlayer(n) {
+  if (creative || dead) return;
+  hp -= n; hurtT = .35; regenT = 0; shakeT = .3;
+  if (hp <= 0) { hp = 0; dead = true; }
+}
+function melee() {                            // swing at the nearest mob in the crosshair cone
+  const dmg = info(heldItem()).dmg || 1;      // bare hands still hurt a little
+  swingT = .18;
+  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
+  const lx = sx * cp, ly = sp, lz = cx * cp;
+  let best = -1, bestD = 1e9;
+  for (let i = 0; i < mobs.length; i++) {
+    const m = mobs[i], dx = m.x - P.x, dy = m.y + .8 - (P.y + EYE), dz = m.z - P.z;
+    const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (d > 3.2 || (dx * lx + dy * ly + dz * lz) / d < .55) continue;  // reach, roughly in front
+    if (d < bestD) { bestD = d; best = i; }
   }
-  if(qg<0)return 0;
-  if(EHURT(MOB[qg],qv))MOB.splice(qg,1);
-  return 1;
-};
-SHOOT=()=>{
-  if(!CRE){if(!has(101,1))return 0;take(101,1);}
-  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
-  ARW.push({x:P.x,y:P.y+1.4,z:P.z,vx:sx*cp*24,vy:sp*24+2,vz:cx*cp*24,life:4});
-  drawBar();if(invOpen)drawInv();
-  return 1;
-};
-
-// ---- per-frame entity update ----
-ETICK=qr=>{
-  // mobs
-  for(qi=MOB.length;qi--;){
-    qo=MOB[qi];
-    qo.ht=mx(0,qo.ht-qr);qo.ck=mx(0,qo.ck-qr);qo.jc=mx(0,qo.jc-qr);
-    qd=P.x-qo.x;qf=P.z-qo.z;qb=P.y-qo.y;
-    ql=M.sqrt(qd*qd+qf*qf);
-    // daylight burns them
-    if(dayf>.5&&sunEl>.15&&!SH(qo.x,qo.y+1.7,qo.z)){
-      qo.bn+=qr;if(qo.bn>1.6){qo.hp-=6;qo.bn=0;qo.ht=.25;if(qo.hp<=0){MOB.splice(qi,1);continue;}}
-    }else qo.bn=0;
-    if(ql<16&&!PDEAD&&!CRE){                          // chase
-      qu=qd/(ql||1);qs=qf/(ql||1);
-      qe=ql>1.4?2.6:0;
-      qa=qu*qe*qr;qc=qs*qe*qr;
-      qo.px=qo.x;qo.pz=qo.z;
-      qo.vy-=18*qr;
-      EMV(qo,qa,qo.vy*qr,qc);
-      // blocked horizontally and on the ground -> hop
-      if(qo.gr&&!qo.jc&&A(qo.x-qo.px)+A(qo.z-qo.pz)<A(qa)+A(qc)-1e-4){qo.vy=7.4;qo.jc=.6;}
-      if(ql<1.5&&A(qb)<2&&!qo.ck){qo.ck=1;PHIT(3);}   // attack
-    }else{
-      qo.vy-=18*qr;EMV(qo,0,qo.vy*qr,0);
-    }
-    if(qo.y<-8)MOB.splice(qi,1);
+  if (best < 0) return false;
+  if (hurtMob(mobs[best], dmg)) mobs.splice(best, 1);
+  return true;
+}
+function shoot() {
+  if (!creative) { if (!take(101, 1)) return; drawBar(); if (invOpen) drawInv(); }
+  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
+  arrows.push({ x: P.x, y: P.y + 1.4, z: P.z, vx: sx * cp * 24, vy: sp * 24 + 2, vz: cx * cp * 24, life: 4 });
+}
+function tickEntities(h) {                    // one sub-step of h seconds (needs sky.dayf / sky.sunEl)
+  const { dayf, sunEl } = sky;
+  for (let i = mobs.length; i--;) {
+    const m = mobs[i];
+    m.ht = Math.max(0, m.ht - h); m.ck = Math.max(0, m.ck - h); m.jc = Math.max(0, m.jc - h);
+    const dx = P.x - m.x, dz = P.z - m.z, dy = P.y - m.y, d = Math.sqrt(dx * dx + dz * dz);
+    if (dayf > .5 && sunEl > .15 && !shadowRay(m.x, m.y + 1.7, m.z)) {   // daylight burns them
+      m.bn += h;
+      if (m.bn > 1.6) { m.hp -= 6; m.bn = 0; m.ht = .25; if (m.hp <= 0) { mobs.splice(i, 1); continue; } }
+    } else m.bn = 0;
+    m.vy -= 18 * h;
+    if (d < 16 && !dead && !creative) {                              // chase
+      const sp = d > 1.4 ? 2.6 : 0, mx = dx / (d || 1) * sp * h, mz = dz / (d || 1) * sp * h;
+      const px = m.x, pz = m.z;
+      mobMove(m, mx, m.vy * h, mz);
+      if (m.gr && !m.jc && Math.abs(m.x - px) + Math.abs(m.z - pz) < Math.abs(mx) + Math.abs(mz) - 1e-4) { m.vy = 7.4; m.jc = .6; }  // blocked: hop
+      if (d < 1.5 && Math.abs(dy) < 2 && !m.ck) { m.ck = 1; hurtPlayer(3); }
+    } else mobMove(m, 0, m.vy * h, 0);
+    if (m.y < -8) mobs.splice(i, 1);
   }
-  // arrows
-  for(qi=ARW.length;qi--;){
-    qo=ARW[qi];qo.life-=qr;
-    if(qo.life<=0){ARW.splice(qi,1);continue;}
-    qo.vy-=16*qr;
-    qa=qo.x+qo.vx*qr;qb=qo.y+qo.vy*qr;qc=qo.z+qo.vz*qr;
-    if((qa|qb|qc)&~WM||QG(qa,qb,qc)){ARW.splice(qi,1);continue;}
-    qg=0;
-    for(qp=MOB.length;qp--;){
-      qm=MOB[qp];
-      if(A(qm.x-qa)<.45&&A(qm.z-qc)<.45&&qb>qm.y-.2&&qb<qm.y+1.9){
-        if(EHURT(qm,7))MOB.splice(qp,1);
-        qg=1;break;
+  for (let i = arrows.length; i--;) {
+    const a = arrows[i];
+    a.life -= h;
+    if (a.life <= 0) { arrows.splice(i, 1); continue; }
+    a.vy -= 16 * h;
+    const nx = a.x + a.vx * h, ny = a.y + a.vy * h, nz = a.z + a.vz * h;
+    if ((nx | ny | nz) & ~WM || solidAt(nx, ny, nz)) { arrows.splice(i, 1); continue; }
+    let hit = false;
+    for (let j = mobs.length; j--;) {
+      const m = mobs[j];
+      if (Math.abs(m.x - nx) < .45 && Math.abs(m.z - nz) < .45 && ny > m.y - .2 && ny < m.y + 1.9) {
+        if (hurtMob(m, 7)) mobs.splice(j, 1);
+        hit = true; break;
       }
     }
-    if(qg){ARW.splice(qi,1);continue;}
-    qo.x=qa;qo.y=qb;qo.z=qc;
+    if (hit) { arrows.splice(i, 1); continue; }
+    a.x = nx; a.y = ny; a.z = nz;
   }
-  // player state
-  PHURT=mx(0,PHURT-qr);SWG=mx(0,SWG-qr);SHK=mx(0,SHK-qr);
-  if(!PDEAD&&PHP<PMX){PREG+=qr;if(PREG>4){PREG=0;PHP=mn(PMX,PHP+1);}}
-  if(CRE&&PHP<PMX)PHP=PMX;
-  // spawning
-  HZ-=qr;
-  if(HZ<=0){HZ=2.5;if(dayf<.25&&!CRE)ESPAWN();}
-  if(dayf>.6&&MOB.length&&M.random()<qr*.15)MOB.pop();
-};
-HZ=2.5;lastHP=-1;
+  hurtT = Math.max(0, hurtT - h); swingT = Math.max(0, swingT - h); shakeT = Math.max(0, shakeT - h);
+  if (!dead && hp < HP_MAX) { regenT += h; if (regenT > 4) { regenT = 0; hp = Math.min(HP_MAX, hp + 1); } }
+  if (creative) hp = HP_MAX;
+  spawnT -= h;
+  if (spawnT <= 0) { spawnT = 2.5; if (dayf < .25 && !creative) spawnMob(); }
+  if (dayf > .6 && mobs.length && Math.random() < h * .15) mobs.pop();
+}
 
-// ---- draw entities as billboards, back to front, with an occlusion ray ----
-EDRAW=()=>{
-  cp=C(P.b);sp=S(P.b);cx=C(P.a);sx=S(P.a);
-  qw=[];
-  for(qi=0;qi<MOB.length;qi++){qo=MOB[qi];qw.push([qo,0]);}
-  for(qi=0;qi<ARW.length;qi++){qo=ARW[qi];qw.push([qo,1]);}
-  for(qi=0;qi<qw.length;qi++){
-    qo=qw[qi][0];
-    qd=qo.x-P.x;qb=(qo.y+(qw[qi][1]?0:.85))-(P.y+1.5);qf=qo.z-P.z;
-    qw[qi][2]=qd*qd+qb*qb+qf*qf;
+// ---- sky: sun, colours, clouds (updated once per frame) ----
+const sky = { sunA: 0, sunEl: 0, sdx: 0, sdy: 1, sdz: 0, light: 1, dayf: 1, flk: 1, wt: 0, ct: 0, cbr: 0,
+              zR: 0, zG: 0, zB: 0, hR: 0, hG: 0, hB: 0 };
+function updateSky(dt, tm) {
+  tod = (tod + dt / 1440 * (K.t ? 100 : 1)) % 1;                    // full day = 24 min (hold T = 100×)
+  const s = sky;
+  s.sunA = (tod - .25) * 6.2832; s.sunEl = Math.sin(s.sunA);        // sun elevation -1..1
+  let dx = Math.cos(s.sunA), dy = s.sunEl, dz = .15;
+  const l = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  s.sdx = dx / l; s.sdy = dy / l; s.sdz = dz / l;                   // unit vector toward the sun
+  s.light = Math.max(.22, Math.min(1, s.sunEl * 1.4 + .5));         // ambient brightness
+  s.dayf = Math.max(0, Math.min(1, s.sunEl * 1.6 + .5));
+  s.zR = 8 + 62 * s.dayf; s.zG = 12 + 128 * s.dayf; s.zB = 35 + 200 * s.dayf;     // zenith
+  s.hR = 22 + 150 * s.dayf; s.hG = 32 + 170 * s.dayf; s.hB = 58 + 190 * s.dayf;   // horizon
+  const tw = Math.max(0, 1 - Math.abs(s.sunEl) * 3);                // twilight glow near sunrise / sunset
+  s.hR += (250 - s.hR) * tw * .8; s.hG += (145 - s.hG) * tw * .8; s.hB += (88 - s.hB) * tw * .8;
+  s.flk = .86 + .09 * Math.sin(tm * .011) + .05 * Math.sin(tm * .027);   // torch flicker
+  s.wt += dt * .35;                                                  // cloud drift
+  const oc = weather ? .72 : 1;                                      // overcast dims everything
+  s.light *= oc; s.zR *= oc; s.zG *= oc; s.zB *= oc; s.hR *= oc; s.hG *= oc; s.hB *= oc;
+  s.ct = weather ? -.1 : .42;                                        // cloud threshold (lower = more cloud)
+  s.cbr = (weather ? 140 : 70) + (weather ? 70 : 180) * s.dayf;     // cloud brightness
+}
+
+// ---- renderer ----------------------------------------------------------------------
+// GFX holds the look. v1 equivalents: steps 24, shadowSteps 16, fog false, shade [1,1,1].
+const GFX = { steps: 100, shadowSteps: 48, fog: true, shade: [.86, 1, .74] };  // shade = x / y / z face ambient
+const QUALITY = [{ n: '低', px: 28224 }, { n: '中', px: 47040 }, { n: '高', px: 84672 }];  // 中 = v1's 280×168
+const view = { w: 0, h: 0, f: 1, cxo: 0, cyo: 0, ui: 1, img: null, buf: null, colX: null, colZ: null };
+const shadowCache = new Uint8Array(VOL * 6);  // per block face: 0 unknown · 1 lit · 2 shadowed
+let shadowKey = NaN, shadowVer = -1, needRender = true, viewDirty = true, autoLevel = 1;
+const invalidateShadows = () => { shadowKey = NaN; };
+const qualityLevel = () => settings.quality < 0 ? autoLevel : settings.quality;
+
+function setResolution(w, h) {
+  view.w = w; view.h = h;
+  view.f = Math.min(w / 2, h * 5 / 6);        // focal length (px): 90° wide or 62° tall, whichever is tighter
+  view.cxo = w / 2 / view.f; view.cyo = h / 2 / view.f;
+  view.ui = h / 168;                          // overlays are authored for a 168 px tall frame
+  canvas.width = w; canvas.height = h;
+  view.img = new ImageData(w, h);
+  view.buf = new Uint32Array(view.img.data.buffer);
+  view.colX = new Float64Array(w); view.colZ = new Float64Array(w);
+  makeParticles();
+  needRender = true;
+}
+function fitView() {                          // match the screen's shape; letterbox only past 1.25–2.4
+  const vw = innerWidth || 1, vh = innerHeight || 1;
+  const aspect = Math.min(2.4, Math.max(1.25, vw / vh));
+  const h = Math.max(60, Math.round(Math.sqrt(QUALITY[qualityLevel()].px / aspect))), w = Math.round(h * aspect);
+  let cw = vw, ch = vw / aspect;
+  if (ch > vh) { ch = vh; cw = vh * aspect; }
+  canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
+  if (w !== view.w || h !== view.h) setResolution(w, h);
+}
+
+// shadow ray: from a point toward the sun, is the sky blocked by an opaque block?
+function shadowRay(px, py, pz) {
+  const { sdx, sdy, sdz } = sky;
+  let gx = px | 0, gy = py | 0, gz = pz | 0;
+  const sx = sdx > 0 ? 1 : -1, sy = sdy > 0 ? 1 : -1, sz = sdz > 0 ? 1 : -1;
+  const dx = Math.abs(1 / sdx), dy = Math.abs(1 / sdy), dz = Math.abs(1 / sdz);
+  let tx = sdx ? (gx + (sdx > 0) - px) / sdx : Infinity,
+      ty = sdy ? (gy + (sdy > 0) - py) / sdy : Infinity,
+      tz = sdz ? (gz + (sdz > 0) - pz) / sdz : Infinity;
+  for (let n = GFX.shadowSteps; n--;) {
+    if (tx < ty) {
+      if (tx < tz) { tx += dx; gx += sx; if (gx & ~WM && (gx < 0) === (sx < 0)) return false; }
+      else { tz += dz; gz += sz; if (gz & ~WM && (gz < 0) === (sz < 0)) return false; }
+    } else if (ty < tz) { ty += dy; gy += sy; if (gy & ~WM && (gy < 0) === (sy < 0)) return false; }
+    else { tz += dz; gz += sz; if (gz & ~WM && (gz < 0) === (sz < 0)) return false; }
+    if ((gx | gy | gz) & ~WM) continue;
+    const b = world[gy << 10 | gz << 5 | gx];
+    if (b !== AIR && b !== GLASS) return true;
   }
-  qw.sort((qa,qc)=>qc[2]-qa[2]);                      // far first
-  for(qi=0;qi<qw.length;qi++){
-    qo=qw[qi][0];qp=qw[qi][1];qe=M.sqrt(qw[qi][2]);
-    if(qe>26)continue;
-    qm=PR(qo.x,qo.y+(qp?0:.85),qo.z);
-    if(!qm)continue;
-    if(EBLOCKED(qo.x,qo.y+(qp?0:.85),qo.z,qe))continue;
-    qn=hw/mx(.4,qe);                                  // pixels per world unit
-    if(qp){                                           // arrow: a short dark dash
-      T.fillStyle='#2b2118';
-      T.fillRect(qm[0]-qn*.06,qm[1]-qn*.06,mx(1,qn*.12),mx(1,qn*.12));
-      continue;
-    }
-    qa=qn*.62;qc=qn*1.7;                              // body width / height
-    T.fillStyle=qo.ht?'#ff9a9a':'#3a2b50';
-    T.fillRect(qm[0]-qa/2,qm[1]-qc*.55,qa,qc*.72);    // torso
-    T.fillStyle=qo.ht?'#ffbdbd':'#4a3768';
-    T.fillRect(qm[0]-qa*.42,qm[1]-qc*.95,qa*.84,qc*.42); // head
-    if(qn>7){                                         // eyes only when close enough to matter
-      T.fillStyle='#ff5a3c';
-      qg=mx(1,qn*.1);
-      T.fillRect(qm[0]-qa*.3,qm[1]-qc*.8,qg,qg);
-      T.fillRect(qm[0]+qa*.3-qg,qm[1]-qc*.8,qg,qg);
-    }
-    if(qo.hp<12&&qn>5){                               // tiny health pip
-      T.fillStyle='#000';T.fillRect(qm[0]-qa/2,qm[1]-qc*1.12,qa,mx(1,qn*.07));
-      T.fillStyle='#6ee27a';T.fillRect(qm[0]-qa/2,qm[1]-qc*1.12,qa*(qo.hp/12),mx(1,qn*.07));
-    }
+  return false;
+}
+
+// The hot path. Everything lives in locals and nothing is allocated per pixel.
+// The ray-direction and lighting arithmetic keeps v1's exact operation order,
+// so with v1's GFX values the output is pixel-identical to v1.
+function renderWorld() {
+  const W = view.w, H = view.h, f = view.f, cxo = view.cxo, cyo = view.cyo;
+  const buf = view.buf, colX = view.colX, colZ = view.colZ;
+  const ox = P.x, oy = P.y + EYE, oz = P.z;
+  const sx = Math.sin(P.a), cx = Math.cos(P.a), sp = Math.sin(P.b), cp = Math.cos(P.b);
+  const Fx = sx * cp, Fz = cx * cp, sxsp = sx * sp, cxsp = cx * sp;
+  for (let x = 0; x < W; x++) { const dx = x / f - cxo; colX[x] = cx * dx; colZ[x] = sx * dx; }
+  const X0 = ox | 0, Y0 = oy | 0, Z0 = oz | 0;
+  const { sdx, sdy, sdz, sunEl, light, dayf, flk, wt, ct, cbr, zR, zG, zB, hR, hG, hB } = sky;
+  const nSteps = GFX.steps - 1, shX = GFX.shade[0], shY = GFX.shade[1], shZ = GFX.shade[2];
+  const shadows = settings.shadows && dayf > .02;
+  if (shadows) {                              // results stay valid until the sun moves ~0.5° or a block changes
+    const key = Math.round(sky.sunA * 115);
+    if (key !== shadowKey || worldVer !== shadowVer) { shadowCache.fill(0); shadowKey = key; shadowVer = worldVer; }
   }
-};
-// is the line from the eye to this point interrupted by an opaque block?
-EBLOCKED=(qa,qb,qc,qe)=>{
-  qu=(qa-P.x)/qe;qt=(qb-(P.y+1.5))/qe;qs=(qc-P.z)/qe;
-  for(ql=.5;ql<qe-.35;ql+=.45){
-    qd=B(P.x+qu*ql|0,P.y+1.5+qt*ql|0,P.z+qs*ql|0);
-    if(qd&&qd!=5&&qd!=6)return 1;
-  }
-  return 0;
-};
-
-// ---- project a world point to screen pixels (inverse of the ray map) ----
-// camera orthonormal basis: F=(sx*cp,sp,cx*cp)  right=(cx,0,-sx)  up=(-sx*sp,cp,-cx*sp)
-PR=(wx,wy,wz)=>{
-  vx=wx-P.x;vy=wy-(P.y+1.5);vz=wz-P.z;
-  fF=vx*sx*cp+vy*sp+vz*cx*cp;
-  if(fF<=.05)return 0;                               // behind camera
-  fR=vx*cx-vz*sx;
-  fU=-vx*sx*sp+vy*cp-vz*cx*sp;
-  return[(fR/fF+1)*hw,(.6-fU/fF)*hw];
-};
-
-// ---- shadow ray: from a point toward the sun, is the sky blocked? ----
-SH=(px,py,pz)=>{
-  gx=px|0;gy=py|0;gz=pz|0;
-  Sx=sdx>0?1:-1;Sy=sdy>0?1:-1;Sz=sdz>0?1:-1;
-  Tx=(gx+(sdx>0)-px)/sdx;Ty=(gy+(sdy>0)-py)/sdy;Tz=(gz+(sdz>0)-pz)/sdz;
-  Dx=A(1/sdx);Dy=A(1/sdy);Dz=A(1/sdz);
-  for(ns=16;ns--;){
-    Tx<Ty?Tx<Tz?(Tx+=Dx,gx+=Sx):(Tz+=Dz,gz+=Sz):Ty<Tz?(Ty+=Dy,gy+=Sy):(Tz+=Dz,gz+=Sz);
-    if((bl=B(gx,gy,gz))&&bl!=5)return 1;               // opaque block casts shadow
-  }
-  return 0;
-};
-
-// ---- input ----
-bd=document.getElementById('bd');bp=document.getElementById('bp');clk=document.getElementById('clock');
-bj=document.getElementById('bj');STK=document.getElementById('stk');KNB=document.getElementById('knb');
-bd.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE1();};
-bd.ontouchend=bd.ontouchcancel=e=>{e.preventDefault();USE1UP();};
-bp.ontouchstart=e=>{e.preventDefault();e.stopPropagation();USE2();};
-bj.ontouchstart=e=>{e.preventDefault();e.stopPropagation();jmp=1;};
-bd.onclick=()=>USE1();bp.onclick=()=>USE2();bj.onclick=()=>jmp=1;
-
-// ---- touch: left half = floating stick (relative to where you touched down),
-//              right half = drag to look (delta based, same feel as the mouse) ----
-mvId=-1;lkId=-1;mvu=0;mvv=0;lkx=0;lky=0;jmp=0;RAD=52;
-LKS=.0042;MSENS=.003;INVY=1;PAUSED=1;MSV=6;TSV=6;      // look settings (PAUSED until 開始遊戲)
-Treset=()=>{mvId=lkId=-1;mvu=mvv=lkx=lky=0;STK.style.display='none';};
-wrap.ontouchstart=e=>{e.preventDefault();
-  for(tt of e.changedTouches){
-    if(tt.clientX<innerWidth/2){
-      if(mvId<0){                                   // stick springs up under the thumb
-        mvId=tt.identifier;jx0=tt.clientX;jy0=tt.clientY;
-        STK.style.display='block';STK.style.left=(jx0-RAD)+'px';STK.style.top=(jy0-RAD)+'px';
-        KNB.style.left=KNB.style.top=(RAD-18)+'px';
+  const fog = GFX.fog, fogStart = weather ? 5 : 14, fogK = 1 / ((weather ? 30 : 46) - fogStart), fogMax = weather ? .85 : .72;
+  const starOn = sunEl < .06, nf = Math.max(0, Math.min(1, -sunEl * 4)), sunOn = sunEl > -.06, moonOn = sunEl < .12;
+  let k = 0;
+  for (let y = 0; y < H; y++) {
+    const dy = cyo - y / f;
+    const ry = sxsp * dy, dirY = sp + cp * dy, rz = cxsp * dy;       // dirY is constant along a row
+    const stY = dirY > 0 ? 1 : -1, ddy = Math.abs(1 / dirY);
+    const ty0 = dirY !== 0 ? (Y0 + (dirY > 0) - oy) / dirY : Infinity;
+    for (let x = 0; x < W; x++, k++) {
+      const dirX = (Fx + colX[x]) - ry, dirZ = (Fz - colZ[x]) - rz;
+      const stX = dirX > 0 ? 1 : -1, stZ = dirZ > 0 ? 1 : -1;
+      const ddx = Math.abs(1 / dirX), ddz = Math.abs(1 / dirZ);
+      let tx = dirX !== 0 ? (X0 + (dirX > 0) - ox) / dirX : Infinity, ty = ty0,
+          tz = dirZ !== 0 ? (Z0 + (dirZ > 0) - oz) / dirZ : Infinity;
+      let X = X0, Y = Y0, Z = Z0, face = 1, t = 0, glass = 0, id = 0;
+      // DDA. The camera's own cell is skipped, so a torch at eye level can't fill the screen.
+      // A ray that leaves the world while moving away from it can never hit anything: stop.
+      for (let n = nSteps; n > 0; n--) {
+        if (tx < ty) {
+          if (tx < tz) { t = tx; tx += ddx; X += stX; face = 0; if (X & ~WM && (X < 0) === (stX < 0)) break; }
+          else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~WM && (Z < 0) === (stZ < 0)) break; }
+        } else if (ty < tz) { t = ty; ty += ddy; Y += stY; face = 1; if (Y & ~WM && (Y < 0) === (stY < 0)) break; }
+        else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~WM && (Z < 0) === (stZ < 0)) break; }
+        if ((X | Y | Z) & ~WM) continue;
+        const b = world[Y << 10 | Z << 5 | X];
+        if (b !== AIR) { if (b !== GLASS) { id = b; break; } glass++; }   // glass tints and lets the ray through
       }
-    }else if(lkId<0){lkId=tt.identifier;kx0=tt.clientX;ky0=tt.clientY;}
-  }};
-wrap.ontouchmove=e=>{e.preventDefault();
-  for(tt of e.changedTouches){
-    if(tt.identifier==mvId){
-      ux=tt.clientX-jx0;uy=tt.clientY-jy0;ul=M.sqrt(ux*ux+uy*uy);
-      if(ul>RAD){ux*=RAD/ul;uy*=RAD/ul;ul=RAD;}      // clamp to the ring
-      KNB.style.left=(RAD-18+ux)+'px';KNB.style.top=(RAD-18+uy)+'px';
-      mvu=ul<9?0:ux/RAD;mvv=ul<9?0:-uy/RAD;          // small dead zone; up = forward
-    }else if(tt.identifier==lkId){
-      lkx+=tt.clientX-kx0;lky+=tt.clientY-ky0;       // accumulate this frame's drag
-      kx0=tt.clientX;ky0=tt.clientY;
-    }
-  }};
-wrap.ontouchend=wrap.ontouchcancel=e=>{e.preventDefault();
-  for(tt of e.changedTouches){
-    if(tt.identifier==mvId){mvId=-1;mvu=mvv=0;STK.style.display='none';}
-    if(tt.identifier==lkId)lkId=-1;
-  }};
-
-// ---- hotbar / inventory ----
-// ---- item table ----
-// blocks 1-10 | materials 100-106 | tools 110+ (kind: p=鎬 a=斧 s=鏟 w=劍)
-// blocks also carry: hd=秒數 tl=需要的工具類 tr=需要的等級 dp=掉落物
-IT={1:{c:'#F4D87E',n:'沙土',hd:.55,tl:'s'},2:{c:'#705030',n:'泥土',hd:.55,tl:'s'},
-    3:{c:'#403020',n:'木頭',hd:1.3,tl:'a'},4:{c:'#206020',n:'樹葉',hd:.3},
-    5:{c:'#BFE6FF',n:'玻璃',hd:.4},6:{c:'#FFC24A',n:'火把',hd:.1},
-    7:{c:'#8A8A8E',n:'石頭',hd:1.6,tl:'p',tr:1},
-    8:{c:'#39393E',n:'煤礦',hd:2.2,tl:'p',tr:1,dp:104},
-    9:{c:'#C99A6E',n:'鐵礦',hd:2.8,tl:'p',tr:2,dp:105},
-    10:{c:'#5FE0D8',n:'鑽石礦',hd:4.2,tl:'p',tr:3,dp:106},
-    100:{c:'#8A6A3A',n:'弓',bow:1,st:1},101:{c:'#D9D2C0',n:'箭'},
-    102:{c:'#7B4FA8',n:'暗核'},103:{c:'#9B7B4A',n:'木棒'},
-    104:{c:'#2C2C30',n:'煤炭'},105:{c:'#D8B08C',n:'鐵錠'},106:{c:'#6FF0E6',n:'鑽石'}};
-// tool tiers: 1 木 2 石 3 鐵 4 鑽石
-TMAT=[0,{m:3,n:'木'},{m:7,n:'石'},{m:105,n:'鐵'},{m:106,n:'鑽石'}];
-TKIND=[{k:'p',n:'鎬',b:110,c:3,d:2,tiers:4},{k:'w',n:'劍',b:120,c:2,d:4,tiers:4},
-       {k:'a',n:'斧',b:130,c:3,d:3,tiers:3},{k:'s',n:'鏟',b:140,c:1,d:1,tiers:3}];
-TCOL=['','#C8A06A','#9AA0A6','#E0BE9A','#7FF0E6'];   // tool colour by tier
-TKIND.forEach(tk=>{for(qt2=1;qt2<=tk.tiers;qt2++)
-  IT[tk.b+qt2-1]={c:TCOL[qt2],n:TMAT[qt2].n+tk.n,st:1,kind:tk.k,tier:qt2,
-                  spd:+(1+qt2*1.9).toFixed(1),dmg:tk.d+qt2*1.4|0};});
-VCOL=new Uint32Array(16);                            // voxel render colour, parsed from IT
-for(qv2=1;qv2<16;qv2++)if(IT[qv2])VCOL[qv2]=parseInt(IT[qv2].c.slice(1),16);
-VCOL[2]=7360560;VCOL[3]=4206624;VCOL[4]=2121760;VCOL[1]=16046206;  // keep the original terrain palette
-BC=i2=>(IT[i2]||0).c||'';                            // colour by id
-BN=i2=>(IT[i2]||0).n||'';                            // name by id
-BLK=i2=>i2>0&&i2<100;                                // placeable?
-MAXS=i2=>(IT[i2]||0).st||64;                         // max stack size (STK is the joystick element)
-PAL=[1,2,3,4,5,6,7,8,9,10];                          // creative palette (infinite)
-selI=0;CRE=0;invOpen=0;dragI=-1;
-bar=document.getElementById('bar');ig=document.getElementById('invg');
-ivp=document.getElementById('inv');gh=document.getElementById('ghost');
-bi=document.getElementById('bi');
-
-CH=(it,i,num,onf)=>'<div class="slot'+(it.id?'':' e')+(num?' hb':'')+(onf?' on':'')+(i==dragI?' src':'')+
-  '" data-i="'+i+'" title="'+BN(it.id)+'" style="background:'+BC(it.id)+'">'+
-  (num?'<span>'+(i+1)+'</span>':'')+(it.id?'<i>'+(it.n<0?'∞':it.n>1?it.n:'')+'</i>':'')+'</div>';
-CPG=0;                                               // creative palette page
-drawBar=()=>{s2='';for(bj=0;bj<6;bj++)s2+=CH(CRE?{id:PAL[(CPG*6+bj)%PAL.length],n:-1}:INV[bj],bj,1,bj==selI);bar.innerHTML=s2;};
-drawInv=()=>{s2='';for(bj=0;bj<24;bj++)s2+=CH(INV[bj],bj,bj<6,bj==selI);ig.innerHTML=s2;
-  RCP.forEach((rc,ri)=>cbt[ri].disabled=!rc[0].every(ing=>has(ing[0],ing[1])));
-  ivt.textContent=CRE?'背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動':'背包 — 拖曳搬移方塊,第一排就是快捷欄';};
-selBlock=v=>{selI=v;drawBar();if(invOpen)drawInv();};
-
-// ---- stacking helpers (64 per stack) ----
-give=(id,n)=>{
-  if(!id)return;
-  gm=MAXS(id);
-  for(gi=0;gi<24;gi++)if(INV[gi].id==id&&INV[gi].n<gm){kk=mn(gm-INV[gi].n,n);INV[gi].n+=kk;n-=kk;if(!n)break;}
-  if(n)for(gi=0;gi<24;gi++)if(!INV[gi].id){kk=mn(gm,n);INV[gi]={id:id,n:kk};n-=kk;if(!n)break;}
-  drawBar();if(invOpen)drawInv();                     // leftover when full is simply lost
-};
-has=(id,n)=>{c3=0;for(gi=0;gi<24;gi++)if(INV[gi].id==id)c3+=INV[gi].n;return c3>=n;};
-take=(id,n)=>{if(!has(id,n))return 0;
-  for(gi=0;gi<24&&n;gi++)if(INV[gi].id==id){kk=mn(INV[gi].n,n);INV[gi].n-=kk;n-=kk;if(!INV[gi].n)INV[gi].id=0;}
-  return 1;};
-// ---- recipes: [[ingredient id, count]...] -> [result id, count] ----
-RCP=[[[[3,1]],[6,4],'木頭×1 → 火把×4'],
-     [[[3,1]],[103,4],'木頭×1 → 木棒×4'],
-     [[[3,1]],[101,4],'木頭×1 → 箭×4'],
-     [[[3,2],[4,2]],[100,1],'木頭×2+樹葉×2 → 弓'],
-     [[[102,1]],[6,8],'暗核×1 → 火把×8'],
-     [[[104,1],[103,1]],[6,4],'煤炭×1+木棒×1 → 火把×4']];
-TKIND.forEach(tk=>{for(qt2=1;qt2<=tk.tiers;qt2++){
-  qm2=TMAT[qt2].m;qn2=tk.b+qt2-1;
-  RCP.push([[[qm2,tk.c],[103,2]],[qn2,1],
-            TMAT[qt2].n+'×'+tk.c+'+棒×2 → '+IT[qn2].n]);
-}});
-cbt=[];cw2=document.getElementById('craft');
-RCP.forEach((rc,ri)=>{
-  qb2=document.createElement('button');
-  qb2.textContent=rc[2];
-  qb2.onclick=()=>{
-    if(!rc[0].every(ing=>has(ing[0],ing[1])))return;
-    rc[0].forEach(ing=>take(ing[0],ing[1]));
-    give(rc[1][0],rc[1][1]);
-    drawInv();
-  };
-  cw2.appendChild(qb2);cbt.push(qb2);
-});
-ivt=document.getElementById('invt');
-hpEl=document.getElementById('hp');dmgEl=document.getElementById('dmg');
-deadEl=document.getElementById('dead');
-drawHP=()=>{
-  qs2='';
-  for(qi2=0;qi2<10;qi2++){
-    qv2=PHP-qi2*2;
-    qs2+='<b class="'+(qv2>=2?'f':qv2>0?'h':'')+'"></b>';
-  }
-  hpEl.innerHTML=qs2;
-};
-RESPAWN=()=>{
-  PHP=PMX;PDEAD=0;PHURT=0;PREG=0;
-  P.x=16;P.y=30;P.z=16;P.g=0;
-  MOB.length=0;ARW.length=0;
-  deadEl.classList.remove('on');drawHP();
-};
-document.getElementById('rb').onclick=()=>RESPAWN();
-
-// ---- start menu + settings ----
-mnuEl=document.getElementById('mnu');setpEl=document.getElementById('setp');
-SAPPLY=()=>{                                          // slider values -> live constants
-  MSENS=.0005*MSV;LKS=.0007*TSV;
-  vMs.textContent=MSV;vTs.textContent=TSV;
-  sMs.value=MSV;sTs.value=TSV;
-  sIy.textContent=INVY<0?'開':'關';
-  sSh.textContent=SHD?'開':'關';
-};
-SSAVE=()=>{try{localStorage.voxelS=JSON.stringify({m:MSV,t:TSV,i:INVY,s:SHD});}catch(e){}};
-try{
-  if(localStorage.voxelS){
-    qj=JSON.parse(localStorage.voxelS);
-    if(qj){MSV=qj.m||6;TSV=qj.t||6;INVY=qj.i<0?-1:1;SHD=qj.s?1:0;}
-  }
-}catch(e){}
-SAPPLY();
-MENU=v=>{                                             // open/close the menu (pauses the world)
-  PAUSED=v?1:0;
-  mnuEl.style.display=v?'flex':'none';
-  if(v){
-    Treset();K={};                                    // drop any held keys/touches
-    document.exitPointerLock&&document.exitPointerLock();
-    if(invOpen)tog(0);
-  }
-};
-CFG=v=>{                                              // settings sub-page
-  setpEl.classList.toggle('on',!!v);
-  mnuEl.classList.toggle('cfg',!!v);
-};
-bstart.onclick=()=>MENU(0);
-bset.onclick=()=>CFG(1);
-bback.onclick=()=>{CFG(0);SSAVE();};
-bres.onclick=()=>{GEN();LGT();KIT();drawBar();RESPAWN();MENU(0);
-  try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');localStorage.removeItem('voxelI');}catch(e){}};
-sMs.oninput=()=>{MSV=+sMs.value;SAPPLY();};
-sTs.oninput=()=>{TSV=+sTs.value;SAPPLY();};
-sIy.onclick=()=>{INVY=-INVY;SAPPLY();SSAVE();};
-sSh.onclick=()=>{SHD^=1;SAPPLY();SSAVE();};
-bm.onclick=()=>MENU(1);
-bm.ontouchstart=e=>{e.preventDefault();e.stopPropagation();MENU(1);};
-MENU(1);
-
-// ---- open / close ----
-tog=v=>{invOpen=v?1:0;ivp.classList.toggle('on',!!v);dragI=-1;gh.style.display='none';
-  bar.style.display=invOpen?'none':'flex';            // first grid row already is the hotbar
-  if(v){Treset();document.exitPointerLock&&document.exitPointerLock();drawInv();}
-  drawBar();};
-ivp.onclick=e=>{if(e.target==ivp)tog(0);};            // tap the dim area to close
-bi.onclick=()=>tog(!invOpen);
-bi.ontouchstart=e=>{e.preventDefault();e.stopPropagation();tog(!invOpen);};
-
-// ---- slot picking (bottom bar) ----
-sfrom=e=>(n3=e.target.closest&&e.target.closest('.slot'))?+n3.dataset.i:-1;
-bar.onclick=e=>{sj=sfrom(e);if(sj>=0)selBlock(sj);};
-bar.ontouchstart=e=>{sj=sfrom(e);if(sj>=0){e.preventDefault();e.stopPropagation();selBlock(sj);}};
-
-// ---- drag & drop inside the bag (pointer events = mouse + touch) ----
-gmove=e=>{gh.style.left=(e.clientX-23)+'px';gh.style.top=(e.clientY-23)+'px';};
-ig.onpointerdown=e=>{
-  sj=sfrom(e);if(sj<0||!INV[sj].id)return;
-  e.preventDefault();dragI=sj;
-  gh.style.background=BC[INV[sj].id];gh.style.display='block';gmove(e);
-  ig.setPointerCapture&&ig.setPointerCapture(e.pointerId);drawInv();
-};
-ig.onpointermove=e=>{if(dragI>=0)gmove(e);};
-ig.onpointercancel=()=>{dragI=-1;gh.style.display='none';drawInv();};
-ig.onpointerup=e=>{
-  if(dragI<0)return;
-  gh.style.display='none';
-  n4=document.elementFromPoint(e.clientX,e.clientY);
-  n4=n4&&n4.closest&&n4.closest('.slot');
-  if(n4&&(dj=+n4.dataset.i)!=dragI){
-    a3=INV[dragI];b3=INV[dj];
-    if(a3.id&&a3.id==b3.id&&b3.n<MAXS(a3.id)){        // same item -> merge stacks
-      kk=mn(MAXS(a3.id)-b3.n,a3.n);b3.n+=kk;a3.n-=kk;if(!a3.n)INV[dragI]={id:0,n:0};
-    }else{INV[dragI]=b3;INV[dj]=a3;}                  // otherwise swap
-  }
-  dragI=-1;drawInv();drawBar();
-};
-drawBar();drawHP();
-onwheel=e=>{e.preventDefault();
-  qw2=selI+(e.deltaY>0?1:-1);
-  if(CRE&&PAL.length>6){                              // wrap onto the next palette page
-    if(qw2>5){CPG=(CPG+1)%M.ceil(PAL.length/6);qw2=0;}
-    else if(qw2<0){CPG=(CPG+M.ceil(PAL.length/6)-1)%M.ceil(PAL.length/6);qw2=5;}
-  }else qw2=(qw2+6)%6;
-  selBlock(qw2);};
-for(i=200;i--;)PT.push({x:M.random()*W,y:M.random()*H,ph:M.random()*6.28}); // rain/snow
-
-onkeydown=e=>{
-  if(e.key=='Escape'){                                // Esc: bag first, then the menu
-    if(invOpen)tog(0);else MENU(!PAUSED);
-    if(!PAUSED)CFG(0);
-    return;
-  }
-  K[e.key.toLowerCase()]=1;if(e.key==' ')e.preventDefault();
-  if(PAUSED)return;                                   // menu open: no gameplay hotkeys
-  if(e.key>='1'&&e.key<='6')selBlock(+e.key-1);
-  if(e.key=='i'||e.key=='Tab'){e.preventDefault();tog(!invOpen);}
-  if(e.key=='c'){CRE^=1;drawBar();if(invOpen)drawInv();}      // survival <-> creative
-  if(e.key=='g'){SHD^=1;SAPPLY();SSAVE();}
-  if(e.key=='r')wthr=(wthr+1)%3;
-  if(e.key=='x'){GEN();LGT();KIT();drawBar();if(invOpen)drawInv();RESPAWN();
-    try{localStorage.removeItem('voxelW');localStorage.removeItem('voxelP');localStorage.removeItem('voxelI');}catch(e){}}
-};
-onkeyup=e=>K[e.key.toLowerCase()]=0;
-c.oncontextmenu=e=>e.preventDefault();
-c.onmousedown=e=>{
-  if(PAUSED)return;                                   // menu is showing; let the buttons work
-  if(document.pointerLockElement==c){if(e.button==2)USE2();else{mdn=1;USE1();}}
-  else{drag=1;c.requestPointerLock&&c.requestPointerLock();}
-};
-onmouseup=()=>{drag=0;mdn=0;USE1UP();};
-onmousemove=e=>{
-  if(document.pointerLockElement==c||drag){
-    P.a+=e.movementX*MSENS;
-    P.b=mx(-1.5,mn(1.5,P.b-e.movementY*MSENS*INVY));
-  }
-};
-
-// ---- main loop ----
-(L=tm=>{
-  requestAnimationFrame(L);                           // schedule first: one bad frame won't freeze the game
-  dt=mn((tm-P.t||0)/1e3,.1);P.t=tm;
-  if(PAUSED)dt=0;                                     // menu open: render, but nothing advances
-  mu=mvu;mv=mvv;
-  if(K.w)mv=1;if(K.s)mv=-1;if(K.a)mu=-1;if(K.d)mu=1;
-  kj=K[' ']||jmp?1:0;jmp=0;
-  if(invOpen||PDEAD||PAUSED){mu=mv=0;kj=0;lkx=lky=0;} // bag, death or menu = hands off the world
-  mu=mx(-1,mn(1,mu));mv=mx(-1,mn(1,mv));
-  J=mx(0,J-dt);
-  dc=mx(0,dc-dt);
-  if(K.f&&!pF&&!invOpen&&!PAUSED&&!PDEAD)MELEE();      // F pressed = swing at mobs
-  pF=K.f?1:0;
-  if(K.e&&dc==0&&!invOpen){USE2();dc=.15;}
-  if(kj&&P.g==0&&J==0){P.g=8;J=.35;}
-  sp=5*dt;
-  P.g-=18*dt;
-  P.a+=lkx*LKS;                                     // drag right = turn right
-  P.b=mx(-1.5,mn(1.5,P.b-lky*LKS*INVY));            // drag down = look down (matches the mouse)
-  lkx=lky=0;
-  cx=C(P.a);sx=S(P.a);
-  vx=(mu*cx+mv*sx)*sp;
-  vz=(-mu*sx+mv*cx)*sp;
-  P.x+=vx;U(0,vx);
-  P.z+=vz;U(2,vz);
-  P.y+=P.g*dt;U(1,P.g);
-  if(P.y<-10){P.x=16;P.y=30;P.z=16;P.g=0;PHIT(4);}
-  // ---- day / night cycle ----
-  tod=(tod+dt/1440*(K.t?100:1))%1;                   // full day = 24 min (hold T = 100x preview)
-  sunA=(tod-.25)*6.2832;sunEl=S(sunA);               // sun elevation -1..1
-  sdx=C(sunA);sdy=sunEl;sdz=.15;sl=M.sqrt(sdx*sdx+sdy*sdy+sdz*sdz);
-  sdx/=sl;sdy/=sl;sdz/=sl;                            // normalized sun direction
-  light=mx(.22,mn(1,sunEl*1.4+.5));                   // ambient brightness
-  dayf=mx(0,mn(1,sunEl*1.6+.5));
-  zR=8+62*dayf;zG=12+128*dayf;zB=35+200*dayf;         // zenith colour
-  hR=22+150*dayf;hG=32+170*dayf;hB=58+190*dayf;       // horizon colour
-  tw=mx(0,1-A(sunEl)*3);                              // twilight (near horizon crossing)
-  hR+=(250-hR)*tw*.8;hG+=(145-hG)*tw*.8;hB+=(88-hB)*tw*.8;
-  flk=.86+.09*S(tm*.011)+.05*S(tm*.027);             // torch flicker
-  wt+=dt*.35;                                        // cloud drift
-  oc=wthr?.72:1;light*=oc;                           // overcast dims everything
-  zR*=oc;zG*=oc;zB*=oc;hR*=oc;hG*=oc;hB*=oc;
-  ct=wthr?-.1:.42;                                   // cloud threshold (lower = more cloud)
-  cbr=(wthr?140:70)+(wthr?70:180)*dayf;              // cloud brightness
-  if((hold1||K.f)&&!invOpen&&!PAUSED&&!PDEAD)MINE(dt);else{MPRG=0;MTGT=-1;}   // hold to mine
-  MHT=mx(0,MHT-dt);
-  ETICK(dt);                                          // mobs, arrows, health (needs dayf/sunEl above)
-  if(PDEAD&&!deadEl.classList.contains('on')){deadEl.classList.add('on');if(invOpen)tog(0);}
-  dmgEl.style.opacity=PDEAD?.55:PHURT>0?(PHURT/.35*.6).toFixed(2):(PHP<7?.16+.05*S(tm*.006):0);
-  if(PHP!=lastHP){lastHP=PHP;drawHP();}
-  c.style.transform=SHK>0?'translate('+((M.random()-.5)*SHK*9).toFixed(1)+'px,'+((M.random()-.5)*SHK*9).toFixed(1)+'px)':'';
-  cp=C(P.b);sp=S(P.b);
-  if(SHD)SC.fill(-1);                                 // reset per-face shadow cache for this frame
-  for(k=W*H;k--;){
-    x=k%W;y=k/W|0;
-    dx=x/hw-1;dy=.6-y/hw;
-    d={x:sx*cp+cx*dx-sx*sp*dy,y:sp+cp*dy,z:cx*cp-sx*dx-cx*sp*dy};
-    h=R({x:P.x,y:P.y+1.5,z:P.z},d);
-    if(h.h){
-      Q=VCOL[h.b];
-      h.n==0?(nrx=-q,nry=0,nrz=0):h.n==1?(nrx=0,nry=-r,nrz=0):(nrx=0,nry=0,nrz=-s); // face normal
-      if(h.b==6){                                      // torch itself: emissive, never dark
-        m=1.18*flk;cr=(Q>>16)*m;cg=((Q>>8)&255)*m;cb=(Q&255)*m;
-      }else{
-      diff=mx(0,nrx*sdx+nry*sdy+nrz*sdz);             // how much the face faces the sun
-      if(SHD&&dayf>.02&&diff>0){                       // shadow (cached per block-face)
-        fi=I(X,Y,Z)*6+h.n*2+(nrx+nry+nrz>0?1:0);
-        sc=SC[fi];if(sc<0)sc=SC[fi]=SH(X+.5+nrx,Y+.5+nry,Z+.5+nrz);
-        if(sc)diff=0;
-      }
-      m=light*(.6+.22*mx(0,nry))+diff*dayf*.8;        // sky ambient (top-lit) + sun
-      cr=(Q>>16)*m;cg=((Q>>8)&255)*m;cb=(Q&255)*m;
-      tl=LV(X+nrx,Y+nry,Z+nrz)/14;                    // torch light landing on this face
-      if(tl){tl=tl*tl*flk;cr+=(Q>>16)*tl*1.3;cg+=((Q>>8)&255)*tl*.82;cb+=(Q&255)*tl*.42;}
-      }
-    }else{                                            // ---- sky ----
-      rx=d.x;ry=d.y;rz=d.z;rl=M.sqrt(rx*rx+ry*ry+rz*rz);
-      up=mx(0,mn(1,ry/rl*1.6+.25));
-      cr=hR+(zR-hR)*up;cg=hG+(zG-hG)*up;cb=hB+(zB-hB)*up;
-      dts=(rx*sdx+ry*sdy+rz*sdz)/rl;                  // cos(angle to sun)
-      if(sunEl>-.06&&dts>.9965){cr=255;cg=250;cb=225;}          // sun disk
-      else if(sunEl>-.06&&dts>.9){gl=(dts-.9)/.1;gl*=gl;cr+=(255-cr)*gl*.5;cg+=(238-cg)*gl*.5;cb+=(180-cb)*gl*.4;} // sun glow
-      else if(sunEl<.12&&-dts>.9975){cr=235;cg=240;cb=250;}     // moon disk
-      if(sunEl<.06){                                             // ---- stars ----
-        nf=mx(0,mn(1,-sunEl*4));snx=rx/rl;sny=ry/rl;snz=rz/rl;
-        if(sny>.03){
-          qx=snx*92|0;qy=sny*92|0;qz=snz*92|0;
-          hs=(qx*1836311903^qy*2109839^qz*971)&2047;
-          if(hs<3){tk=.6+.4*S(hs*3+tod*60);st=210*nf*tk;cr+=st;cg+=st;cb+=st+8;}
+      let cr, cg, cb;
+      if (id !== 0) {
+        const Q = COL[id], qr = Q >> 16, qg = Q >> 8 & 255, qb = Q & 255;
+        const nx = face === 0 ? -stX : 0, ny = face === 1 ? -stY : 0, nz = face === 2 ? -stZ : 0;
+        if (id === TORCH) {                                          // torch: emissive, never dark
+          const m = 1.18 * flk; cr = qr * m; cg = qg * m; cb = qb * m;
+        } else {
+          let diff = nx * sdx + ny * sdy + nz * sdz;                 // how squarely the face meets the sun
+          if (diff < 0) diff = 0;
+          if (shadows && diff > 0) {
+            const fi = (Y << 10 | Z << 5 | X) * 6 + face * 2 + (nx + ny + nz > 0 ? 1 : 0);
+            let sc = shadowCache[fi];
+            if (sc === 0) sc = shadowCache[fi] = shadowRay(X + .5 + nx, Y + .5 + ny, Z + .5 + nz) ? 2 : 1;
+            if (sc === 2) diff = 0;
+          }
+          const m = light * (.6 + .22 * (ny > 0 ? ny : 0)) * (face === 0 ? shX : face === 1 ? shY : shZ) + diff * dayf * .8;
+          cr = qr * m; cg = qg * m; cb = qb * m;
+          const lx = X + nx, ly = Y + ny, lz = Z + nz;               // torch light on the air cell in front of the face
+          const tl0 = (lx | ly | lz) & ~WM ? 0 : torch[ly << 10 | lz << 5 | lx];
+          if (tl0) { let tl = tl0 / 14; tl = tl * tl * flk; cr += qr * tl * 1.3; cg += qg * tl * .82; cb += qb * tl * .42; }
+        }
+        if (fog) {                                                   // distance fog toward the horizon colour
+          const dist = t * Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+          if (dist > fogStart) {
+            let fa = (dist - fogStart) * fogK; if (fa > 1) fa = 1; fa *= fogMax;
+            cr += (hR - cr) * fa; cg += (hG - cg) * fa; cb += (hB - cb) * fa;
+          }
+        }
+      } else {                                                       // ---- sky ----
+        const rl = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+        let up = dirY / rl * 1.6 + .25; up = up > 1 ? 1 : up < 0 ? 0 : up;
+        cr = hR + (zR - hR) * up; cg = hG + (zG - hG) * up; cb = hB + (zB - hB) * up;
+        const dts = (dirX * sdx + dirY * sdy + dirZ * sdz) / rl;     // cos(angle to the sun)
+        if (sunOn && dts > .9965) { cr = 255; cg = 250; cb = 225; }  // sun disk
+        else if (sunOn && dts > .9) {                                // sun glow
+          let gl = (dts - .9) / .1; gl *= gl;
+          cr += (255 - cr) * gl * .5; cg += (238 - cg) * gl * .5; cb += (180 - cb) * gl * .4;
+        } else if (moonOn && -dts > .9975) { cr = 235; cg = 240; cb = 250; }   // moon disk
+        if (starOn) {                                                // stars: hashed sky directions
+          const sny = dirY / rl;
+          if (sny > .03) {
+            const qx = dirX / rl * 92 | 0, qy = sny * 92 | 0, qz = dirZ / rl * 92 | 0;
+            const hs = (qx * 1836311903 ^ qy * 2109839 ^ qz * 971) & 2047;
+            if (hs < 3) { const st = 210 * nf * (.6 + .4 * Math.sin(hs * 3 + tod * 60)); cr += st; cg += st; cb += st + 8; }
+          }
+        }
+        if (dirY > .05) {                                            // clouds, projected onto a plane
+          const cfx = ox + dirX / dirY * 20, cfz = oz + dirZ / dirY * 20;
+          const nv = Math.sin(cfx * .15 + wt) * Math.cos(cfz * .13 - wt * .5);
+          let c1 = (nv - ct) * 2, c2 = (dirY - .05) * 5;
+          c1 = c1 > 1 ? 1 : c1 < 0 ? 0 : c1; c2 = c2 > 1 ? 1 : c2;
+          const cov = c1 * c2;
+          cr += (cbr - cr) * cov; cg += (cbr - cg) * cov; cb += (cbr + 6 - cb) * cov;
         }
       }
-      if(ry>.05){                                                // ---- clouds ----
-        cfx=P.x+rx/ry*20;cfz=P.z+rz/ry*20;                       // project onto cloud plane
-        nv=S(cfx*.15+wt)*C(cfz*.13-wt*.5);
-        cov=mx(0,mn(1,(nv-ct)*2))*mx(0,mn(1,(ry-.05)*5));
-        cr+=(cbr-cr)*cov;cg+=(cbr-cg)*cov;cb+=(cbr+6-cb)*cov;
+      if (glass) {                                                   // glass tints toward the horizon colour
+        const aG = glass * .24 < .6 ? glass * .24 : .6;
+        cr += (hR - cr) * aG; cg += (hG - cg) * aG; cb += (hB - cb) * aG;
       }
-    }
-    if(h.gc){                                         // glass tint toward sky
-      aG=mn(.6,h.gc*.24);
-      cr+=(hR-cr)*aG;cg+=(hG-cg)*aG;cb+=(hB-cb)*aG;
-    }
-    cr=cr>255?255:cr;cg=cg>255?255:cg;cb=cb>255?255:cb;
-    D[k]=0xFF000000|(cb&255)<<16|(cg&255)<<8|cr&255;
-  }
-  T.putImageData(N,0,0);
-  EDRAW();                                            // mobs and arrows, over the voxel pass
-  // ---- highlight the face the crosshair points at ----
-  TG=target();
-  if(TG&&(TG[0]-TG[3]|TG[1]-TG[4]|TG[2]-TG[5])){
-    gx=TG[0];gy=TG[1];gz=TG[2];
-    dfx=gx-TG[3];dfy=gy-TG[4];dfz=gz-TG[5];
-    C4=dfx?[[gx+(dfx<0),gy,gz],[gx+(dfx<0),gy+1,gz],[gx+(dfx<0),gy+1,gz+1],[gx+(dfx<0),gy,gz+1]]
-      :dfy?[[gx,gy+(dfy<0),gz],[gx+1,gy+(dfy<0),gz],[gx+1,gy+(dfy<0),gz+1],[gx,gy+(dfy<0),gz+1]]
-      :[[gx,gy,gz+(dfz<0)],[gx+1,gy,gz+(dfz<0)],[gx+1,gy+1,gz+(dfz<0)],[gx,gy+1,gz+(dfz<0)]];
-    bad=0;T.beginPath();
-    for(m=0;m<4;m++){p=PR(C4[m][0],C4[m][1],C4[m][2]);if(!p){bad=1;break;}m?T.lineTo(p[0],p[1]):T.moveTo(p[0],p[1]);}
-    if(!bad){T.closePath();
-      if(MPRG>0){T.fillStyle='rgba(0,0,0,'+(MPRG*.55).toFixed(2)+')';T.fill();}   // crack darkening
-      T.lineWidth=1.5;T.strokeStyle='rgba(0,0,0,.7)';T.stroke();T.lineWidth=.8;T.strokeStyle='#fff';T.stroke();}
-  }
-  // ---- mining progress + tool hint ----
-  if(MPRG>0){
-    T.fillStyle='rgba(0,0,0,.55)';T.fillRect(hw-26,H*.62,52,4);
-    T.fillStyle='#8fe0a0';T.fillRect(hw-25,H*.62+1,50*mn(1,MPRG),2);
-  }
-  if(MHT>0&&MHINT){
-    T.fillStyle='rgba(0,0,0,.5)';T.fillRect(hw-52,H*.68,104,11);
-    T.fillStyle='#ffd9a0';T.font='8px monospace';T.textAlign='center';
-    T.fillText(MHINT,hw,H*.68+8);T.textAlign='left';
-  }
-  // ---- held weapon in the corner ----
-  qh2=WEP()||(CRE?PAL[(CPG*6+selI)%PAL.length]:0);
-  if(qh2&&!PDEAD){
-    qy2=SWG>0?1-SWG/.18:1;                            // 0 at swing start, 1 at rest
-    qo2=SWG>0?S(qy2*3.14)*14:0;                       // arc through the swing
-    T.fillStyle=BC(qh2)||'#888';
-    if((IT[qh2]||0).dmg){                             // sword: a diagonal blade
-      T.save();T.translate(W-38+qo2*.6,H-6+qo2*.5);T.rotate(-.6-qo2*.055);
-      T.fillRect(-3,-30,6,32);T.fillStyle='#5c4326';T.fillRect(-5,-2,10,8);T.restore();
-    }else if((IT[qh2]||0).bow){
-      T.save();T.translate(W-34+qo2*.4,H-8);T.fillRect(-2,-26,4,28);
-      T.fillStyle='#e8e0cc';T.fillRect(-1,-22,2,18);T.restore();
-    }else{                                            // block in hand
-      T.save();T.translate(W-34,H-4+qo2*.7);T.fillRect(-11,-22,22,22);
-      T.strokeStyle='rgba(0,0,0,.45)';T.lineWidth=1;T.strokeRect(-11,-22,22,22);T.restore();
+      cr = cr > 255 ? 255 : cr; cg = cg > 255 ? 255 : cg; cb = cb > 255 ? 255 : cb;
+      buf[k] = 0xFF000000 | (cb & 255) << 16 | (cg & 255) << 8 | cr & 255;
     }
   }
-  // ---- precipitation overlay ----
-  if(wthr){
-    if(wthr==1){T.strokeStyle='rgba(190,215,255,.5)';T.lineWidth=1;T.beginPath();}
-    else T.fillStyle='rgba(255,255,255,.9)';
-    for(pt of PT){
-      if(wthr==1){pt.y+=420*dt;pt.x+=45*dt;}else{pt.y+=72*dt;pt.x+=S(pt.y*.05+pt.ph)*22*dt+9*dt;}
-      if(pt.y>H+2){pt.y=-4;pt.x=M.random()*W;}
-      if(pt.x>W+2)pt.x-=W+6;
-      if(wthr==1){T.moveTo(pt.x,pt.y);T.lineTo(pt.x-5,pt.y-11);}else T.fillRect(pt.x,pt.y,1.6,1.6);
-    }
-    if(wthr==1)T.stroke();
+  g2d.putImageData(view.img, 0, 0);
+}
+
+// ---- overlays drawn with the 2D API on top of the voxel pass ----
+const cam = { sx: 0, cx: 1, sp: 0, cp: 1 };   // camera basis for project(), set once per frame
+// camera basis: F = (sx*cp, sp, cx*cp) · right = (cx, 0, -sx) · up = (-sx*sp, cp, -cx*sp)
+function project(wx, wy, wz) {                // world point → canvas pixel, or null when behind the camera
+  const { sx, cx, sp, cp } = cam, f = view.f;
+  const vx = wx - P.x, vy = wy - (P.y + EYE), vz = wz - P.z;
+  const fF = vx * sx * cp + vy * sp + vz * cx * cp;
+  if (fF <= .05) return null;
+  const fR = vx * cx - vz * sx, fU = -vx * sx * sp + vy * cp - vz * cx * sp;
+  return [(fR / fF + view.cxo) * f, (view.cyo - fU / fF) * f];
+}
+function lineBlocked(px, py, pz, d) {         // is the line from the eye to this point cut by an opaque block?
+  const ux = (px - P.x) / d, uy = (py - (P.y + EYE)) / d, uz = (pz - P.z) / d;
+  for (let l = .5; l < d - .35; l += .45) {
+    const b = blockAt(P.x + ux * l | 0, P.y + EYE + uy * l | 0, P.z + uz * l | 0);
+    if (b !== AIR && b !== GLASS && b !== TORCH) return true;
   }
-  // ---- autosave (silently skipped in sandboxed previews) ----
-  sv-=dt;
-  if(sv<=0){sv=8;try{ss='';for(i=0;i<32768;i++)ss+=String.fromCharCode(w[i]);
-    localStorage.voxelW=btoa(ss);localStorage.voxelP=JSON.stringify({x:P.x,y:P.y,z:P.z,a:P.a,b:P.b,g:0});
-    localStorage.voxelT=tod;localStorage.voxelI=JSON.stringify(INV);}catch(e){}}
-  hh=tod*24|0;mm=(tod*24-hh)*60|0;
-  clk.textContent=(sunEl>.12?'☀':sunEl<-.12?'🌙':'🌆')+(wthr==1?'🌧':wthr==2?'❄':'')+' '+(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm+(CRE?' ∞':'');
-})(0);
+  return false;
+}
+function drawEntities() {                     // billboards, far to near, hidden behind blocks
+  const list = [];
+  for (const m of mobs) list.push([m, 0, 0]);
+  for (const a of arrows) list.push([a, 1, 0]);
+  for (const e of list) {
+    const o = e[0], dx = o.x - P.x, dy = o.y + (e[1] ? 0 : .85) - (P.y + EYE), dz = o.z - P.z;
+    e[2] = dx * dx + dy * dy + dz * dz;
+  }
+  list.sort((a, b) => b[2] - a[2]);
+  for (const [o, isArrow, d2] of list) {
+    const d = Math.sqrt(d2), oy = o.y + (isArrow ? 0 : .85);
+    if (d > 40) continue;
+    const s = project(o.x, oy, o.z);
+    if (!s || lineBlocked(o.x, oy, o.z, d)) continue;
+    const u = view.f / Math.max(.4, d);                              // pixels per world unit
+    if (isArrow) {
+      g2d.fillStyle = '#2b2118';
+      g2d.fillRect(s[0] - u * .06, s[1] - u * .06, Math.max(1, u * .12), Math.max(1, u * .12));
+      continue;
+    }
+    const bw = u * .62, bh = u * 1.7;                                // body width / height
+    g2d.fillStyle = o.ht ? '#ff9a9a' : '#3a2b50';
+    g2d.fillRect(s[0] - bw / 2, s[1] - bh * .55, bw, bh * .72);      // torso
+    g2d.fillStyle = o.ht ? '#ffbdbd' : '#4a3768';
+    g2d.fillRect(s[0] - bw * .42, s[1] - bh * .95, bw * .84, bh * .42);   // head
+    if (u > 7) {                                                     // eyes only when close enough to matter
+      const e = Math.max(1, u * .1);
+      g2d.fillStyle = '#ff5a3c';
+      g2d.fillRect(s[0] - bw * .3, s[1] - bh * .8, e, e);
+      g2d.fillRect(s[0] + bw * .3 - e, s[1] - bh * .8, e, e);
+    }
+    if (o.hp < 12 && u > 5) {                                        // tiny health bar
+      g2d.fillStyle = '#000'; g2d.fillRect(s[0] - bw / 2, s[1] - bh * 1.12, bw, Math.max(1, u * .07));
+      g2d.fillStyle = '#6ee27a'; g2d.fillRect(s[0] - bw / 2, s[1] - bh * 1.12, bw * (o.hp / 12), Math.max(1, u * .07));
+    }
+  }
+}
+let particles = [];                           // rain / snow, in overlay units
+function makeParticles() {
+  const vw = view.w / view.ui, vh = view.h / view.ui;
+  particles = [];
+  for (let i = Math.round(200 * vw / 280); i--;) particles.push({ x: Math.random() * vw, y: Math.random() * vh, ph: Math.random() * 6.28 });
+}
+function drawOverlays(dt) {
+  drawEntities();
+  const tg = target();                        // outline the face under the crosshair
+  if (tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {
+    const [gx, gy, gz] = tg, fx = gx - tg[3], fy = gy - tg[4], fz = gz - tg[5];
+    const q = fx ? [[gx + (fx < 0), gy, gz], [gx + (fx < 0), gy + 1, gz], [gx + (fx < 0), gy + 1, gz + 1], [gx + (fx < 0), gy, gz + 1]]
+            : fy ? [[gx, gy + (fy < 0), gz], [gx + 1, gy + (fy < 0), gz], [gx + 1, gy + (fy < 0), gz + 1], [gx, gy + (fy < 0), gz + 1]]
+            : [[gx, gy, gz + (fz < 0)], [gx + 1, gy, gz + (fz < 0)], [gx + 1, gy + 1, gz + (fz < 0)], [gx, gy + 1, gz + (fz < 0)]];
+    let ok = true;
+    g2d.beginPath();
+    for (let m = 0; m < 4; m++) {
+      const p = project(q[m][0], q[m][1], q[m][2]);
+      if (!p) { ok = false; break; }
+      m ? g2d.lineTo(p[0], p[1]) : g2d.moveTo(p[0], p[1]);
+    }
+    if (ok) {
+      g2d.closePath();
+      if (mineProg > 0) { g2d.fillStyle = 'rgba(0,0,0,' + (mineProg * .55).toFixed(2) + ')'; g2d.fill(); }   // crack darkening
+      g2d.lineWidth = 1.5 * view.ui; g2d.strokeStyle = 'rgba(0,0,0,.7)'; g2d.stroke();
+      g2d.lineWidth = .8 * view.ui; g2d.strokeStyle = '#fff'; g2d.stroke();
+    }
+  }
+  // the rest is drawn in overlay units: a frame 168 tall and VW wide
+  const ui = view.ui, VW = view.w / ui, VH = view.h / ui;
+  g2d.save(); g2d.scale(ui, ui);
+  if (mineProg > 0) {                         // mining progress
+    g2d.fillStyle = 'rgba(0,0,0,.55)'; g2d.fillRect(VW / 2 - 26, VH * .62, 52, 4);
+    g2d.fillStyle = '#8fe0a0'; g2d.fillRect(VW / 2 - 25, VH * .62 + 1, 50 * Math.min(1, mineProg), 2);
+  }
+  if (hintT > 0 && hint) {                    // tool / confirmation hint
+    g2d.font = '8px monospace';
+    const tw = Math.max(104, g2d.measureText(hint).width + 10);
+    g2d.fillStyle = 'rgba(0,0,0,.5)'; g2d.fillRect(VW / 2 - tw / 2, VH * .68, tw, 11);
+    g2d.fillStyle = '#ffd9a0'; g2d.textAlign = 'center'; g2d.fillText(hint, VW / 2, VH * .68 + 8); g2d.textAlign = 'left';
+  }
+  const held = heldItem() || (creative ? PAL[(palPage * 6 + selI) % PAL.length] : 0);
+  if (held && !dead) {                        // held item in the corner
+    const sw = swingT > 0 ? 1 - swingT / .18 : 1;                    // 0 at swing start, 1 at rest
+    const arc = swingT > 0 ? Math.sin(sw * 3.14) * 14 : 0;
+    const it = info(held);
+    g2d.fillStyle = it.c || '#888';
+    if (it.dmg) {                                                    // tools and swords: a diagonal blade
+      g2d.save(); g2d.translate(VW - 38 + arc * .6, VH - 6 + arc * .5); g2d.rotate(-.6 - arc * .055);
+      g2d.fillRect(-3, -30, 6, 32); g2d.fillStyle = '#5c4326'; g2d.fillRect(-5, -2, 10, 8); g2d.restore();
+    } else if (it.bow) {
+      g2d.save(); g2d.translate(VW - 34 + arc * .4, VH - 8); g2d.fillRect(-2, -26, 4, 28);
+      g2d.fillStyle = '#e8e0cc'; g2d.fillRect(-1, -22, 2, 18); g2d.restore();
+    } else {                                                         // a block in hand
+      g2d.save(); g2d.translate(VW - 34, VH - 4 + arc * .7); g2d.fillRect(-11, -22, 22, 22);
+      g2d.strokeStyle = 'rgba(0,0,0,.45)'; g2d.lineWidth = 1; g2d.strokeRect(-11, -22, 22, 22); g2d.restore();
+    }
+  }
+  if (weather) {                              // precipitation
+    if (weather === 1) { g2d.strokeStyle = 'rgba(190,215,255,.5)'; g2d.lineWidth = 1; g2d.beginPath(); }
+    else g2d.fillStyle = 'rgba(255,255,255,.9)';
+    for (const p of particles) {
+      if (weather === 1) { p.y += 420 * dt; p.x += 45 * dt; } else { p.y += 72 * dt; p.x += Math.sin(p.y * .05 + p.ph) * 22 * dt + 9 * dt; }
+      if (p.y > VH + 2) { p.y = -4; p.x = Math.random() * VW; }
+      if (p.x > VW + 2) p.x -= VW + 6;
+      if (weather === 1) { g2d.moveTo(p.x, p.y); g2d.lineTo(p.x - 5, p.y - 11); } else g2d.fillRect(p.x, p.y, 1.6, 1.6);
+    }
+    if (weather === 1) g2d.stroke();
+  }
+  g2d.restore();
+}
+
+// ---- HUD: hotbar, bag, crafting, health ----
+function slotHTML(it, i, hb, on) {
+  return '<div class="slot' + (it.id ? '' : ' e') + (hb ? ' hb' : '') + (on ? ' on' : '') + (i === dragI ? ' src' : '') +
+    '" data-i="' + i + '" title="' + nameOf(it.id) + '" style="background:' + colorOf(it.id) + '">' +
+    (hb ? '<span>' + (i + 1) + '</span>' : '') + (it.id ? '<i>' + (it.n < 0 ? '∞' : it.n > 1 ? it.n : '') + '</i>' : '') + '</div>';
+}
+function drawBar() {
+  let s = '';
+  for (let i = 0; i < 6; i++) s += slotHTML(creative ? { id: PAL[(palPage * 6 + i) % PAL.length], n: -1 } : INV[i], i, true, i === selI);
+  barEl.innerHTML = s;
+}
+function drawInv() {
+  let s = '';
+  for (let i = 0; i < 24; i++) s += slotHTML(INV[i], i, i < 6, i === selI);
+  invGrid.innerHTML = s;
+  RCP.forEach((rc, ri) => { craftBtns[ri].disabled = !rc[0].every(g => has(g[0], g[1])); });
+  invTitle.textContent = creative ? '背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動' : '背包 — 拖曳搬移方塊,第一排就是快捷欄';
+}
+function selectSlot(i) { selI = i; drawBar(); if (invOpen) drawInv(); }
+function setCreative(on) {                    // survival ↔ creative (C key, or 模式 in settings)
+  creative = !!on; drawBar(); if (invOpen) drawInv();
+  $('sCr').textContent = creative ? '創造' : '生存';
+}
+function drawHP() {
+  let s = '';
+  for (let i = 0; i < 10; i++) { const v = hp - i * 2; s += '<b class="' + (v >= 2 ? 'f' : v > 0 ? 'h' : '') + '"></b>'; }
+  hpEl.innerHTML = s;
+}
+const craftBtns = RCP.map(rc => {
+  const b = document.createElement('button');
+  b.textContent = rc[2];
+  b.onclick = () => {
+    if (!rc[0].every(g => has(g[0], g[1]))) return;
+    rc[0].forEach(g => take(g[0], g[1]));
+    give(rc[1][0], rc[1][1]);
+    drawInv();
+  };
+  $('craft').appendChild(b);
+  return b;
+});
+function toggleInv(open) {
+  invOpen = !!open; invEl.classList.toggle('on', invOpen);
+  dragI = -1; ghostEl.style.display = 'none';
+  barEl.style.display = invOpen ? 'none' : 'flex';                  // the grid's first row already is the hotbar
+  if (invOpen) { resetTouch(); unlockPointer(); drawInv(); }
+  else if (!paused && !dead && !isTouch()) lockPointer();
+  drawBar();
+}
+function respawn() {
+  hp = HP_MAX; dead = false; hurtT = 0; regenT = 0;
+  P.x = 16; P.y = 30; P.z = 16; P.g = 0;
+  mobs.length = 0; arrows.length = 0;
+  deadEl.classList.remove('on'); drawHP();
+}
+function resetWorld() {
+  generateWorld(); relight(); newKit(); drawBar(); if (invOpen) drawInv(); respawn(); saveGame();
+}
+
+// ---- menu & settings ----
+function applySettings() {                    // settings → live values and labels
+  $('vMs').textContent = settings.ms; $('vTs').textContent = settings.ts;
+  $('sMs').value = settings.ms; $('sTs').value = settings.ts;
+  $('sIy').textContent = settings.invY < 0 ? '開' : '關';
+  $('sSh').textContent = settings.shadows ? '開' : '關';
+  $('sQ').textContent = settings.quality < 0 ? '自動(' + QUALITY[autoLevel].n + ')' : QUALITY[settings.quality].n;
+  $('sFp').textContent = settings.fps ? '開' : '關';
+  $('sHp').textContent = settings.help ? '開' : '關';
+  hudEl.classList.toggle('off', !settings.help);
+  fpsEl.classList.toggle('on', !!settings.fps);
+  viewDirty = true; needRender = true;
+}
+function saveSettings() {
+  try {
+    localStorage.voxelS = JSON.stringify({ m: settings.ms, t: settings.ts, i: settings.invY, s: settings.shadows,
+                                           q: settings.quality, f: settings.fps, h: settings.help });
+  } catch (e) {}
+}
+function loadSettings() {
+  try {
+    const j = JSON.parse(localStorage.voxelS || 'null');
+    if (!j) return;
+    settings.ms = j.m || 6; settings.ts = j.t || 6; settings.invY = j.i < 0 ? -1 : 1; settings.shadows = j.s ? 1 : 0;
+    if (Number.isInteger(j.q) && j.q >= -1 && j.q < QUALITY.length) settings.quality = j.q;
+    settings.fps = j.f ? 1 : 0; settings.help = j.h === 0 ? 0 : 1;
+  } catch (e) {}
+}
+function setMenu(open) {                      // the menu pauses the world
+  paused = !!open;
+  menuEl.style.display = open ? 'flex' : 'none';
+  if (open) {
+    releaseInput(); unlockPointer();
+    if (invOpen) toggleInv(false);
+    if (started) saveGame();
+    needRender = true;
+  } else {
+    showSettings(false);
+    if (!started) { started = true; $('bstart').textContent = '繼續遊戲'; }
+  }
+}
+function showSettings(on) { setpEl.classList.toggle('on', !!on); menuEl.classList.toggle('cfg', !!on); }
+function closeMenuAndPlay() {
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // Space must not re-click a button
+  setMenu(false);
+  if (!isTouch()) lockPointer();
+}
+let resetArm = 0, resetArmTimer = 0;          // "press twice" guards for the destructive reset
+function confirmReset() {
+  if (resetArm > 0) { resetArm = 0; resetWorld(); showHint('世界已重置', 1.5); }
+  else { resetArm = 3; showHint('再按一次 X 重置整個世界', 3); }
+}
+
+$('bstart').onclick = closeMenuAndPlay;
+$('bset').onclick = () => showSettings(true);
+$('bback').onclick = () => { showSettings(false); saveSettings(); };
+$('bres').onclick = e => {
+  const b = e.currentTarget;
+  clearTimeout(resetArmTimer);
+  if (b.dataset.arm !== '1') {
+    b.dataset.arm = '1'; b.textContent = '確定重置?再按一次';
+    resetArmTimer = setTimeout(() => { b.dataset.arm = ''; b.textContent = '重新產生世界'; }, 3000);
+    return;
+  }
+  b.dataset.arm = ''; b.textContent = '重新產生世界';
+  resetWorld(); closeMenuAndPlay();
+};
+$('sMs').oninput = () => { settings.ms = +$('sMs').value; applySettings(); };
+$('sTs').oninput = () => { settings.ts = +$('sTs').value; applySettings(); };
+$('sIy').onclick = () => { settings.invY = -settings.invY; applySettings(); saveSettings(); };
+$('sSh').onclick = () => { settings.shadows ^= 1; applySettings(); saveSettings(); };
+$('sQ').onclick = () => { settings.quality = settings.quality + 1 < QUALITY.length ? settings.quality + 1 : -1; applySettings(); saveSettings(); };
+$('sFp').onclick = () => { settings.fps ^= 1; applySettings(); saveSettings(); };
+$('sHp').onclick = () => { settings.help ^= 1; applySettings(); saveSettings(); };
+$('sCr').onclick = () => setCreative(!creative);
+$('bm').onclick = () => setMenu(true);
+$('bm').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); setMenu(true); }, { passive: false });
+$('rb').onclick = () => { respawn(); if (!isTouch()) lockPointer(); };
+
+// ---- input -----------------------------------------------------------------------
+// keys go by physical position (e.code), so WASD works with any layout or IME
+const KEYMAP = { Space: ' ', Tab: 'tab', Escape: 'escape', ArrowUp: 'w', ArrowDown: 's', ArrowLeft: 'a', ArrowRight: 'd' };
+function keyOf(e) {
+  const c = e.code || '';
+  if (c.startsWith('Key')) return c.slice(3).toLowerCase();
+  if (c.startsWith('Digit')) return c.slice(5);
+  if (/^Numpad\d$/.test(c)) return c.slice(6);
+  if (KEYMAP[c]) return KEYMAP[c];
+  const k = (e.key || '').toLowerCase();
+  return k === 'esc' ? 'escape' : k;
+}
+let autoMenuAt = -1e9;
+addEventListener('keydown', e => {
+  const k = keyOf(e);
+  if (k === 'escape') {                       // Esc: bag first, then the menu
+    if (performance.now() - autoMenuAt < 400) return;               // losing the pointer lock already opened it
+    if (invOpen) toggleInv(false); else setMenu(!paused);
+    if (!paused) showSettings(false);
+    return;
+  }
+  if (paused) return;                         // menu open: no gameplay keys
+  if (k === ' ' || k === 'tab' || (e.code || '').startsWith('Arrow')) e.preventDefault();
+  K[k] = 1;
+  if (e.repeat) return;                       // holding a key must not flip toggles over and over
+  tapped[k] = 1;
+  if (k >= '1' && k <= '6' && k.length === 1) selectSlot(+k - 1);
+  else if (k === 'i' || k === 'tab') toggleInv(!invOpen);
+  else if (k === 'c') setCreative(!creative);
+  else if (k === 'g') { settings.shadows ^= 1; applySettings(); saveSettings(); }
+  else if (k === 'h') { settings.help ^= 1; applySettings(); saveSettings(); }
+  else if (k === 'r') weather = (weather + 1) % 3;
+  else if (k === 'x') confirmReset();
+});
+addEventListener('keyup', e => { K[keyOf(e)] = 0; });
+function releaseInput() {                     // drop everything held (blur, tab switch, menu)
+  for (const k in K) K[k] = 0;
+  for (const k in tapped) tapped[k] = 0;
+  holdMine = false; dragLook = false; mineProg = 0; mineIdx = -1;
+  resetTouch();
+}
+addEventListener('blur', releaseInput);
+document.addEventListener('visibilitychange', () => { if (document.hidden) { releaseInput(); if (started) saveGame(); } });
+addEventListener('pagehide', () => { if (started) saveGame(); });
+
+// mouse + pointer lock
+let dragLook = false, wantUnlock = false, wasLocked = false;
+const isLocked = () => document.pointerLockElement === canvas;
+function lockPointer() {
+  if (!canvas.requestPointerLock || isLocked()) return;
+  try { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+}
+function unlockPointer() {
+  if (document.pointerLockElement && document.exitPointerLock) { wantUnlock = true; document.exitPointerLock(); }
+}
+document.addEventListener('pointerlockchange', () => {
+  const locked = isLocked();
+  if (locked && !wasLocked) skipMoves = 1;
+  if (!locked && wasLocked && !wantUnlock && !paused && !invOpen && !dead) { setMenu(true); autoMenuAt = performance.now(); }  // Esc / alt-tab
+  wasLocked = locked; wantUnlock = false;
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('mousedown', e => {
+  if (paused) return;
+  if (isLocked()) { if (e.button === 2) use2(); else use1(); }
+  else { dragLook = true; lockPointer(); }    // no pointer lock (e.g. sandboxed): drag to look
+});
+addEventListener('mouseup', () => { dragLook = false; use1Up(); });
+let skipMoves = 0;                            // Chrome can report one huge movement right after locking
+addEventListener('mousemove', e => {
+  if (paused || !(isLocked() || dragLook)) return;
+  if (skipMoves > 0) { skipMoves--; return; }
+  if (Math.abs(e.movementX) > 400 || Math.abs(e.movementY) > 400) return;   // spurious jump, not a hand
+  const s = .0005 * settings.ms;
+  P.a += e.movementX * s;
+  P.b = Math.max(-1.5, Math.min(1.5, P.b - e.movementY * s * settings.invY));
+});
+addEventListener('wheel', e => {
+  if (paused || dead || !e.deltaY) return;
+  let i = selI + (e.deltaY > 0 ? 1 : -1);
+  const pages = Math.ceil(PAL.length / 6);
+  if (creative && PAL.length > 6) {           // wrap onto the next palette page
+    if (i > 5) { palPage = (palPage + 1) % pages; i = 0; }
+    else if (i < 0) { palPage = (palPage + pages - 1) % pages; i = 5; }
+  } else i = (i + 6) % 6;
+  selectSlot(i);
+}, { passive: true });
+
+// touch: left half = floating stick (springs up under the thumb), right half = drag to look
+const RAD = 52;
+const stick = { id: -1, x0: 0, y0: 0, u: 0, v: 0 }, look = { id: -1, x0: 0, y0: 0, dx: 0, dy: 0 };
+let jumpTap = false;
+const isTouch = () => document.body.classList.contains('touch');
+addEventListener('touchstart', () => document.body.classList.add('touch'), { passive: true, capture: true });
+function resetTouch() { stick.id = look.id = -1; stick.u = stick.v = look.dx = look.dy = 0; stickEl.style.display = 'none'; }
+const wrapEl = $('wrap');
+wrapEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (t.clientX < innerWidth / 2) {
+      if (stick.id < 0) {
+        stick.id = t.identifier; stick.x0 = t.clientX; stick.y0 = t.clientY;
+        stickEl.style.display = 'block'; stickEl.style.left = (stick.x0 - RAD) + 'px'; stickEl.style.top = (stick.y0 - RAD) + 'px';
+        knobEl.style.left = knobEl.style.top = (RAD - 18) + 'px';
+      }
+    } else if (look.id < 0) { look.id = t.identifier; look.x0 = t.clientX; look.y0 = t.clientY; }
+  }
+}, { passive: false });
+wrapEl.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (t.identifier === stick.id) {
+      let ux = t.clientX - stick.x0, uy = t.clientY - stick.y0, ul = Math.sqrt(ux * ux + uy * uy);
+      if (ul > RAD) { ux *= RAD / ul; uy *= RAD / ul; ul = RAD; }  // clamp to the ring
+      knobEl.style.left = (RAD - 18 + ux) + 'px'; knobEl.style.top = (RAD - 18 + uy) + 'px';
+      stick.u = ul < 9 ? 0 : ux / RAD; stick.v = ul < 9 ? 0 : -uy / RAD;   // small dead zone; up = forward
+    } else if (t.identifier === look.id) {
+      look.dx += t.clientX - look.x0; look.dy += t.clientY - look.y0;       // accumulate this frame's drag
+      look.x0 = t.clientX; look.y0 = t.clientY;
+    }
+  }
+}, { passive: false });
+const touchEnd = e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (t.identifier === stick.id) { stick.id = -1; stick.u = stick.v = 0; stickEl.style.display = 'none'; }
+    if (t.identifier === look.id) look.id = -1;
+  }
+};
+wrapEl.addEventListener('touchend', touchEnd, { passive: false });
+wrapEl.addEventListener('touchcancel', touchEnd, { passive: false });
+function touchButton(id, down, up) {           // on-screen buttons: touch, or mouse (released by the window mouseup)
+  const el = $(id);
+  el.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); down(); }, { passive: false });
+  if (up) { el.addEventListener('touchend', e => { e.preventDefault(); up(); }, { passive: false });
+            el.addEventListener('touchcancel', e => { e.preventDefault(); up(); }, { passive: false }); }
+  el.addEventListener('mousedown', e => { if (e.button === 0) { e.preventDefault(); down(); } });
+}
+touchButton('bd', use1, use1Up);
+touchButton('bp', use2);
+touchButton('bj', () => { jumpTap = true; });
+touchButton('bi', () => toggleInv(!invOpen));
+
+// hotbar picking, and drag & drop inside the bag (pointer events = mouse + touch)
+const slotFrom = e => { const n = e.target.closest && e.target.closest('.slot'); return n ? +n.dataset.i : -1; };
+barEl.onclick = e => { const i = slotFrom(e); if (i >= 0) selectSlot(i); };
+barEl.addEventListener('touchstart', e => { const i = slotFrom(e); if (i >= 0) { e.preventDefault(); e.stopPropagation(); selectSlot(i); } }, { passive: false });
+invEl.onclick = e => { if (e.target === invEl) toggleInv(false); };  // tap the dim area to close
+const moveGhost = e => { ghostEl.style.left = (e.clientX - 23) + 'px'; ghostEl.style.top = (e.clientY - 23) + 'px'; };
+invGrid.onpointerdown = e => {
+  const i = slotFrom(e);
+  if (i < 0 || !INV[i].id) return;
+  e.preventDefault(); dragI = i;
+  ghostEl.style.background = colorOf(INV[i].id); ghostEl.style.display = 'block'; moveGhost(e);
+  if (invGrid.setPointerCapture) invGrid.setPointerCapture(e.pointerId);
+  drawInv();
+};
+invGrid.onpointermove = e => { if (dragI >= 0) moveGhost(e); };
+invGrid.onpointercancel = () => { dragI = -1; ghostEl.style.display = 'none'; drawInv(); };
+invGrid.onpointerup = e => {
+  if (dragI < 0) return;
+  ghostEl.style.display = 'none';
+  let n = document.elementFromPoint(e.clientX, e.clientY);
+  n = n && n.closest && n.closest('.slot');
+  const j = n ? +n.dataset.i : -1;
+  if (j >= 0 && j !== dragI) {
+    const a = INV[dragI], b = INV[j];
+    if (a.id && a.id === b.id && b.n < maxStack(a.id)) {            // same item: merge stacks
+      const k = Math.min(maxStack(a.id) - b.n, a.n); b.n += k; a.n -= k;
+      if (!a.n) INV[dragI] = { id: 0, n: 0 };
+    } else { INV[dragI] = b; INV[j] = a; }                           // otherwise swap
+  }
+  dragI = -1; drawInv(); drawBar();
+};
+addEventListener('resize', () => { viewDirty = true; needRender = true; });
+
+// ---- main loop ---------------------------------------------------------------------
+let lastT = -1, saveT = 8, lastHP = -1, jumpCD = 0, placeCD = 0, prevF = false;
+let workMs = 0, autoT = 0, autoLocked = false, fpsN = 0, fpsT0 = 0;
+let lastClock = '', lastDmg = '', lastShake = '';
+const pad2 = n => (n < 10 ? '0' : '') + n;
+
+function autoQuality(dt) {                    // auto 畫質: step down when frames are heavy, up when there is room
+  if (settings.quality >= 0 || (autoT += dt) < 2) return;
+  autoT = 0;
+  if (workMs > 12 && autoLevel > 0) { autoLevel--; autoLocked = true; }
+  else if (workMs < 5 && autoLevel < QUALITY.length - 1 && !autoLocked) autoLevel++;
+  else return;
+  workMs = 0; viewDirty = true; applySettings();
+}
+
+function frame(tm) {
+  requestAnimationFrame(frame);               // schedule first: one bad frame won't freeze the game
+  const t0 = performance.now();
+  let dt = lastT < 0 ? 0 : (tm - lastT) / 1000;
+  lastT = tm;
+  dt = dt > 0 ? Math.min(dt, .1) : 0;
+  if (paused) dt = 0;                         // menu open: nothing advances
+  fpsN++;
+  if (t0 - fpsT0 >= 500) {
+    if (settings.fps) fpsEl.textContent = Math.round(fpsN * 1000 / (t0 - fpsT0)) + ' fps · ' + workMs.toFixed(1) +
+      ' ms · ' + QUALITY[qualityLevel()].n + ' ' + view.w + '×' + view.h;
+    fpsN = 0; fpsT0 = t0;
+  }
+  if (viewDirty) { viewDirty = false; fitView(); }
+  if (paused && !needRender) return;          // …and nothing needs redrawing either
+  needRender = false;
+
+  // ---- input ----
+  let mu = stick.u, mv = stick.v, jump = K[' '] || tapped[' '] || jumpTap;
+  jumpTap = false;
+  if (K.w) mv = 1; if (K.s) mv = -1; if (K.a) mu = -1; if (K.d) mu = 1;
+  const handsOff = invOpen || dead || paused; // bag, death or menu = hands off the world
+  if (handsOff) { mu = mv = 0; jump = false; look.dx = look.dy = 0; }
+  mu = Math.max(-1, Math.min(1, mu)); mv = Math.max(-1, Math.min(1, mv));
+  const ml = Math.sqrt(mu * mu + mv * mv);
+  if (ml > 1) { mu /= ml; mv /= ml; }         // diagonals are no faster than straight lines
+  jumpCD = Math.max(0, jumpCD - dt); placeCD = Math.max(0, placeCD - dt);
+  creativeCD -= dt; resetArm = Math.max(0, resetArm - dt);
+  if (handsOff) tapped.e = 0;
+  if ((tapped.f || K.f && !prevF) && !handsOff) melee();   // F pressed = swing at mobs
+  prevF = !!K.f;
+  if ((K.e || tapped.e) && placeCD === 0 && !invOpen) { use2(); placeCD = .15; tapped.e = 0; }  // a tap waits out the cooldown
+  tapped.f = tapped[' '] = 0;
+  if (jump && P.g === 0 && jumpCD === 0) { P.g = 8; jumpCD = .35; }
+  const lks = .0007 * settings.ts;
+  P.a += look.dx * lks;                       // drag right = turn right
+  P.b = Math.max(-1.5, Math.min(1.5, P.b - look.dy * lks * settings.invY));   // drag down = look down
+  look.dx = look.dy = 0;
+
+  updateSky(dt, tm);
+
+  // ---- physics + entities in ≤20 ms sub-steps, so arrows and falls stay accurate on slow frames ----
+  const steps = Math.max(1, Math.ceil(dt / .02)), h = dt / steps;
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv); tickEntities(h); }
+  if (P.y < -10) { P.x = 16; P.y = 30; P.z = 16; P.g = 0; hurtPlayer(4); }
+  if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
+  hintT = Math.max(0, hintT - dt);
+
+  // ---- status ----
+  if (dead && !deadEl.classList.contains('on')) { deadEl.classList.add('on'); if (invOpen) toggleInv(false); unlockPointer(); }
+  const dmg = (dead ? .55 : hurtT > 0 ? hurtT / .35 * .6 : hp < 7 ? .16 + .05 * Math.sin(tm * .006) : 0).toFixed(2);
+  if (dmg !== lastDmg) { dmgEl.style.opacity = dmg; lastDmg = dmg; }
+  if (hp !== lastHP) { lastHP = hp; drawHP(); }
+  const shake = shakeT > 0 ? 'translate(' + ((Math.random() - .5) * shakeT * 9).toFixed(1) + 'px,' + ((Math.random() - .5) * shakeT * 9).toFixed(1) + 'px)' : '';
+  if (shake !== lastShake) { canvas.style.transform = shake; lastShake = shake; }
+
+  // ---- draw ----
+  cam.sx = Math.sin(P.a); cam.cx = Math.cos(P.a); cam.sp = Math.sin(P.b); cam.cp = Math.cos(P.b);
+  renderWorld();
+  drawOverlays(dt);
+
+  // ---- autosave (silently skipped where storage is blocked) + clock ----
+  if (dt > 0 && (saveT -= dt) <= 0) { saveT = 8; saveGame(); }
+  const hh = tod * 24 | 0, mm = (tod * 24 - hh) * 60 | 0;
+  const clock = (sky.sunEl > .12 ? '☀' : sky.sunEl < -.12 ? '🌙' : '🌆') + (weather === 1 ? '🌧' : weather === 2 ? '❄' : '') +
+                ' ' + pad2(hh) + ':' + pad2(mm) + (creative ? ' ∞' : '');
+  if (clock !== lastClock) { clockEl.textContent = clock; lastClock = clock; }
+
+  if (dt > 0) {                               // frame cost, for auto quality and the FPS readout
+    const work = performance.now() - t0;
+    workMs = workMs ? workMs * .95 + work * .05 : work;
+    autoQuality(dt);
+  }
+}
+
+// ---- boot ----
+loadSettings();
+newKit();
+if (!loadGame()) generateWorld();
+relight();
+applySettings();
+drawBar(); drawHP();
+setMenu(true);
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
