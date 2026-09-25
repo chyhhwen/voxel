@@ -85,7 +85,7 @@
   #buffs span{background:rgba(0,0,0,.38);border-radius:9px;padding:1px 7px}
   #toasts{position:fixed;bottom:calc(98px + var(--sb));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;
           align-items:center;gap:5px;z-index:6;pointer-events:none;width:max-content;max-width:72vw}
-  .toast{background:rgba(0,0,0,.62);color:#fff;font:12px/1.4 monospace;padding:4px 12px;border-radius:12px;text-align:center;
+  .toast{background:rgba(0,0,0,.62);color:#fff;font:12px/1.4 monospace;padding:4px 12px;border-radius:12px;text-align:center;white-space:pre-line;
          transition:opacity .5s,transform .5s;animation:tin .25s ease-out}
   .toast.big{font-size:15px;padding:6px 16px;background:rgba(52,38,6,.82);border:1px solid rgba(255,215,102,.75);color:#ffe9a8}
   .toast.out{opacity:0;transform:translateY(-8px)}
@@ -154,11 +154,33 @@
   .sz.on{background:#4c7f3c;color:#fff}
   .mapbox{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:6px}
   #mapc{width:min(384px,100%);aspect-ratio:1;image-rendering:pixelated;border:1px solid rgba(255,255,255,.2);border-radius:4px;
-        cursor:crosshair;flex:none;touch-action:manipulation}
+        cursor:grab;flex:none;touch-action:none}
+  .mapctl{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .mapctl button{font:12px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
+        border-radius:5px;padding:3px 10px;cursor:pointer}
+  #mapzoom{opacity:.6;font-size:11px}
   .mapside{flex:1;min-width:200px}
   #mapinfo{min-height:64px}
   .legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;opacity:.75;margin-top:8px}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+  #pg-pets .petbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  #petlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
+  .pet{display:flex;gap:8px;padding:7px 8px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+  .pet .dx{flex:1;min-width:0;line-height:1.5}
+  .pet .pn{cursor:text;border-bottom:1px dashed rgba(255,255,255,.35)}
+  .pet .hearts{color:#ff7b95;letter-spacing:1px}
+  .pet .ab{color:#9cc8ff;font-size:11px}
+  .pet .btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+  .pet button,#petcall{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
+        border-radius:5px;padding:3px 8px;cursor:pointer}
+  .petname{font:12px monospace;width:7em;background:#0c0e12;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:4px;padding:1px 4px}
+  #petegg{margin-top:10px}
+  #petdex{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:5px}
+  .dex{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;background:rgba(255,255,255,.04);font-size:11px;line-height:1.45}
+  .dex.t{background:rgba(80,140,90,.16)}
+  .dex .q{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.35;
+        border:1px dashed rgba(255,255,255,.3);border-radius:6px;box-sizing:border-box}
+  .dex .ok{color:#8fe0a0}
   @media (max-width:600px){.cols{grid-template-columns:1fr}}
   @media (max-width:560px){#ptabs .tab span{display:none} #ptabs .tab{padding:4px 9px;font-size:16px}}
   @media (max-height:480px){                  /* landscape phones: the panel takes the whole screen */
@@ -222,7 +244,8 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
 選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明)<br>
 </span>夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
 種菜:鋤頭翻土 → 右鍵播種 → 保持濕潤(水 4 格內、灑水器、澆水壺、下雨)→ 成熟右鍵收成<br>
-背包上方的分頁:市集、料理、雜交培育圖、農場平面圖<span class="kb"> · M 農場圖</span> · 晚上對床右鍵睡到天亮<br>
+背包上方的分頁:市集、料理、雜交培育圖、農場平面圖、寵物<span class="kb"> · M 農場圖 · P 寵物</span> · 晚上對床右鍵睡到天亮<br>
+寵物:拿野生動物最愛的食物對牠右鍵,多餵幾次就會跟你走 · 空手右鍵摸摸 · 寵物蛋放在地上會孵化<br>
 按住挖掘持續挖 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<span class="kb"><br>
 按住 T 快轉時間 · G 陰影 · R 天氣 · X(按兩次)重置世界 · H 隱藏說明 · Esc 或 ⚙ 開選單/設定</span></div>
 <div id="cross"></div>
@@ -248,6 +271,7 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
     <button class="tab" data-p="cook">🍳<span> 料理</span></button>
     <button class="tab" data-p="tree">🧬<span> 培育圖</span></button>
     <button class="tab" data-p="map">🗺<span> 農場圖</span></button>
+    <button class="tab" data-p="pets">🐾<span> 寵物</span></button>
     <span id="pcoin"></span>
     <button id="pclose" title="關閉">✕</button>
   </div>
@@ -260,7 +284,7 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
     </div>
     <div class="pg" id="pg-shop"><div class="cols"><div id="sell"></div><div id="buy"></div></div></div>
     <div class="pg" id="pg-cook">
-      <p class="dim">材料夠了就能煮。拿著料理按右鍵吃掉會回血並得到效果,也可以拿去市集賣。</p>
+      <p class="dim">材料夠了就能煮。拿著料理按右鍵吃掉會回血並得到效果,也可以拿去市集賣。雞蛋、牛奶、蜂蜜、松露要靠寵物。</p>
       <div id="cooklist"></div>
     </div>
     <div class="pg" id="pg-tree">
@@ -273,13 +297,23 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
       <div class="mapbox">
         <canvas id="mapc" width="384" height="384"></canvas>
         <div class="mapside">
+          <div class="mapctl"><button id="mapout" title="縮小">−</button><button id="mapin" title="放大">＋</button>
+            <button id="mapme">⌖ 回到我身邊</button><span id="mapzoom"></span></div>
           <div id="mapinfo"></div>
           <div class="legend"><span><i style="background:#7a5636"></i>乾耕地</span><span><i style="background:#4a3220"></i>濕耕地</span>
             <span><i style="background:#3a78d8"></i>水</span><span><i style="background:rgba(120,190,255,.5)"></i>灑水範圍</span>
             <span><i style="border:1px solid #c8ecff"></i>溫室</span><span><i style="background:#fff;border-radius:50%"></i>成熟作物</span>
-            <span><i style="background:#ff5a3c;border-radius:50%"></i>怪物</span></div>
+            <span><i style="background:#ff5a3c;border-radius:50%"></i>怪物</span>
+            <span><i style="background:#c49660;border-radius:50%;box-shadow:0 0 0 1px #fff"></i>寵物</span></div>
         </div>
       </div>
+    </div>
+    <div class="pg" id="pg-pets">
+      <div class="petbar"><b id="petsum"></b><button id="petcall">📣 全部叫過來</button></div>
+      <div id="petlist"></div>
+      <div id="petegg"></div>
+      <h3 style="margin-top:12px">圖鑑</h3>
+      <div id="petdex"></div>
     </div>
   </div>
 </div></div>
@@ -293,7 +327,7 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
 <div id="mnu">
   <div id="home">
     <h1>VOXEL</h1>
-    <p class="tag">方塊世界 · 種田 · 季節 · 日夜 · 怪物</p>
+    <p class="tag">方塊世界 · 種田 · 寵物 · 季節 · 日夜 · 怪物</p>
     <div style="display:flex;flex-direction:column;gap:9px">
       <button id="bstart">開始遊戲</button>
       <button id="bset">設定</button>
@@ -322,11 +356,11 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
 <script>
 'use strict';
 // =============================================================================
-//  VOXEL — a raycast voxel sandbox and farming game in one file, no libraries.
-//  Every pixel casts one DDA ray into a 32³ block world: on the graphics card
+//  VOXEL — a raycast voxel sandbox, farming and pet game in one file, no libraries.
+//  Every pixel casts one DDA ray into a 128×64×128 block world: on the graphics card
 //  (WebGL2) when it can, else in JavaScript into an ImageData buffer. Sections, in order:
-//    DOM · world · torch light · items & crops · textures & icons · save/load ·
-//    player · mining & farm tools · entities · farming · sky · CPU renderer ·
+//    DOM · world · terrain · torch light · items & crops · textures & icons · save/load ·
+//    player · mining & farm tools · entities · farming · pets · sky · CPU renderer ·
 //    GPU renderer · overlays · HUD & panel · farm UI · menu & settings ·
 //    input · main loop · boot
 // =============================================================================
@@ -341,169 +375,261 @@ const hudEl = $('hud'), clockEl = $('clock'), fpsEl = $('fps'), barEl = $('bar')
       stickEl = $('stk'), knobEl = $('knb');
 
 // ---- world -------------------------------------------------------------------
-// WS³ cells, index = (y*WS + z)*WS + x. The save format and the bit shifts used
-// below (<<5, <<10, &31) both assume WS = 32.
-const WS = 32, WM = WS - 1, VOL = WS * WS * WS;
+// SX × SY × SZ cells (128 × 64 × 128), index = y << YSH | z << ZSH | x. The sizes are powers of two,
+// so a cell's x, y and z come back out of an index with a shift and a mask.
+const SX = 128, SY = 64, SZ = 128, XM = SX - 1, YM = SY - 1, ZM = SZ - 1, ZSH = 7, YSH = 14;
+const LAYER = SX * SZ, VOL = LAYER * SY;      // cells in one horizontal layer, and in the world
+const SPX = SX >> 1, SPZ = SZ >> 1;           // the spawn column, in the middle
+const TILE = 16, TILES_X = SX / TILE, TILES_Z = SZ / TILE;   // 16×16-column tiles: GPU uploads and saves go tile by tile
+const LEG = { x: 48, y: 10, z: 48 };          // where a world saved by the old 32³ versions is set down
 const AIR = 0, SAND = 1, DIRT = 2, WOOD = 3, LEAF = 4, GLASS = 5, TORCH = 6,
       STONE = 7, COAL = 8, IRON = 9, DIAMOND = 10, GRASS = 11;
 const FARM = 12, FARM_W = 13, FARM_F = 14, FARM_FW = 15;       // farmland: dry · wet · fertilised dry · fertilised wet
 const WATER = 16, TALL = 17, SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21;
+const EGG = 22, EGG2 = 23, EGG3 = 24;                           // pet eggs: 寵物蛋 · 稀有寵物蛋 · 龍蛋 (they hatch where they are put)
+const isEgg = b => b >= EGG && b <= EGG3;
 const CROP0 = 128;                                              // crop cells: 128 + crop*4 + stage
 const isFarm = b => b >= FARM && b <= FARM_FW, isWetFarm = b => b === FARM_W || b === FARM_FW;
+const isFarmCell = b => (b >= FARM && b <= FARM_FW) || b >= CROP0 || (b >= EGG && b <= EGG3);   // ticked by tickFarm
 const cropOf = b => b - CROP0 >> 2, stageOf = b => b - CROP0 & 3, cropId = (c, st) => CROP0 + c * 4 + st;
 const glows = b => b >= CROP0 && (b - CROP0 & 3) === 3 && !!CROPS[b - CROP0 >> 2].glow;   // ripe 金南瓜 / 星光果 / 月光花
 const SOLID = new Uint8Array(256), PASS = new Uint8Array(256); // SOLID stops bodies · PASS lets torch light through
 for (let b = 1; b < 256; b++) SOLID[b] = b < CROP0 ? 1 : 0;
-for (const b of [TORCH, WATER, TALL, SPRINK, SPRINK2, BED]) SOLID[b] = 0;
+for (const b of [TORCH, WATER, TALL, SPRINK, SPRINK2, BED, EGG, EGG2, EGG3]) SOLID[b] = 0;
 for (let b = 0; b < 256; b++) PASS[b] = !SOLID[b] || b === GLASS ? 1 : 0;
 const world = new Uint8Array(VOL);            // block id per cell
 const torch = new Uint8Array(VOL);            // torch light 0..14 per cell
-const idx = (x, y, z) => (y * WS + z) * WS + x;
-const blockAt = (x, y, z) => (x | y | z) & ~WM ? AIR : world[idx(x, y, z)];
-const lightAt = (x, y, z) => (x | y | z) & ~WM ? 0 : torch[idx(x, y, z)];
+const idx = (x, y, z) => y << YSH | z << ZSH | x;
+const ixOf = i => i & XM, iyOf = i => i >> YSH, izOf = i => i >> ZSH & ZM;
+const outside = (x, y, z) => (x & ~XM | y & ~YM | z & ~ZM) !== 0;   // whole-cell coordinates past the world's edge
+const blockAt = (x, y, z) => outside(x, y, z) ? AIR : world[idx(x, y, z)];
+const lightAt = (x, y, z) => outside(x, y, z) ? 0 : torch[idx(x, y, z)];
 const solidAt = (x, y, z) => SOLID[blockAt(x | 0, y | 0, z | 0)] === 1;
-let worldVer = 0;                             // bumped on every edit: invalidates the shadow cache
+const topSolid = (x, z) => { let y = YM; while (y > 0 && !SOLID[world[idx(x, y, z)]]) y--; return y; };
+let worldVer = 0;                             // bumped on every edit
+let geomVer = 0;                              // bumped when a block is placed or removed (the CPU renderer's shadow cache)
 let worldDirty = false;                       // world differs from the last save
+function grassEdit() {                        // grass and weeds changed: the farm cell list (farmCells) is still right
+  if (farmListVer === worldVer) farmListVer = worldVer + 1;
+  worldVer++; worldDirty = true;
+}
 
 function setBlock(i, id) {
   const old = world[i];
-  world[i] = id; worldVer++; worldDirty = true;
+  world[i] = id; worldVer++; geomVer++; worldDirty = true;
   if (old === WATER || id === WATER || old === SPRINK || id === SPRINK || old === SPRINK2 || id === SPRINK2) waterVer++;
   grow[i] = 0;
-  relight();
+  if (PASS[old] !== PASS[id] || old === TORCH || id === TORCH || glows(old) || glows(id)) relightAround(i);
 }
 
 function tickGrass(dt) {                      // grass creeps onto open dirt, covered grass turns to dirt, weeds come and go
-  for (let n = Math.round(dt * 240); n-- > 0;) {
+  for (let n = Math.round(dt * 240 * VOL / 32768); n-- > 0;) {   // 240 checks a second per 32³ of world
     const i = Math.random() * VOL | 0, b = world[i];
-    if (b === TALL) { if (Math.random() < (season() === 3 ? .12 : .01)) { world[i] = AIR; worldVer++; worldDirty = true; } continue; }
+    if (b === TALL) { if (Math.random() < (season() === 3 ? .12 : .01)) { world[i] = AIR; grassEdit(); } continue; }
     if (b !== DIRT && b !== GRASS) continue;
-    const above = i >> 10 === WM ? AIR : world[i + 1024];
+    const top = i >= VOL - LAYER, above = top ? AIR : world[i + LAYER];
     const open = !SOLID[above] || above === GLASS || above === LEAF;
-    if (b === GRASS ? !open : open && grassNear(i)) { world[i] = b === GRASS ? DIRT : GRASS; worldVer++; worldDirty = true; }
-    else if (b === GRASS && above === AIR && i >> 10 < WM && season() !== 3 && Math.random() < .0015) { world[i + 1024] = TALL; worldVer++; worldDirty = true; }
+    if (b === GRASS ? !open : open && grassNear(i)) { world[i] = b === GRASS ? DIRT : GRASS; grassEdit(); }
+    else if (b === GRASS && above === AIR && !top && season() !== 3 && Math.random() < .0015) { world[i + LAYER] = TALL; grassEdit(); }
   }
 }
 function grassNear(i) {
-  const x = i & WM, z = i >> 5 & WM, y = i >> 10;
+  const x = ixOf(i), z = izOf(i), y = iyOf(i);
   for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++)
     if ((dx || dy || dz) && blockAt(x + dx, y + dy, z + dz) === GRASS) return true;
   return false;
 }
 
-function generateWorld() {
-  world.fill(AIR);
-  for (let i = WS * WS; i--;) {                                      // terrain, one column at a time
-    const X = i % WS, Z = i / WS | 0;
-    const h = 12 + 4 * Math.sin(X / 4) * Math.cos(Z / 4) | 0;        // 8..16
-    for (let y = h + 3; y--;) {
-      let id;
-      if (y === h + 2) id = GRASS;                                   // grass on top of 3 blocks of dirt
-      else if (y >= h) id = DIRT;
-      else if (y >= h - 4) id = SAND;                                // then sand
-      else {                                                         // stone with ores
-        const r = Math.random();
-        id = r < (y < 5 ? .014 : 0) ? DIAMOND                        // diamond: deep only
-           : r < (y < 8 ? .05 : .012) ? IRON                         // iron: mostly deep
-           : r < .09 ? COAL : STONE;                                 // coal: everywhere
-      }
-      world[idx(X, y, Z)] = id;
+// ---- world generation: rolling hills, lakes with sandy shores, forests, ores by depth ----
+const WATER_LVL = 21;                         // lakes fill up to this height
+function valueNoise(seed) {                   // smooth 2D noise in 0..1 over a unit grid
+  const h = (x, z) => { let n = Math.imul(x, 374761393) ^ Math.imul(z, 668265263) ^ seed; n = Math.imul(n ^ n >>> 13, 1274126177); return ((n ^ n >>> 16) >>> 0) / 4294967296; };
+  return (x, z) => {
+    const xi = Math.floor(x), zi = Math.floor(z);
+    let u = x - xi, v = z - zi;
+    u = u * u * (3 - 2 * u); v = v * v * (3 - 2 * v);
+    const a = h(xi, zi), b = h(xi + 1, zi), c = h(xi, zi + 1), d = h(xi + 1, zi + 1);
+    return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+  };
+}
+const fbm = (n, x, z, oct) => { let v = 0, a = 1, t = 0; for (let o = 0; o < oct; o++, a *= .5, x *= 2, z *= 2) { v += n(x, z) * a; t += a; } return v / t; };
+function oreAt(y) {                           // stone with ores: diamond only near the bottom, iron mostly deep, coal everywhere
+  const r = Math.random();
+  return r < (y < 5 ? .014 : 0) ? DIAMOND : r < (y < 12 ? .05 : .012) ? IRON : r < .09 ? COAL : STONE;
+}
+function generateWorld(old) {                 // old: a 32³ world from an earlier version, kept in the middle
+  world.fill(AIR); resetFarm();
+  const seed = Math.random() * 2147483647 | 0;
+  const nH = valueNoise(seed), nM = valueNoise(seed ^ 0x5bd1e995), nF = valueNoise(seed ^ 0x27d4eb2f);
+  const raw = new Float32Array(LAYER), H = new Int16Array(LAYER), dry = new Uint8Array(LAYER);
+  for (let z = 0; z < SZ; z++) for (let x = 0; x < SX; x++)       // height: rolling ground plus the odd big hill
+    raw[z * SX + x] = (fbm(nH, x / 34, z / 34, 4) - .5) * 34 + Math.max(0, fbm(nM, x / 52 + 9, z / 52 + 3, 3) - .5) * 64;
+  const shift = WATER_LVL - .5 - Float32Array.from(raw).sort()[LAYER * .16 | 0];   // about a sixth of the ground under water
+  const oldTop = (x, z) => { for (let y = 31; y > 0; y--) { const b = old[(y * 32 + z) * 32 + x]; if (SOLID[b] && b !== GLASS && b !== LEAF && b !== WOOD) return y; } return 0; };
+  for (let z = 0; z < SZ; z++) for (let x = 0; x < SX; x++) {
+    let h = raw[z * SX + x] + shift;
+    if (old) {                                // new land slopes into the old world's edge
+      const ex = Math.max(0, Math.min(31, x - LEG.x)), ez = Math.max(0, Math.min(31, z - LEG.z));
+      const d = Math.max(Math.abs(x - LEG.x - ex), Math.abs(z - LEG.z - ez));
+      if (d < 12) { const e = oldTop(ex, ez) + LEG.y, w = d / 12; h = Math.max(WATER_LVL + 1, e + (h - e) * w * w * (3 - 2 * w)); dry[z * SX + x] = 1; }
+    } else {                                  // the middle stays dry and gentle, so the spawn is on land
+      const d = Math.hypot(x - SPX, z - SPZ) / 26;
+      if (d < 1) { const w = (1 - d) * (1 - d); h += (Math.max(h, WATER_LVL + 3) - h) * w; h += (WATER_LVL + 4 - h) * w * .35; }
     }
+    H[z * SX + x] = Math.round(Math.max(6, Math.min(SY - 14, h)));
   }
-  for (let i = WS * WS; i--;) {                                      // trees, after all terrain so no column erases a canopy
-    const X = i % WS, Z = i / WS | 0;
-    if (X < 2 || X > WS - 3 || Z < 2 || Z > WS - 3) continue;        // canopies stay off the glass wall
-    if (Math.abs(X - 16) < 3 && Math.abs(Z - 16) < 3) continue;      // keep the spawn point clear
-    let g = WM;                                                      // g = first air cell above the ground
-    while (g > 0 && world[idx(X, g - 1, Z)] === AIR) g--;
-    if (g >= 18 || world[idx(X, g - 1, Z)] !== GRASS || Math.random() >= .05) continue;
-    const top = g + 4 + (Math.random() * 2 | 0);                     // trunk is 4–5 tall
-    for (let y = g; y < top; y++) world[idx(X, y, Z)] = WOOD;
+  for (let z = 0; z < SZ; z++) for (let x = 0; x < SX; x++) {          // columns: grass (sand by the water), dirt, sand, stone
+    const h = H[z * SX + x], shore = h <= WATER_LVL + 1;
+    for (let y = 0; y <= h; y++) {
+      const d = h - y;
+      world[idx(x, y, z)] = d === 0 ? (shore ? SAND : GRASS) : d < 3 ? (shore ? SAND : DIRT) : d < 7 ? SAND : oreAt(y);
+    }
+    if (!dry[z * SX + x]) for (let y = h + 1; y <= WATER_LVL; y++) world[idx(x, y, z)] = WATER;
+  }
+  const inOld = (x, z, m) => !!old && x >= LEG.x - m && x < LEG.x + 32 + m && z >= LEG.z - m && z < LEG.z + 32 + m;
+  for (let z = 2; z < SZ - 2; z++) for (let x = 2; x < SX - 2; x++) {  // trees: dense in forests, sparse on the plains
+    if ((Math.abs(x - SPX) < 3 && Math.abs(z - SPZ) < 3) || inOld(x, z, 2)) continue;
+    const h = H[z * SX + x];
+    if (world[idx(x, h, z)] !== GRASS || world[idx(x, h + 1, z)] !== AIR) continue;
+    if (Math.random() >= .012 + .09 * Math.max(0, Math.min(1, (fbm(nF, x / 30, z / 30, 2) - .47) * 4))) continue;
+    const top = h + 5 + (Math.random() * 2 | 0);                     // trunk is 4–5 tall, on dirt
+    world[idx(x, h, z)] = DIRT;
+    for (let y = h + 1; y < top; y++) world[idx(x, y, z)] = WOOD;
     for (let k = 0; k < 27; k++) {                                   // 3×3×3 canopy around the trunk top
-      const j = idx(X - 1 + k % 3, top - 2 + (k / 9 | 0), Z - 1 + (k / 3 | 0) % 3);
+      const j = idx(x - 1 + k % 3, top - 2 + (k / 9 | 0), z - 1 + (k / 3 | 0) % 3);
       if (world[j] === AIR && (k === 22 || Math.random() < .85)) world[j] = LEAF;   // k 22 = crown centre
     }
   }
-  resetFarm();
-  // a clearing for a pond and a starter garden: the spot near spawn needing the least levelling and tree felling
-  const isTree = b => b === WOOD || b === LEAF;
-  const groundY = (x, z) => { let y = WM; while (y > 0 && (world[idx(x, y, z)] === AIR || isTree(world[idx(x, y, z)]))) y--; return y; };
-  let pond = null, best = 1e9;
-  for (let pz = 6; pz <= 25; pz++) for (let px = 9; px <= 22; px++) {
-    const d = (px - 16) ** 2 + (pz - 16) ** 2;
-    if (d < 36) continue;                                            // not on top of the spawn point
-    let sum = 0, n = 0, trees = 0;
-    for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {
-      const x = px + dx, z = pz + dz;
-      if (Math.abs(dx) <= 7 && Math.abs(dz) <= 3) { sum += groundY(x, z); n++; }
-      if (world[idx(x, groundY(x, z) + 1, z)] === WOOD) trees++;
-    }
-    const y0 = Math.round(sum / n);
-    let cost = d * .3 + trees * 8;
-    for (let dz = -3; dz <= 3; dz++) for (let dx = -7; dx <= 7; dx++) cost += Math.abs(groundY(px + dx, pz + dz) - y0) * 2;
-    if (cost < best) { best = cost; pond = [px, y0, pz]; }
-  }
-  if (pond) {
-    const [px, y0, pz] = pond;
-    for (let dz = -5; dz <= 5; dz++) for (let dx = -9; dx <= 9; dx++) {  // fell whole trees standing in or next to it
-      const x = px + dx, z = pz + dz, g = groundY(x, z);
-      if (world[idx(x, g + 1, z)] !== WOOD) continue;
-      for (let y = g + 1; y < WS; y++) if (world[idx(x, y, z)] === WOOD) world[idx(x, y, z)] = AIR;
-      for (let k = 0; k < 9; k++) {
-        const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
-        if (X < 1 || Z < 1 || X > WM - 1 || Z > WM - 1) continue;
-        for (let y = groundY(X, Z) + 1; y < WS; y++) if (world[idx(X, y, Z)] === LEAF) world[idx(X, y, Z)] = AIR;
+  if (old) {                                  // the old world itself, without its glass wall
+    for (let z = 0; z < 32; z++) for (let x = 0; x < 32; x++) {
+      const X = LEG.x + x, Z = LEG.z + z, edge = !x || !z || x === 31 || z === 31;
+      for (let y = 0; y < SY; y++) {
+        const i = idx(X, y, Z);
+        if (y < LEG.y) { if (!SOLID[world[i]]) world[i] = oreAt(y); continue; }
+        const b = y < LEG.y + 32 ? old[((y - LEG.y) * 32 + z) * 32 + x] : AIR;
+        world[i] = edge && b === GLASS ? AIR : b;
       }
     }
-    for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {  // level it: flat middle, half-way edge
-      const x = px + dx, z = pz + dz, t = groundY(x, z);
-      const goal = Math.abs(dx) === 8 || Math.abs(dz) === 4 ? Math.round((t + y0) / 2) : y0;
-      for (let y = t; y > goal; y--) world[idx(x, y, z)] = AIR;
-      for (let y = t; y < goal; y++) world[idx(x, y, z)] = DIRT;
-      for (let y = goal + 1; y < WS; y++) if (isTree(world[idx(x, y, z)])) world[idx(x, y, z)] = AIR;
-      world[idx(x, goal, z)] = GRASS;
+  } else starterGarden();
+  for (let z = 1; z < ZM; z++) for (let x = 1; x < XM; x++) {          // weeds in the grass
+    if (Math.abs(x - SPX) + Math.abs(z - SPZ) <= 3 || inOld(x, z, 0)) continue;
+    let y = YM - 1;
+    while (y > 0 && world[idx(x, y, z)] === AIR) y--;
+    if (world[idx(x, y, z)] === GRASS && Math.random() < .07) world[idx(x, y + 1, z)] = TALL;
+  }
+  for (let z = 0; z < SZ; z++) for (let x = 0; x < SX; x++)          // glass boundary walls
+    if (!x || x === XM || !z || z === ZM)
+      for (let y = 0; y < SY; y++) { const i = idx(x, y, z); if (world[i] === AIR || world[i] === WATER) world[i] = GLASS; }
+  worldVer++; geomVer++; waterVer++; worldDirty = true;
+}
+// a clearing near the spawn with a small pond and a 3×3 starter garden: the spot that needs the least levelling
+function starterGarden() {
+  const isTree = b => b === WOOD || b === LEAF;
+  const groundY = (x, z) => { let y = YM; while (y > 0 && (world[idx(x, y, z)] === AIR || isTree(world[idx(x, y, z)]))) y--; return y; };
+  const G = new Int16Array(LAYER);
+  for (let z = SPZ - 21; z <= SPZ + 21; z++) for (let x = SPX - 21; x <= SPX + 21; x++) G[z * SX + x] = groundY(x, z);
+  let pond = null, best = 1e9;
+  for (let pz = SPZ - 12; pz <= SPZ + 12; pz++) for (let px = SPX - 12; px <= SPX + 12; px++) {
+    const d = (px - SPX) ** 2 + (pz - SPZ) ** 2;
+    if (d < 36 || d > 144) continue;                                 // near the spawn point, not on top of it
+    let sum = 0, n = 0, trees = 0, wet = 0;
+    for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {
+      const x = px + dx, z = pz + dz, g = G[z * SX + x];
+      if (Math.abs(dx) <= 7 && Math.abs(dz) <= 3) { sum += g; n++; }
+      if (world[idx(x, g + 1, z)] === WOOD) trees++;
+      if (world[idx(x, g, z)] === WATER || world[idx(x, g, z)] === SAND) wet++;
     }
-    for (let dz = -3; dz <= 3; dz++) for (let dx = -4; dx <= 4; dx++) {   // a small pond with a sandy rim…
-      const e = (dx / 3.5) ** 2 + (dz / 2.5) ** 2, i = idx(px + dx, y0, pz + dz);
-      if (e <= 1) world[i] = WATER; else if (e <= 1.7) world[i] = SAND;
-    }
-    const gx = px + (px < 16 ? 6 : -6) - 1, gz = pz - 1;               // …and a 3×3 starter garden on the side toward spawn
-    for (let dz = 0; dz < 3; dz++) for (let dx = 0; dx < 3; dx++) {
-      const x = gx + dx, z = gz + dz;
-      if (world[idx(x, y0, z)] !== GRASS) continue;
-      world[idx(x, y0, z)] = FARM;
-      if ((dx + dz) % 2 === 0) { world[idx(x, y0 + 1, z)] = cropId(0, 0); grow[idx(x, y0 + 1, z)] = .15; }
+    const y0 = Math.round(sum / n);
+    let cost = d * .3 + trees * 8 + wet * 20;
+    for (let dz = -3; dz <= 3; dz++) for (let dx = -7; dx <= 7; dx++) cost += Math.abs(G[(pz + dz) * SX + px + dx] - y0) * 2;
+    if (cost < best) { best = cost; pond = [px, y0, pz]; }
+  }
+  if (!pond) return;
+  const [px, y0, pz] = pond;
+  for (let dz = -5; dz <= 5; dz++) for (let dx = -9; dx <= 9; dx++) {  // fell whole trees standing in or next to it
+    const x = px + dx, z = pz + dz, g = groundY(x, z);
+    if (world[idx(x, g + 1, z)] !== WOOD) continue;
+    for (let y = g + 1; y < SY; y++) if (world[idx(x, y, z)] === WOOD) world[idx(x, y, z)] = AIR;
+    for (let k = 0; k < 9; k++) {
+      const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
+      for (let y = groundY(X, Z) + 1; y < SY; y++) if (world[idx(X, y, Z)] === LEAF) world[idx(X, y, Z)] = AIR;
     }
   }
-  for (let i = 0; i < VOL - 1024; i++)                               // weeds in the grass
-    if (world[i] === GRASS && world[i + 1024] === AIR && Math.random() < .07 &&
-        Math.abs((i & WM) - 16) + Math.abs((i >> 5 & WM) - 16) > 3) world[i + 1024] = TALL;
-  for (let x = 0; x < WS; x++) for (let z = 0; z < WS; z++)          // glass boundary walls
-    if (!x || x === WM || !z || z === WM)
-      for (let y = 0; y < WS; y++) if (world[idx(x, y, z)] === AIR) world[idx(x, y, z)] = GLASS;
-  worldVer++; worldDirty = true;
+  for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {  // level it: flat middle, half-way edge
+    const x = px + dx, z = pz + dz, t = groundY(x, z);
+    const goal = Math.abs(dx) === 8 || Math.abs(dz) === 4 ? Math.round((t + y0) / 2) : y0;
+    for (let y = t; y > goal; y--) world[idx(x, y, z)] = AIR;
+    for (let y = t; y < goal; y++) world[idx(x, y, z)] = DIRT;
+    for (let y = goal + 1; y < SY; y++) if (isTree(world[idx(x, y, z)])) world[idx(x, y, z)] = AIR;
+    world[idx(x, goal, z)] = GRASS;
+  }
+  for (let dz = -3; dz <= 3; dz++) for (let dx = -4; dx <= 4; dx++) {   // a small pond with a sandy rim…
+    const e = (dx / 3.5) ** 2 + (dz / 2.5) ** 2, i = idx(px + dx, y0, pz + dz);
+    if (e <= 1) world[i] = WATER; else if (e <= 1.7) world[i] = SAND;
+  }
+  const gx = px + (px < SPX ? 6 : -6) - 1, gz = pz - 1;              // …and a 3×3 starter garden on the side toward spawn
+  for (let dz = 0; dz < 3; dz++) for (let dx = 0; dx < 3; dx++) {
+    const x = gx + dx, z = gz + dz;
+    if (world[idx(x, y0, z)] !== GRASS) continue;
+    world[idx(x, y0, z)] = FARM;
+    if ((dx + dz) % 2 === 0) { world[idx(x, y0 + 1, z)] = cropId(0, 0); grow[idx(x, y0 + 1, z)] = .15; }
+  }
 }
 
 // ---- torch light: BFS flood through air / glass / torches, one level lost per block ----
 const lightQ = new Int32Array(VOL * 2);       // torches, then glowing crops: a cell is enqueued at most twice
-function relight() {
+function spreadLight(tail, xa, xb, ya, yb, za, zb) {   // flood the queued cells' light, staying inside the box
+  for (let head = 0; head < tail; head++) {
+    const i = lightQ[head], lv = torch[i] - 1;
+    if (lv < 1) continue;
+    const x = i & XM, z = i >> ZSH & ZM, y = i >> YSH;
+    for (let d = 0; d < 6; d++) {
+      let ni;
+      if (d === 0) { if (x >= xb) continue; ni = i + 1; }
+      else if (d === 1) { if (x <= xa) continue; ni = i - 1; }
+      else if (d === 2) { if (y >= yb) continue; ni = i + LAYER; }
+      else if (d === 3) { if (y <= ya) continue; ni = i - LAYER; }
+      else if (d === 4) { if (z >= zb) continue; ni = i + SX; }
+      else { if (z <= za) continue; ni = i - SX; }
+      if (!PASS[world[ni]] || torch[ni] >= lv) continue;        // opaque blocks stop light
+      torch[ni] = lv; lightQ[tail++] = ni;
+    }
+  }
+}
+function relight() {                          // the whole world, after loading or generating it
   torch.fill(0);
   let tail = 0;
   for (let i = 0; i < VOL; i++) if (world[i] === TORCH) { torch[i] = 14; lightQ[tail++] = i; }
   for (let i = 0; i < VOL; i++) if (glows(world[i])) { torch[i] = Math.max(torch[i], 10); lightQ[tail++] = i; }   // ripe glowing crops
-  for (let head = 0; head < tail; head++) {
-    const i = lightQ[head], lv = torch[i] - 1;
-    if (lv < 1) continue;
-    const x = i & WM, z = i >> 5 & WM, y = i >> 10;
-    for (let d = 0; d < 6; d++) {
-      const nx = x + (d === 0) - (d === 1), ny = y + (d === 2) - (d === 3), nz = z + (d === 4) - (d === 5);
-      if ((nx | ny | nz) & ~WM) continue;
-      const ni = ny << 10 | nz << 5 | nx, b = world[ni];
-      if (!PASS[b]) continue;                                        // opaque blocks stop light
-      if (torch[ni] >= lv) continue;
-      torch[ni] = lv; lightQ[tail++] = ni;
-    }
+  spreadLight(tail, 0, XM, 0, YM, 0, ZM);
+}
+function relightAround(i) {                   // one block changed: light can only change within 15 blocks of it
+  const R = 15, x = i & XM, z = i >> ZSH & ZM, y = i >> YSH;
+  const xa = Math.max(0, x - R), xb = Math.min(XM, x + R), ya = Math.max(0, y - R), yb = Math.min(YM, y + R),
+        za = Math.max(0, z - R), zb = Math.min(ZM, z + R);
+  let tail = 0;
+  for (let Y = ya; Y <= yb; Y++) for (let Z = za; Z <= zb; Z++) for (let X = xa, j = idx(xa, Y, Z); X <= xb; X++, j++) {
+    const b = world[j];
+    torch[j] = b === TORCH ? 14 : glows(b) ? 10 : 0;
+    if (torch[j]) lightQ[tail++] = j;
   }
+  const seed = (j, from) => {                 // light from just outside the box (unchanged) flows back in
+    const v = torch[from] - 1;
+    if (v > torch[j] && PASS[world[j]]) { torch[j] = v; lightQ[tail++] = j; }
+  };
+  for (let Y = ya; Y <= yb; Y++) for (let Z = za; Z <= zb; Z++) {
+    if (xa > 0) seed(idx(xa, Y, Z), idx(xa - 1, Y, Z));
+    if (xb < XM) seed(idx(xb, Y, Z), idx(xb + 1, Y, Z));
+  }
+  for (let Z = za; Z <= zb; Z++) for (let X = xa; X <= xb; X++) {
+    if (ya > 0) seed(idx(X, ya, Z), idx(X, ya - 1, Z));
+    if (yb < YM) seed(idx(X, yb, Z), idx(X, yb + 1, Z));
+  }
+  for (let Y = ya; Y <= yb; Y++) for (let X = xa; X <= xb; X++) {
+    if (za > 0) seed(idx(X, Y, za), idx(X, Y, za - 1));
+    if (zb < ZM) seed(idx(X, Y, zb), idx(X, Y, zb + 1));
+  }
+  spreadLight(tail, xa, xb, ya, yb, za, zb);
 }
 
 // ---- items -------------------------------------------------------------------
@@ -613,6 +739,110 @@ const DISHES = [
 const FX_NAME = { run: '跑快', jump: '跳高', night: '夜視', dig: '挖快', yield: '豐收', breed: '雜交↑', hp: '生命+2心' };
 const FX_ICON = { run: '🏃', jump: '🦘', night: '🌙', dig: '⛏', yield: '🌾', breed: '🧬', hp: '💛' };
 
+// ---- pets: 13 kinds of animal. Wild ones roam; feed one its favourite food to tame it, or hatch one from an egg ----
+// parts: boxes in blocks, the animal faces +z with its feet at y = 0: [x0, y0, z0, x1, y1, z1, colour, flags]
+// flags: 1 leg (steps) · 2 head · 4 wing (flaps) · 8 tail (wags) · 16 face (eyes on its front)
+// hab: where wild ones turn up (grass · forest · shore = grass by water · beach = sand by water) · time: day / dusk / night
+// sea: seasons bit mask (1 spring 2 summer 4 autumn 8 winter) · w: how often they turn up (0 = only from eggs)
+// tame: chance each feeding · fly: hovering height · r, h: half width and height (for bumping and clicking)
+// pat: pattern on the body (1 cow spots · 2 bee stripes · 3 tabby · 4 shell · 5 dragon scales · 6 fox tail tip · 7 owl eyes)
+const ITEM_EGG = 500, ITEM_MILK = 501, ITEM_HONEY = 502, ITEM_TRUFFLE = 503, PET_ICON0 = 600;
+const PETS = [
+  { n: '狗', food: DISH0, hab: ['grass'], time: 'day', w: 10, tame: .34, abil: 'guard', dmg: 5, spd: 4.4, r: .2, h: .85,
+    text: '保護你:衝過去咬靠近你的怪物', pal: [[196, 150, 96], [132, 94, 58], [236, 228, 214], [40, 30, 26]],
+    parts: [[-.17, .3, -.32, .17, .6, .3, 0, 0], [-.15, .46, .26, .15, .76, .52, 0, 18], [-.08, .48, .52, .08, .6, .64, 2, 2],
+            [-.16, .7, .3, -.08, .84, .38, 1, 2], [.08, .7, .3, .16, .84, .38, 1, 2], [-.15, 0, .16, -.06, .32, .25, 0, 1],
+            [.06, 0, .16, .15, .32, .25, 0, 1], [-.15, 0, -.28, -.06, .32, -.19, 0, 1], [.06, 0, -.28, .15, .32, -.19, 0, 1],
+            [-.03, .5, -.48, .03, .58, -.3, 1, 8]] },
+  { n: '貓', food: ITEM_MILK, hab: ['grass', 'forest'], time: 'day', w: 5, tame: .25, abil: 'gift', spd: 4, r: .15, h: .7, pat: 3,
+    text: '每天早上叼種子回來,偶爾是稀有品種的種子或寵物蛋', pal: [[226, 150, 70], [176, 100, 42], [248, 236, 222], [240, 160, 170]],
+    parts: [[-.12, .24, -.28, .12, .46, .24, 0, 0], [-.12, .36, .2, .12, .58, .4, 0, 18], [-.12, .58, .26, -.05, .68, .32, 1, 2],
+            [.05, .58, .26, .12, .68, .32, 1, 2], [-.05, .38, .4, .05, .45, .44, 2, 2], [-.1, 0, .12, -.04, .25, .18, 2, 1],
+            [.04, 0, .12, .1, .25, .18, 2, 1], [-.1, 0, -.24, -.04, .25, -.18, 0, 1], [.04, 0, -.24, .1, .25, -.18, 0, 1],
+            [-.025, .4, -.56, .025, .46, -.26, 1, 8]] },
+  { n: '雞', food: SEED0, hab: ['grass'], time: 'day', w: 10, tame: .4, abil: 'egg', spd: 3, r: .15, h: .68,
+    text: '每天下蛋(雞蛋可以做料理),偶爾下出寵物蛋', pal: [[244, 242, 236], [214, 40, 40], [236, 150, 40], [206, 200, 192]],
+    parts: [[-.13, .18, -.16, .13, .42, .16, 0, 0], [-.07, .4, .06, .07, .6, .18, 0, 18], [-.03, .48, .18, .03, .53, .25, 2, 2],
+            [-.02, .6, .08, .02, .66, .17, 1, 2], [-.02, .42, .16, .02, .47, .19, 1, 2], [-.16, .22, -.1, -.13, .38, .12, 3, 4],
+            [.13, .22, -.1, .16, .38, .12, 3, 4], [-.06, 0, -.02, -.03, .18, .02, 2, 1], [.03, 0, -.02, .06, .18, .02, 2, 1],
+            [-.06, .32, -.22, .06, .48, -.14, 0, 8]] },
+  { n: '牛', food: CROP_ITEM0, hab: ['grass'], time: 'day', w: 8, tame: .34, abil: 'milk', spd: 3, r: .32, h: 1.02, pat: 1,
+    text: '每天產牛奶(可以做料理,也是貓最愛的食物)', pal: [[240, 238, 232], [44, 40, 38], [236, 160, 160], [230, 220, 190]],
+    parts: [[-.28, .42, -.48, .28, .92, .44, 0, 0], [-.18, .56, .4, .18, .94, .7, 0, 18], [-.14, .56, .68, .14, .72, .78, 2, 2],
+            [-.22, .9, .5, -.14, 1.02, .56, 3, 2], [.14, .9, .5, .22, 1.02, .56, 3, 2], [-.26, 0, .26, -.12, .44, .38, 0, 1],
+            [.12, 0, .26, .26, .44, .38, 0, 1], [-.26, 0, -.44, -.12, .44, -.32, 0, 1], [.12, 0, -.44, .26, .44, -.32, 0, 1],
+            [-.03, .6, -.56, .03, .88, -.48, 1, 8]] },
+  { n: '兔子', food: CROP_ITEM0 + 1, hab: ['grass', 'forest'], time: 'day', sea: 7, w: 9, tame: .34, abil: 'grow', spd: 3.8, r: .13, h: .6, hop: 1,
+    text: '附近 6 格內的作物長得快 30%', pal: [[178, 152, 126], [244, 240, 234], [240, 170, 180], [112, 92, 78]],
+    parts: [[-.11, .08, -.14, .11, .28, .12, 0, 0], [-.08, .2, .08, .08, .36, .22, 0, 18], [-.07, .36, .1, -.03, .58, .15, 0, 2],
+            [.03, .36, .1, .07, .58, .15, 0, 2], [-.04, .14, -.19, .04, .22, -.13, 1, 8], [-.11, 0, -.12, -.05, .1, 0, 3, 1],
+            [.05, 0, -.12, .11, .1, 0, 3, 1], [-.07, 0, .06, -.03, .12, .1, 0, 1], [.03, 0, .06, .07, .12, .1, 0, 1],
+            [-.02, .26, .22, .02, .3, .24, 2, 2]] },
+  { n: '豬', food: CROP_ITEM0 + 2, hab: ['forest'], time: 'day', w: 7, tame: .34, abil: 'truffle', spd: 3.2, r: .21, h: .66,
+    text: '跟著你走在草地上時會拱出松露(很值錢)', pal: [[240, 172, 172], [212, 124, 130], [226, 140, 150], [120, 82, 82]],
+    parts: [[-.2, .24, -.34, .2, .56, .3, 0, 0], [-.17, .3, .26, .17, .58, .5, 0, 18], [-.08, .34, .5, .08, .46, .56, 2, 2],
+            [-.16, .56, .3, -.08, .64, .36, 1, 2], [.08, .56, .3, .16, .64, .36, 1, 2], [-.17, 0, .14, -.08, .25, .24, 0, 1],
+            [.08, 0, .14, .17, .25, .24, 0, 1], [-.17, 0, -.3, -.08, .25, -.2, 0, 1], [.08, 0, -.3, .17, .25, -.2, 0, 1],
+            [-.02, .44, -.38, .02, .5, -.33, 1, 8]] },
+  { n: '鴨子', food: CROP_ITEM0 + 6, hab: ['shore', 'beach'], time: 'day', w: 7, tame: .25, abil: 'weed', spd: 2.8, r: .14, h: .5,
+    text: '把附近 6 格內的雜草吃掉,偶爾從草裡翻出種子給你', pal: [[244, 242, 236], [44, 112, 62], [240, 160, 40], [150, 112, 72]],
+    parts: [[-.12, .1, -.18, .12, .3, .14, 0, 0], [-.07, .28, .06, .07, .46, .18, 1, 18], [-.05, .32, .18, .05, .37, .28, 2, 2],
+            [-.14, .14, -.12, -.12, .28, .1, 3, 4], [.12, .14, -.12, .14, .28, .1, 3, 4], [-.05, .22, -.24, .05, .3, -.18, 0, 8],
+            [-.07, 0, 0, -.02, .1, .05, 2, 1], [.02, 0, 0, .07, .1, .05, 2, 1]] },
+  { n: '蜜蜂', food: CROP_ITEM0 + 16, hab: ['grass', 'forest'], time: 'day', sea: 3, w: 5, tame: .25, abil: 'pollen', spd: 3.6, r: .12, h: .36, fly: 1.3, pat: 2,
+    text: '附近 8 格內雜交機率變兩倍;身邊有開花作物時每天產蜂蜜', pal: [[248, 204, 40], [42, 34, 30], [230, 242, 252], [120, 90, 30]],
+    parts: [[-.1, .08, -.15, .1, .28, .13, 0, 0], [-.08, .1, .12, .08, .26, .22, 1, 18], [-.02, .14, -.2, .02, .18, -.15, 1, 8],
+            [-.24, .27, -.06, -.04, .29, .1, 2, 4], [.04, .27, -.06, .24, .29, .1, 2, 4], [-.05, .26, .2, -.03, .34, .22, 1, 2],
+            [.03, .26, .2, .05, .34, .22, 1, 2]] },
+  { n: '烏龜', food: CROP_ITEM0 + 5, hab: ['beach'], time: 'day', sea: 7, w: 6, tame: .25, abil: 'wet', spd: 1.6, r: .26, h: .4, pat: 4,
+    text: '身邊 3 格內的耕地一直保持濕潤,像會走路的灑水器', pal: [[72, 122, 62], [46, 82, 42], [152, 172, 92], [202, 192, 122]],
+    parts: [[-.24, .1, -.28, .24, .32, .26, 0, 0], [-.18, .32, -.2, .18, .38, .18, 1, 0], [-.07, .1, .26, .07, .22, .4, 2, 18],
+            [-.28, 0, .12, -.18, .1, .22, 2, 1], [.18, 0, .12, .28, .1, .22, 2, 1], [-.28, 0, -.22, -.18, .1, -.12, 2, 1],
+            [.18, 0, -.22, .28, .1, -.12, 2, 1], [-.03, .1, -.34, .03, .14, -.28, 2, 8]] },
+  { n: '狐狸', food: CROP_ITEM0 + 19, hab: ['forest'], time: 'dusk', w: 3, tame: .2, abil: 'forage', dmg: 3, spd: 4.8, r: .15, h: .75, pat: 6,
+    text: '幫忙趕走怪物;每天早上帶回一份採來的作物', pal: [[226, 112, 42], [246, 238, 226], [46, 34, 30], [182, 82, 32]],
+    parts: [[-.13, .26, -.3, .13, .5, .26, 0, 0], [-.13, .38, .22, .13, .62, .44, 0, 18], [-.06, .4, .44, .06, .5, .56, 1, 2],
+            [-.13, .62, .28, -.06, .74, .34, 0, 2], [.06, .62, .28, .13, .74, .34, 0, 2], [-.11, 0, .14, -.05, .27, .2, 2, 1],
+            [.05, 0, .14, .11, .27, .2, 2, 1], [-.11, 0, -.26, -.05, .27, -.2, 2, 1], [.05, 0, -.26, .11, .27, -.2, 2, 1],
+            [-.07, .34, -.64, .07, .48, -.28, 0, 8]] },
+  { n: '貓頭鷹', food: CROP_ITEM0 + 10, hab: ['forest'], time: 'night', w: 3, tame: .2, abil: 'night', spd: 4, r: .15, h: .74, fly: 1.6, pat: 7,
+    text: '晚上跟在你身邊時,四周看得清楚(夜視)', pal: [[142, 102, 68], [222, 198, 162], [82, 58, 42], [232, 202, 92]],
+    parts: [[-.13, .08, -.12, .13, .44, .12, 0, 0], [-.15, .42, -.12, .15, .66, .13, 0, 2], [-.12, .44, .13, .12, .64, .15, 1, 18],
+            [-.14, .66, -.02, -.08, .74, .04, 2, 2], [.08, .66, -.02, .14, .74, .04, 2, 2], [-.16, .1, -.1, -.13, .4, .1, 2, 4],
+            [.13, .1, -.1, .16, .4, .1, 2, 4], [-.08, 0, .02, .08, .08, .08, 3, 1]] },
+  { n: '鸚鵡', food: CROP_ITEM0 + 26, hab: ['forest'], time: 'day', sea: 2, w: 2, tame: .15, abil: 'coin', spd: 4.2, r: .1, h: .5, fly: 1.7,
+    text: '每天早上撿金幣回來,好感越高撿越多', pal: [[222, 42, 42], [42, 92, 212], [248, 212, 52], [72, 72, 72]],
+    parts: [[-.08, .1, -.08, .08, .36, .1, 0, 0], [-.07, .34, -.02, .07, .48, .12, 0, 18], [-.03, .38, .12, .03, .45, .17, 3, 2],
+            [-.1, .14, -.08, -.08, .32, .08, 1, 4], [.08, .14, -.08, .1, .32, .08, 1, 4], [-.04, .02, -.26, .04, .14, -.08, 1, 8]] },
+  { n: '小龍', food: CROP_ITEM0 + 30, hab: [], time: 'day', w: 0, tame: 0, abil: 'dragon', dmg: 8, spd: 5, r: .2, h: .8, fly: 1.9, pat: 5,
+    text: '最強的保護者;身邊 16 格內晚上不會生怪。只能從龍蛋孵出來', pal: [[122, 72, 192], [92, 202, 192], [242, 232, 202], [255, 122, 242, 1]],
+    parts: [[-.18, .3, -.4, .18, .6, .3, 0, 0], [-.14, .44, .26, .14, .68, .54, 0, 18], [-.09, .44, .54, .09, .56, .66, 1, 2],
+            [-.12, .68, .3, -.07, .8, .36, 2, 2], [.07, .68, .3, .12, .8, .36, 2, 2], [-.62, .56, -.2, -.18, .6, .2, 3, 4],
+            [.18, .56, -.2, .62, .6, .2, 3, 4], [-.05, .36, -.8, .05, .46, -.4, 0, 8], [-.15, 0, -.3, -.07, .32, -.2, 0, 1],
+            [.07, 0, -.3, .15, .32, -.2, 0, 1]] },
+];
+const PET_DRAGON = 12;
+const PET_NAMES = ['小白', '小黑', '豆豆', '咪咪', '阿福', '旺財', '球球', '布丁', '麻糬', '奶茶', '花花', '胖胖', '皮皮', '嘟嘟', '可可',
+                   '樂樂', '年糕', '湯圓', '芝麻', '黑糖', '小虎', '阿金', '點點', '雪球', '棉花', '小橘', '烏龍', '珍珠', '餅乾', '栗子'];
+// what each kind of egg hatches into: [kind, weight]
+const EGG_POOL = { 22: [[0, 5], [1, 4], [2, 5], [3, 4], [4, 5], [5, 4], [6, 3], [7, 3], [8, 3]],
+                   23: [[9, 5], [10, 5], [11, 4], [7, 2], [8, 2], [PET_DRAGON, 1]],
+                   24: [[PET_DRAGON, 1]] };
+const EGG_HOURS = { 22: 16, 23: 24, 24: 48 };  // game hours to hatch (twice as fast with a torch next to it)
+// dishes made with what the animals give (ingredients over 100 are item ids, not crops)
+DISHES.push(
+  { n: '煎蛋', i: [[ITEM_EGG, 1]], heal: 3, p: 20, ic: 'egg', col: [250, 214, 80] },
+  { n: '番茄炒蛋', i: [[3, 1], [ITEM_EGG, 1]], heal: 6, p: 45, fx: ['dig', 120], ic: 'plate', col: [236, 120, 60] },
+  { n: '布丁', i: [[ITEM_EGG, 1], [ITEM_MILK, 1]], heal: 6, p: 55, fx: ['jump', 120], ic: 'pudding', col: [246, 206, 110] },
+  { n: '熱牛奶', i: [[ITEM_MILK, 1]], heal: 3, p: 22, fx: ['hp', 120], ic: 'cup', col: [248, 246, 240] },
+  { n: '奶茶', i: [[23, 1], [ITEM_MILK, 1]], heal: 5, p: 95, fx: ['run', 120, 'night', 120], ic: 'cup', col: [206, 164, 116] },
+  { n: '蜂蜜水', i: [[ITEM_HONEY, 1]], heal: 4, p: 45, fx: ['breed', 180], ic: 'cup', col: [242, 186, 60] },
+  { n: '蜂蜜蛋糕', i: [[0, 2], [ITEM_EGG, 1], [ITEM_HONEY, 1]], heal: 12, p: 170, fx: ['yield', 300], ic: 'cake', col: [236, 172, 60] },
+  { n: '松露燉飯', i: [[6, 2], [ITEM_TRUFFLE, 1]], heal: 14, p: 280, fx: ['dig', 300, 'yield', 300], ic: 'bowl', col: [214, 190, 150] },
+);
+const ingId = c => c < 100 ? CROP_ITEM0 + c : c;             // a dish ingredient → the item it uses
+const ingKnown = c => c >= 100 || discovered.has(c);
+
 // new blocks (ids 12–21) and farm items
 IT[FARM] = { c: '#5A3D26', n: '耕地', hd: .55, tl: 's', dp: DIRT };
 IT[FARM_W] = { c: '#3F2A1A', n: '濕潤的耕地', hd: .55, tl: 's', dp: DIRT };
@@ -628,6 +858,13 @@ IT[160] = { c: '#7FB0C0', n: '澆水壺', st: 1, can: 1 };
 IT[161] = { c: '#A0A4AA', n: '水桶', st: 1, bucket: 1 };
 IT[162] = { c: '#3A6FC8', n: '裝水的水桶', st: 1, wbucket: 1 };
 IT[163] = { c: '#8B6A40', n: '肥料', fert: 1, sell: 4 };
+IT[EGG] = { c: '#F0E4C6', n: '寵物蛋', hd: .3, st: 16, sell: 60 };
+IT[EGG2] = { c: '#A8D6F0', n: '稀有寵物蛋', hd: .3, st: 16, sell: 200 };
+IT[EGG3] = { c: '#4A2C72', n: '龍蛋', hd: .3, st: 16, sell: 800 };
+IT[ITEM_EGG] = { c: '#F4EEE0', n: '雞蛋', sell: 8 };
+IT[ITEM_MILK] = { c: '#F6F6F2', n: '牛奶', st: 16, sell: 12 };
+IT[ITEM_HONEY] = { c: '#F0B032', n: '蜂蜜', st: 16, sell: 25 };
+IT[ITEM_TRUFFLE] = { c: '#4A3428', n: '松露', sell: 80 };
 for (const [i, c] of CROPS.entries()) {
   IT[SEED0 + i] = { c: '#C8A870', n: c.n + '種子', seed: i };
   IT[CROP_ITEM0 + i] = { c: '#' + c.f.map(v => v.toString(16).padStart(2, '0')).join(''), n: c.n, crop: i };
@@ -647,7 +884,7 @@ const info = id => IT[id] || NONE;
 const nameOf = id => info(id).n || '';
 const placeable = id => id > 0 && id < 100 && !isFarm(id) && id !== WATER && id !== TALL;
 const maxStack = id => info(id).st || 64;
-const PAL = [11, 2, 1, 3, PLANK, 4, 5, 6, 7, 8, 9, 10, SPRINK, SPRINK2, BED];   // creative palette (infinite)
+const PAL = [11, 2, 1, 3, PLANK, 4, 5, 6, 7, 8, 9, 10, SPRINK, SPRINK2, BED, EGG, EGG2, EGG3];   // creative palette (infinite)
 const COL = new Int32Array(256);              // 0xRRGGBB per block id, for the CPU renderer (crops use their sprites)
 for (let i = 1; i < CROP0; i++) if (IT[i]) COL[i] = parseInt(IT[i].c.slice(1), 16);
 
@@ -678,6 +915,7 @@ RCP.push(
 // ---- textures: procedural 16×16 pixel art, shared by the GPU renderer and the UI ----
 // layer = block id * 3 + face (0 top · 1 side · 2 bottom); mining cracks at CRACK0..CRACK0+9
 const TEX = 16, TEX_LAYERS = 256, CRACK0 = 96, PLANT0 = 112, TALL_L = 240;   // PLANT0 + crop*4 + stage
+const EGG_L = 241;                            // egg sprites for the CPU renderer: EGG_L + (egg - EGG)
 const texData = new Uint8Array(TEX * TEX * 4 * TEX_LAYERS);
 function seeded(s) {                          // tiny deterministic PRNG, so textures look the same every run
   return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -918,7 +1156,23 @@ function makeFarmTextures() {
     }
     putSprite(TALL_L, px); }
   for (let c = 0; c < CROPS.length; c++) for (let s = 0; s < 4; s++) cropSprite(c, s);
+  for (const [id, base, s1, s2] of PET_EGG_LOOK) {                   // pet eggs: speckled shells
+    r = seeded(240 + id);
+    const spots = new Map();
+    for (let n = 0; n < 18; n++) {
+      const x = r() * 16 | 0, y = r() * 16 | 0, kind = n % 3 ? 1 : 2;
+      spots.set(y * 16 + x, kind); if (r() < .4) spots.set(y * 16 + Math.min(15, x + 1), kind);
+    }
+    const px = (x, y) => { const k = spots.get(y * 16 + x); return k === 1 ? s1 : k === 2 ? s2 : shadeC(base, 1 + (r() - .5) * .08); };
+    for (let q = 0; q < 3; q++) paintLayer(id * 3 + q, px);
+    paintLayer(EGG_L + id - EGG, (x, y) => {                          // the same egg as a flat sprite, for the CPU renderer
+      const t = y - 11, w = 4.2 * Math.sqrt(Math.max(0, 1 - (t / (t < 0 ? 5.8 : 4.3)) ** 2));
+      return y > 4 && Math.abs(x - 7.5) <= w ? px(x, y) : [0, 0, 0, 0];
+    });
+  }
 }
+const PET_EGG_LOOK = [[EGG, [240, 228, 198], [156, 112, 70], [118, 168, 88]], [EGG2, [168, 214, 240], [240, 198, 72], [252, 252, 255]],
+                      [EGG3, [74, 44, 114], [255, 122, 242, 200], [128, 86, 180]]];
 
 // ---- farm icons: seeds, produce, dishes, tools ----
 function produceIcon(cr) {
@@ -994,6 +1248,17 @@ function dishIcon(d) {
       case 'pie': ell(7.5, 9, 6.5, 4, (dx, dy, x, y) => dx * dx + dy * dy > .7 ? [214, 170, 110] : ((x + y) % 4 === 0 || (x - y + 16) % 4 === 0) ? [230, 196, 130] : C); break;
       case 'cup': for (let y = 3; y < 14; y++) for (let x = 4; x < 12; x++) { const edge = x === 4 || x === 11 || y === 13; set(x, y, edge ? [220, 236, 244] : y < 5 ? [230, 244, 250] : (x < 6 ? Ch : C)); } for (let y = 6; y < 10; y++) set(12, y, [220, 236, 244]); break;
       case 'jar': for (let y = 4; y < 14; y++) for (let x = 3; x < 13; x++) set(x, y, y < 6 ? [200, 160, 110] : (x === 3 || x === 12) ? [220, 236, 244] : (x < 6 ? Ch : C)); break;
+      case 'egg':                                                   // fried egg: a wavy white with a yolk
+        for (let y = 3; y < 14; y++) for (let x = 1; x < 15; x++) {
+          const dx = (x - 7.5) / 6.5, dy = (y - 8.5) / 4.8;
+          if (dx * dx + dy * dy <= 1 - .12 * Math.sin(Math.atan2(dy, dx) * 5)) set(x, y, dx > .5 ? Wd : W);
+        }
+        ell(8.5, 8, 2.6, 2.3, (dx, dy) => dx + dy < -.5 ? [255, 238, 150] : [250, 190, 36]);
+        break;
+      case 'pudding':                                               // caramel on top, on a little plate
+        ell(7.5, 13, 7, 1.8, (dx, dy) => dx * dx + dy * dy > .45 ? Wd : W);
+        for (let y = 4; y < 13; y++) for (let x = 2; x < 14; x++) { const w = 2.8 + (y - 4) * .42; if (Math.abs(x - 7.5) <= w) set(x, y, y < 6 ? [150, 84, 30] : x < 6 ? Ch : C); }
+        break;
       default: ell(7.5, 8.5, 5, 5, () => C);
     }
   });
@@ -1031,6 +1296,71 @@ function farmToolIcons() {
   ICON_CANVAS[PLANK] = cubeIcon(PLANK);
   for (const [i, c] of CROPS.entries()) { ICON_CANVAS[SEED0 + i] = seedIcon(c); ICON_CANVAS[CROP_ITEM0 + i] = produceIcon(c); }
   for (const [j, d] of DISHES.entries()) ICON_CANVAS[DISH0 + j] = dishIcon(d);
+  petIcons();
+}
+// ---- pet icons: animal products, eggs, and a portrait of every kind (PET_ICON0 + kind) ----
+function eggIcon(base, s1, s2, seed, w0 = 4.9) {                    // an egg standing up, speckled when s1 is given
+  const r = seeded(seed);
+  return sprite(set => {
+    for (let y = 1; y < 15; y++) {
+      const t = y - 9.5, w = w0 * Math.sqrt(Math.max(0, 1 - (t / (t < 0 ? 7.8 : 5.4)) ** 2));
+      for (let x = 1; x < 15; x++) {
+        const dx = x - 7.5, sp = r();
+        if (Math.abs(dx) > w) continue;
+        set(x, y, s1 && sp < .09 ? s1 : s2 && sp < .14 ? s2 : shadeC(base, dx < -w * .35 && t < 1 ? 1.12 : dx > w * .4 ? .82 : 1));
+      }
+    }
+  });
+}
+const PET_ICON_K = [];                        // pixels per block in each portrait (the feet rest on its 15th row)
+function petIcon(s) {                         // the animal's boxes seen from its right side, far side first
+  const d = PETS[s];
+  let z0 = 1e9, z1 = -1e9, y1 = 0;
+  for (const q of d.parts) { z0 = Math.min(z0, q[2]); z1 = Math.max(z1, q[5]); y1 = Math.max(y1, q[4]); }
+  const k = 14 / Math.max(z1 - z0, y1), ox = (16 - (z1 - z0) * k) / 2;
+  PET_ICON_K[s] = k;
+  const order = d.parts.map((_, j) => j).sort((a, b) => (d.parts[a][0] + d.parts[a][3]) - (d.parts[b][0] + d.parts[b][3]));
+  return sprite(set => {
+    for (const j of order) {
+      const q = d.parts[j], far = q[0] + q[3] < -.02;
+      const xa = Math.round(ox + (q[2] - z0) * k), xb = Math.max(xa + 1, Math.round(ox + (q[5] - z0) * k));
+      const yb = Math.max(Math.round(15 - q[4] * k) + 1, Math.round(15 - q[1] * k));
+      let ya = Math.round(15 - q[4] * k);
+      if (q[7] & 4 && q[3] - q[0] > .12) ya = Math.round(ya - (q[3] - q[0]) * k * .8);   // wide wings: drawn raised
+      for (let y = ya; y < yb; y++) for (let x = xa; x < xb; x++) {
+        let c = q[6];
+        if (d.pat === 1 && c === 0 && (x * 7 + y * 13) % 5 === 0) c = 1;             // cow spots
+        else if (d.pat === 2 && c === 0 && (x - xa) % 3 === 1) c = 1;                // bee stripes
+        else if (d.pat === 3 && c === 0 && (x + y) % 3 === 0) c = 1;                 // tabby
+        else if (d.pat === 4 && c === 0 && (x % 3 === 0 || y % 3 === 0)) c = 1;      // shell plates
+        else if (d.pat === 5 && c === 0 && y === yb - 1) c = 2;                      // dragon: pale belly
+        else if (d.pat === 6 && q[7] & 8 && x < xa + (xb - xa) * .35) c = 1;         // fox: white tail tip
+        set(x, y, shadeC(d.pal[c], far ? .72 : y === ya ? 1.12 : 1));
+      }
+      if (q[7] & 16) set(xb - 2, ya + (yb - ya) * .35, d.pat === 7 ? [250, 208, 60] : [24, 18, 18]);   // an eye
+    }
+  });
+}
+function petIcons() {
+  for (const [id, base, s1, s2] of PET_EGG_LOOK) ICON_CANVAS[id] = eggIcon(base, s1.slice(0, 3), s2, 300 + id);
+  ICON_CANVAS[ITEM_EGG] = eggIcon([244, 234, 214], null, null, 310, 4.2);
+  ICON_CANVAS[ITEM_MILK] = sprite(set => {                          // a bottle of milk
+    for (let y = 6; y < 15; y++) for (let x = 4; x < 12; x++) set(x, y, x === 4 ? [255, 255, 255] : x > 9 ? [212, 218, 226] : [244, 246, 248]);
+    for (let y = 3; y < 6; y++) for (let x = 6; x < 10; x++) set(x, y, x < 7 ? [255, 255, 255] : [222, 228, 236]);
+    for (let x = 6; x < 10; x++) set(x, 2, [70, 130, 220]);
+    for (let x = 4; x < 12; x++) { set(x, 10, [110, 170, 240]); set(x, 11, [90, 150, 226]); }
+  });
+  ICON_CANVAS[ITEM_HONEY] = sprite(set => {                         // a jar of honey with a cloth lid
+    for (let y = 6; y < 15; y++) for (let x = 3; x < 13; x++) set(x, y, x < 5 ? [255, 214, 110] : x > 10 ? [206, 136, 30] : [240, 176, 50]);
+    for (let x = 3; x < 13; x++) { set(x, 5, [226, 206, 170]); set(x, 4, [196, 166, 126]); }
+    set(6, 8, [255, 238, 176]); set(6, 9, [255, 238, 176]);
+  });
+  ICON_CANVAS[ITEM_TRUFFLE] = sprite(set => { const r = seeded(97);  // a knobbly black truffle
+    for (let y = 4; y < 14; y++) for (let x = 3; x < 13; x++) {
+      const dx = (x - 7.5) / 5, dy = (y - 9) / 4.6;
+      if (dx * dx + dy * dy < 1 - r() * .18) set(x, y, r() < .25 ? [120, 92, 70] : dx + dy < -.4 ? [100, 74, 56] : [74, 52, 40]);
+    } });
+  for (let s = 0; s < PETS.length; s++) ICON_CANVAS[PET_ICON0 + s] = petIcon(s);
 }
 
 // ---- icons for the hotbar, bag and hand ----
@@ -1174,7 +1504,7 @@ function take(id, n) {
 
 // ---- game state ----------------------------------------------------------------
 // P: feet position x,y,z · a yaw · b pitch · g vertical speed
-let P = { x: 16, y: 20, z: 16, a: 0, b: 0, g: 0 };
+let P = { x: SPX + .5, y: 40, z: SPZ + .5, a: 0, b: 0, g: 0 };
 let tod = .35;                                // time of day 0..1 (.25 sunrise · .5 noon · .75 sunset)
 let weather = 0;                              // 0 clear · 1 rain · 2 snow
 let paused = true, started = false, invOpen = false, creative = false;
@@ -1185,43 +1515,110 @@ let sprinting = false, sprintLatch = false, lastWDown = -1e9, fovK = 1;   // spr
 const K = {};                                 // keys held, by name ('w', ' ', 'tab'…)
 const tapped = {};                            // keys pressed since the last frame, so a quick tap is never lost
 
-// ---- save / load (same localStorage keys and format as v1, so old saves load) ----
+// ---- save / load ----
+// The world is saved run-length packed (a block id and a run length per byte pair, then base64) under its
+// own keys, voxelW3 / voxelP3 / voxelF3, so a million cells take a few hundred thousand characters. A world
+// saved by the old 32³ versions (voxelW / voxelP / voxelF) is set down in the middle of a new big world; the
+// old keys are left alone as a backup.
+const bytesToB64 = u => { let t = ''; for (let i = 0; i < u.length; i += 8192) t += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return btoa(t); };
+const b64ToBytes = t => { const r = atob(t), u = new Uint8Array(r.length); for (let i = 0; i < r.length; i++) u[i] = r.charCodeAt(i); return u; };
+// Each tile is packed on its own and the packed bytes are kept; a save only re-packs the tiles that
+// changed since the last one (found by comparing with a copy of the world as it was saved).
+const savedWorld = new Uint8Array(VOL), tilePacks = new Array(TILES_X * TILES_Z).fill(null), packTmp = new Uint8Array(TILE * TILE * SY * 2);
+function packTile(tx, tz) {
+  let o = 0, prev = -1, n = 0;
+  for (let y = 0; y < SY; y++) for (let z = tz * TILE; z < tz * TILE + TILE; z++)
+    for (let i = y << YSH | z << ZSH | tx * TILE, e = i + TILE; i < e; i++) {
+      const b = world[i];
+      if (b === prev && n < 256) { n++; continue; }
+      if (n) { packTmp[o++] = prev; packTmp[o++] = n - 1; }
+      prev = b; n = 1;
+    }
+  packTmp[o++] = prev; packTmp[o++] = n - 1;
+  return packTmp.slice(0, o);
+}
+function packWorld() {
+  const SW32 = new Uint32Array(savedWorld.buffer);
+  let total = 0;
+  for (let tz = 0; tz < TILES_Z; tz++) for (let tx = 0; tx < TILES_X; tx++) {
+    const k = tz * TILES_X + tx;
+    if (tileSync(W32, SW32, tx, tz, !tilePacks[k])) tilePacks[k] = packTile(tx, tz);
+    total += tilePacks[k].length;
+  }
+  const all = new Uint8Array(total);
+  for (let k = 0, o = 0; k < tilePacks.length; k++) { all.set(tilePacks[k], o); o += tilePacks[k].length; }
+  return bytesToB64(all);
+}
+function unpackWorld(t) {
+  const u = b64ToBytes(t);
+  let k = 0;
+  for (let tz = 0; tz < TILES_Z; tz++) for (let tx = 0; tx < TILES_X; tx++) {
+    let left = 0, b = 0;
+    for (let y = 0; y < SY; y++) for (let z = tz * TILE; z < tz * TILE + TILE; z++)
+      for (let i = y << YSH | z << ZSH | tx * TILE, e = i + TILE; i < e; i++) {
+        if (!left) { if (k + 1 >= u.length) return false; b = u[k]; left = u[k + 1] + 1; k += 2; }
+        world[i] = b; left--;
+      }
+    if (left) return false;                   // a run ran past its tile: not a save of ours
+  }
+  tilePacks.fill(null);
+  return k === u.length;
+}
 function saveGame() {
   try {
-    if (worldDirty) {
-      let s = '';
-      for (let i = 0; i < VOL; i += 8192) s += String.fromCharCode.apply(null, world.subarray(i, i + 8192));
-      localStorage.voxelW = btoa(s);
-      worldDirty = false;
-    }
-    localStorage.voxelP = JSON.stringify({ x: P.x, y: P.y, z: P.z, a: P.a, b: P.b, g: 0 });
+    if (worldDirty) { localStorage.voxelW3 = packWorld(); worldDirty = false; }
+    localStorage.voxelP3 = JSON.stringify({ x: P.x, y: P.y, z: P.z, a: P.a, b: P.b });
     localStorage.voxelT = tod;
     localStorage.voxelI = JSON.stringify(INV);
-    localStorage.voxelV = 2;                  // save format 2: worlds have grass
     saveFarm();
   } catch (e) {}                              // storage may be blocked (private mode, sandboxed preview)
 }
+let loadNote = '';                            // what the loader wants to tell the player at the start
+let petNews = true;                           // the save predates pets: say so at the start
 function loadGame() {
   try {
     const inv = JSON.parse(localStorage.voxelI || 'null');
     if (Array.isArray(inv) && inv.length === 24 && inv.every(s => s && Number.isInteger(s.id) && Number.isInteger(s.n))) INV = inv;
-    const s = localStorage.voxelW ? atob(localStorage.voxelW) : '';
-    if (s.length !== VOL) return false;
-    for (let i = 0; i < VOL; i++) world[i] = s.charCodeAt(i);
-    const p = JSON.parse(localStorage.voxelP || 'null');
-    if (p && [p.x, p.y, p.z, p.a, p.b].every(Number.isFinite)) P = { x: p.x, y: p.y, z: p.z, a: p.a, b: p.b, g: 0 };
+    const pos = (json, dx, dy, dz) => {       // saved position (moved by the offset), or the spawn point
+      const p = JSON.parse(json || 'null');
+      if (p && [p.x, p.y, p.z, p.a, p.b].every(Number.isFinite)) P = { x: p.x + dx, y: p.y + dy, z: p.z + dz, a: p.a, b: p.b, g: 0 };
+      else placeAtSpawn();
+    };
+    let farm = false;
+    if (localStorage.voxelW3) {
+      if (!unpackWorld(localStorage.voxelW3)) return false;
+      pos(localStorage.voxelP3, 0, 0, 0);
+      try { farm = loadFarm(localStorage.voxelF3); } catch (e) {}   // a broken farm save must not cost the world
+      worldDirty = false;
+    } else if (localStorage.voxelW) {         // an old 32³ world: it becomes the middle of a new, bigger one
+      const r = atob(localStorage.voxelW);
+      if (r.length !== 32768) return false;
+      const old = new Uint8Array(32768);
+      for (let i = 0; i < 32768; i++) old[i] = r.charCodeAt(i);
+      const v1 = localStorage.voxelV !== '2';
+      for (let i = 0; i < 32768; i++) {       // its glass wall comes down…
+        const x = i & 31, z = i >> 5 & 31;
+        if (old[i] === GLASS && (!x || !z || x === 31 || z === 31)) old[i] = AIR;
+      }
+      for (let i = 0; i < 32768; i++) {       // …and open dirt turns to grass: everywhere if it was saved before grass, else along the old wall
+        const x = i & 31, z = i >> 5 & 31;
+        if (old[i] === DIRT && (v1 || !x || !z || x === 31 || z === 31) && (i >> 10 === 31 || old[i + 1024] === AIR)) old[i] = GRASS;
+      }
+      generateWorld(old);
+      pos(localStorage.voxelP, LEG.x, LEG.y, LEG.z);
+      try { farm = loadFarm(localStorage.voxelF, i => idx((i & 31) + LEG.x, (i >> 10) + LEG.y, (i >> 5 & 31) + LEG.z)); } catch (e) {}
+      loadNote = '🗺 世界變大了!你原本的世界在正中間,四周是新的土地';
+      worldDirty = true;
+    } else return false;
     const t = +localStorage.voxelT;
     if (t >= 0 && t < 1) tod = t;
-    worldVer++; worldDirty = false; waterVer++;
-    let farm = false;
-    try { farm = loadFarm(); } catch (e) {}   // a broken farm save must not cost the world
+    worldVer++; geomVer++; waterVer++;
     if (!farm) needStarter = true;            // a save from before farming: hand out the starter tools at boot
-    if (localStorage.voxelV !== '2') {          // saved before grass existed: green up the open dirt once
-      for (let i = 0; i < VOL; i++) if (world[i] === DIRT && (i >> 10 === WM || world[i + 1024] === AIR)) world[i] = GRASS;
-      worldDirty = true;
-    }
     return true;
   } catch (e) { return false; }
+}
+function placeAtSpawn() {                     // on top of whatever stands in the middle column
+  P.x = SPX + .5; P.z = SPZ + .5; P.y = topSolid(SPX, SPZ) + 1; P.g = 0;
 }
 
 // ---- player physics --------------------------------------------------------------
@@ -1262,7 +1659,7 @@ function target(wantWater) {                  // water is looked through unless 
   let ax = gx, ay = gy, az = gz;
   for (let n = 7; n--;) {
     const b = blockAt(gx, gy, gz);
-    if (b && (b !== WATER || wantWater) && (b !== GLASS || gx && gz && gx !== WM && gz !== WM)) return [gx, gy, gz, ax, ay, az];  // the cage can't be dug
+    if (b && (b !== WATER || wantWater) && (b !== GLASS || gx && gz && gx !== XM && gz !== ZM)) return [gx, gy, gz, ax, ay, az];  // the cage can't be dug
     ax = gx; ay = gy; az = gz;
     if (tmx < tmy) { if (tmx < tmz) { tmx += tdx; gx += stx; } else { tmz += tdz; gz += stz; } }
     else if (tmy < tmz) { tmy += tdy; gy += sty; } else { tmz += tdz; gz += stz; }
@@ -1293,7 +1690,7 @@ function mine(dt) {
     mineProg = 0; showHint('需要' + TMAT[bi.tr].n + '質以上的' + (bi.tl === 'p' ? '鎬' : '工具'), 1.2); return;
   }
   mineProg += dt * breakSpeed(b) / (bi.hd || .5) * (buffs.dig > 0 ? 1.6 : 1);
-  if (mineProg >= 1) { breakFarmBlock(i, b); setBlock(i, AIR); give(bi.dp || b, 1); mineProg = 0; mineIdx = -1; }
+  if (mineProg >= 1) { breakFarmBlock(i, b); setBlock(i, AIR); give(bi.dp || b, 1); oreEgg(i, b); mineProg = 0; mineIdx = -1; }
 }
 function place() {
   const o = target();
@@ -1302,7 +1699,7 @@ function place() {
   if (!placeable(sel)) return;                                       // empty hand, or holding a tool
   const ax = o[3], ay = o[4], az = o[5];
   const cur = blockAt(ax, ay, az);
-  if ((ax | ay | az) & ~WM || (cur && cur !== WATER && cur !== TALL)) return;   // outside the world, or occupied
+  if (outside(ax, ay, az) || (cur && cur !== WATER && cur !== TALL)) return;   // outside the world, or occupied
   if (SOLID[sel] && ax + 1 > P.x - PW && ax < P.x + PW && az + 1 > P.z - PW && az < P.z + PW &&
       ay + 1 > P.y && ay < P.y + PH) return;                         // inside the player
   setBlock(idx(ax, ay, az), sel);
@@ -1310,9 +1707,10 @@ function place() {
 }
 function use1() { if (dead || paused) return; if (!melee()) holdMine = true; }   // hit a mob, else start mining
 function use1Up() { holdMine = false; mineProg = 0; mineIdx = -1; }
-function use2() {                             // right click / E: sleep, harvest, eat, shoot, farm tools, else place
+function use2() {                             // right click / E: pets, sleep, harvest, eat, shoot, farm tools, else place
   if (dead || paused) return;
-  const held = heldItem(), it = info(held), o = target(held === 161);
+  const held = heldItem(), it = info(held), o = target(held === 161), pet = pickPet(o);
+  if (pet && petUse(pet, held)) return;
   const i = o ? idx(o[0], o[1], o[2]) : -1, b = o ? world[i] : AIR;
   if (b === BED) return sleep();
   if (b >= CROP0 && stageOf(b) === 3) return harvest(i, true);
@@ -1322,7 +1720,7 @@ function use2() {                             // right click / E: sleep, harvest
   if (held === 161) { if (b === WATER) { setBlock(i, AIR); swapHeld(162); } return; }
   if (held === 162) {
     const cur = blockAt(o[3], o[4], o[5]);
-    if (!((o[3] | o[4] | o[5]) & ~WM) && (cur === AIR || cur === TALL)) { setBlock(idx(o[3], o[4], o[5]), WATER); swapHeld(161); }
+    if (!outside(o[3], o[4], o[5]) && (cur === AIR || cur === TALL)) { setBlock(idx(o[3], o[4], o[5]), WATER); swapHeld(161); }
     return;
   }
   if (it.kind === 'h') { if (!till(o, it.tier)) showHint('草地或泥土才能翻土', 1.2); return; }
@@ -1352,22 +1750,23 @@ function mobMove(m, dx, dy, dz) {             // axis-separated AABB move
   if (mobHits(m)) { m.y -= dy; if (dy < 0) m.gr = 1; m.vy = 0; }
   else m.gr = 0;
 }
-function spawnMob() {                         // night only, on solid ground, in the dark, away from the player
+function spawnMob() {                         // night only, on solid ground, in the dark, 10–30 blocks from the player
   if (mobs.length >= MOB_MAX) return;
   for (let tries = 8; tries--;) {
-    const x = 1 + Math.random() * (WS - 2) | 0, z = 1 + Math.random() * (WS - 2) | 0;
+    const a = Math.random() * 6.2832, r = 10 + Math.random() * 20;
+    const x = P.x + Math.cos(a) * r | 0, z = P.z + Math.sin(a) * r | 0;
+    if (x < 1 || z < 1 || x > SX - 2 || z > SZ - 2) continue;
     let y = -1;
-    for (let k = WS - 2; k > 0; k--) if (solidAt(x, k, z) && !solidAt(x, k + 1, z) && !solidAt(x, k + 2, z)) { y = k + 1; break; }
-    if (y < 0 || lightAt(x, y, z) > 6) continue;                    // torchlight keeps them away
-    const dx = x + .5 - P.x, dz = z + .5 - P.z, d2 = dx * dx + dz * dz;
-    if (d2 < 100 || d2 > 900) continue;                              // not on top of the player, not absurdly far
+    for (let k = SY - 3; k > 0; k--) if (solidAt(x, k, z) && !solidAt(x, k + 1, z) && !solidAt(x, k + 2, z)) { y = k + 1; break; }
+    if (y < 0 || lightAt(x, y, z) > 6 || blockAt(x, y, z) === WATER) continue;   // torchlight keeps them away
+    if (petNear('dragon', x + .5, y, z + .5, 16, 16)) continue;       // and so does a tamed dragon
     mobs.push({ x: x + .5, y, z: z + .5, vy: 0, hp: 12, gr: 0, ht: 0, ck: 0, jc: 0, bn: 0 });
     return;
   }
 }
-function hurtMob(m, dmg) {                    // damage with knockback; true when it dies
+function hurtMob(m, dmg, fx = P.x, fz = P.z) {   // damage with knockback away from whoever hit it; true when it dies
   m.hp -= dmg; m.ht = .25;
-  const dx = m.x - P.x, dz = m.z - P.z, l = Math.sqrt(dx * dx + dz * dz) || 1;
+  const dx = m.x - fx, dz = m.z - fz, l = Math.sqrt(dx * dx + dz * dz) || 1;
   m.x += dx / l * .45; m.z += dz / l * .45;
   if (mobHits(m)) { m.x -= dx / l * .45; m.z -= dz / l * .45; }
   if (m.hp <= 0) { give(102, 1 + (Math.random() < .35 ? 1 : 0)); return true; }
@@ -1418,7 +1817,7 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
       if (m.gr && !m.jc && Math.abs(m.x - px) + Math.abs(m.z - pz) < Math.abs(mx) + Math.abs(mz) - 1e-4) { m.vy = 7.4; m.jc = .6; }  // blocked: hop
       if (d < 1.5 && Math.abs(dy) < 2 && !m.ck) { m.ck = 1; hurtPlayer(3); }
     } else mobMove(m, 0, m.vy * h, 0);
-    if (m.y < -8) mobs.splice(i, 1);
+    if (m.y < -8 || Math.abs(m.x - P.x) > 64 || Math.abs(m.z - P.z) > 64) mobs.splice(i, 1);   // fell out, or left far behind
   }
   for (let i = arrows.length; i--;) {
     const a = arrows[i];
@@ -1426,7 +1825,7 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
     if (a.life <= 0) { arrows.splice(i, 1); continue; }
     a.vy -= 16 * h;
     const nx = a.x + a.vx * h, ny = a.y + a.vy * h, nz = a.z + a.vz * h;
-    if ((nx | ny | nz) & ~WM || solidAt(nx, ny, nz)) { arrows.splice(i, 1); continue; }
+    if (outside(nx | 0, ny | 0, nz | 0) || solidAt(nx, ny, nz)) { arrows.splice(i, 1); continue; }
     let hit = false;
     for (let j = mobs.length; j--;) {
       const m = mobs[j];
@@ -1449,8 +1848,7 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
 // ---- farming: growth, water, hybrids, seasons, and what the player can do with it ----
 const grow = new Float32Array(VOL);           // crop cells: progress 0..1 (1 = ripe)
 const wetT = new Float32Array(VOL);           // farmland: game hours it stays wet
-const nearWater = new Uint8Array(VOL);        // farmland kept wet by water within 4 or a sprinkler
-let coins = 100, day = 1, farmHours = 0, farmAcc = 0, waterVer = 0, maskVer = -1;
+let coins = 100, day = 1, farmHours = 0, farmAcc = 0, waterVer = 0;
 const discovered = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
 const harvested = new Array(CROPS.length).fill(0);
 const buffs = {};                             // effect → seconds left
@@ -1462,89 +1860,124 @@ function resetFarm() {
   grow.fill(0); wetT.fill(0); coins = 100; day = 1; farmHours = 0;
   discovered.clear(); for (let i = 0; i < 8; i++) discovered.add(i);
   harvested.fill(0); for (const k in buffs) delete buffs[k];
+  pets.length = 0; petSeen.clear(); petTamed.clear();
   waterVer++;
 }
-const sprinklers = [];                        // [x, y, z, reach], for the spray drawn over the view
-function buildWetMask() {                     // farmland within 4 of water (same level or one below), or in a sprinkler's reach
-  nearWater.fill(0); sprinklers.length = 0;
-  for (let i = 0; i < VOL; i++) {
-    const b = world[i];
-    if (b !== WATER && b !== SPRINK && b !== SPRINK2) continue;
-    const x = i & WM, z = i >> 5 & WM, y = i >> 10, r = b === WATER ? 4 : b === SPRINK ? 1 : 2;
-    if (b !== WATER) sprinklers.push([x, y, z, r]);
-    for (let dy = -1; dy <= 0; dy++) for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) {
-      const X = x + dx, Y = y + dy, Z = z + dz;
-      if ((X | Y | Z) & ~WM) continue;
-      nearWater[Y << 10 | Z << 5 | X] = 1;
-    }
+// farmland and crop cells, found by one sweep of the world after any edit made outside the farm code
+let farmList = [], farmListVer = -1;
+function farmCells() {
+  if (farmListVer !== worldVer) {
+    farmList = [];
+    for (let i = 0; i < VOL; i++) if (isFarmCell(world[i])) farmList.push(i);
+    farmListVer = worldVer;
   }
-  maskVer = waterVer;
+  return farmList;
+}
+// farmland stays wet with water within 4 (same level or one up), or in a sprinkler's 3×3 / 5×5
+const wetCache = new Map();
+let wetCacheVer = -1;
+function nearWaterAt(i) {
+  if (wetCacheVer !== waterVer) { wetCache.clear(); wetCacheVer = waterVer; }
+  let v = wetCache.get(i);
+  if (v === undefined) {
+    v = 0;
+    const x = ixOf(i), y = iyOf(i), z = izOf(i);
+    for (let dy = 0; dy <= 1 && !v; dy++) for (let dz = -4; dz <= 4 && !v; dz++) for (let dx = -4; dx <= 4; dx++) {
+      const b = blockAt(x + dx, y + dy, z + dz), r = Math.max(Math.abs(dx), Math.abs(dz));
+      if (b === WATER || (b === SPRINK2 && r <= 2) || (b === SPRINK && r <= 1)) { v = 1; break; }
+    }
+    wetCache.set(i, v);
+  }
+  return v;
+}
+const sprinklers = [];                        // [x, y, z, reach], for the spray over the view and the farm map
+let sprinkVer = -1;
+function sprinklerList() {
+  if (sprinkVer !== waterVer) {
+    sprinklers.length = 0;
+    for (let i = 0; i < VOL; i++) { const b = world[i]; if (b === SPRINK || b === SPRINK2) sprinklers.push([ixOf(i), iyOf(i), izOf(i), b === SPRINK ? 1 : 2]); }
+    sprinkVer = waterVer;
+  }
+  return sprinklers;
 }
 function skyOpen(i) {                         // nothing opaque between this cell and the sky (glass counts as open)
-  for (i += 1024; i < VOL; i += 1024) if (SOLID[world[i]] && world[i] !== GLASS && world[i] !== LEAF) return false;
+  for (i += LAYER; i < VOL; i += LAYER) if (SOLID[world[i]] && world[i] !== GLASS && world[i] !== LEAF) return false;
   return true;
 }
 function underGlass(i) {                      // greenhouse: the first solid thing above is glass
-  for (i += 1024; i < VOL; i += 1024) { const b = world[i]; if (b === GLASS) return true; if (SOLID[b]) return false; }
+  for (i += LAYER; i < VOL; i += LAYER) { const b = world[i]; if (b === GLASS) return true; if (SOLID[b]) return false; }
   return false;
 }
 function waterBeside(i) {                     // a water block right next to this farmland (paddy crops)
-  const x = i & WM, z = i >> 5 & WM;
-  return x > 0 && world[i - 1] === WATER || x < WM && world[i + 1] === WATER ||
-         z > 0 && world[i - 32] === WATER || z < WM && world[i + 32] === WATER;
+  const x = ixOf(i), z = izOf(i);
+  return x > 0 && world[i - 1] === WATER || x < XM && world[i + 1] === WATER ||
+         z > 0 && world[i - SX] === WATER || z < ZM && world[i + SX] === WATER;
 }
 function cropLit(i) { return (sky.sunEl > 0 && skyOpen(i)) || torch[i] >= 8; }
 
 // growth rate multipliers for one crop cell, with the reason text shown by the crosshair tip and the farm map
 function growInfo(i) {
-  const c = cropOf(world[i]), cr = CROPS[c], soil = i >= 1024 ? world[i - 1024] : AIR;
+  const c = cropOf(world[i]), cr = CROPS[c], soil = i >= LAYER ? world[i - LAYER] : AIR;
   const out = { rate: 1, notes: [] };
   if (!isWetFarm(soil)) { out.rate *= .25; out.notes.push('缺水'); }
-  if (cr.w && !waterBeside(i - 1024)) { out.rate *= .1; out.notes.push('旁邊要有水'); }
+  if (cr.w && !waterBeside(i - LAYER)) { out.rate *= .1; out.notes.push('旁邊要有水'); }
   if (!inSeason(c)) { if (underGlass(i)) out.notes.push('溫室'); else { out.rate *= .25; out.notes.push('非當季'); } }
   if (!cropLit(i)) { out.rate *= .4; out.notes.push('太暗'); }
   if (soil === FARM_F || soil === FARM_FW) { out.rate *= 1.5; out.notes.push('施肥'); }
+  if (petNear('grow', ixOf(i) + .5, iyOf(i), izOf(i) + .5, 6)) { out.rate *= 1.3; out.notes.push('兔子幫忙'); }
   return out;
 }
 
 // advance every farm cell by dH game hours
 function tickFarm(dH) {
   if (dH <= 0) return;
-  if (maskVer !== waterVer) buildWetMask();
-  const rain = weather === 1;
-  let changed = false, relit = false;
-  for (let i = 0; i < VOL; i++) {
-    const b = world[i];
-    if (b < FARM) continue;
-    if (b <= FARM_FW) {                         // farmland: wetness, then maybe a hybrid on the empty cell above
-      if (nearWater[i] || (rain && skyOpen(i))) wetT[i] = 24;
+  for (const p of pets) if (!p.wild && p.grown < 1) p.grown = Math.min(1, p.grown + dH / 48);   // babies grow up in two days
+  const list = farmCells(), rain = weather === 1, born = [], relit = [], hatch = [];
+  let changed = false, gone = false;
+  for (let k = 0; k < list.length; k++) {
+    const i = list[k], b = world[i];
+    if (b >= FARM && b <= FARM_FW) {            // farmland: wetness, then maybe a hybrid on the empty cell above
+      if (nearWaterAt(i) || (rain && skyOpen(i)) || petNear('wet', ixOf(i) + .5, iyOf(i) + 1, izOf(i) + .5, 3)) wetT[i] = 24;
       else if (wetT[i] > 0) wetT[i] = Math.max(0, wetT[i] - dH);
       const fert = b >= FARM_F, want = wetT[i] > 0 ? (fert ? FARM_FW : FARM_W) : (fert ? FARM_F : FARM);
       if (want !== b) { world[i] = want; changed = true; }
-      if (i >> 10 < WM && world[i + 1024] === AIR && tryBreed(i + 1024, dH, wetT[i] > 0)) changed = true;
+      if (i < VOL - LAYER && world[i + LAYER] === AIR && tryBreed(i + LAYER, dH, wetT[i] > 0)) { changed = true; born.push(i + LAYER); }
     } else if (b >= CROP0) {                    // crop: needs farmland underneath, grows toward ripe
-      if (i < 1024 || !isFarm(world[i - 1024])) { relit = relit || glows(b); world[i] = AIR; grow[i] = 0; changed = true; continue; }
+      if (i < LAYER || !isFarm(world[i - LAYER])) { if (glows(b)) relit.push(i); world[i] = AIR; grow[i] = 0; changed = gone = true; continue; }
       if (stageOf(b) === 3) continue;
       const c = cropOf(b);
       grow[i] = Math.min(1, grow[i] + dH / CROPS[c].g * growInfo(i).rate);
       const st = grow[i] >= 1 ? 3 : Math.min(2, grow[i] * 3 | 0);
-      if (st !== stageOf(b)) { world[i] = cropId(c, st); changed = true; relit = relit || glows(world[i]); }
+      if (st !== stageOf(b)) { world[i] = cropId(c, st); changed = true; if (glows(world[i])) relit.push(i); }
+    } else if (isEgg(b)) {                      // a pet egg warms up (twice as fast next to a torch), then hatches
+      grow[i] = Math.min(1, grow[i] + dH / EGG_HOURS[b] * (torch[i] >= 12 ? 2 : 1));
+      if (grow[i] >= 1 && tamedPets().length + hatch.length < PET_MAX) hatch.push(i);
     }
   }
-  if (changed) { worldVer++; worldDirty = true; }
-  if (relit) relight();
+  for (const i of hatch) { hatchEgg(i); changed = gone = true; geomVer++; }
+  if (changed) {
+    const inSync = farmListVer === worldVer;
+    worldVer++; worldDirty = true;
+    if (inSync) {                               // keep the list without another sweep
+      if (gone) farmList = farmList.filter(i => isFarmCell(world[i]));
+      for (const i of born) farmList.push(i);
+      farmListVer = worldVer;
+    }
+  }
+  for (const i of relit) relightAround(i);
 }
 // an empty farm cell next to two ripe crops may sprout their hybrid (or more of the same crop)
 function tryBreed(slot, dH, wet) {
-  const x = slot & WM, z = slot >> 5 & WM, ripe = [];
+  const x = ixOf(slot), z = izOf(slot), ripe = [];
   const look = j => { const b = world[j]; if (b >= CROP0 && stageOf(b) === 3) ripe.push(cropOf(b)); };
-  if (x > 0) look(slot - 1); if (x < WM) look(slot + 1); if (z > 0) look(slot - 32); if (z < WM) look(slot + 32);
+  if (x > 0) look(slot - 1); if (x < XM) look(slot + 1); if (z > 0) look(slot - SX); if (z < ZM) look(slot + SX);
   if (ripe.length < 2) return false;
   const i = Math.random() * ripe.length | 0, j = (i + 1 + (Math.random() * (ripe.length - 1) | 0)) % ripe.length;
   const a = ripe[i], b = ripe[j];
   const child = a === b ? a : HYBRID[Math.min(a, b) + ',' + Math.max(a, b)];
   if (child === undefined) return false;
-  const lambda = (a === b ? .6 : 1.5 / CROPS[child].tier) * (wet ? 1 : .3) * (buffs.breed > 0 ? 2.5 : 1);
+  const lambda = (a === b ? .6 : 1.5 / CROPS[child].tier) * (wet ? 1 : .3) * (buffs.breed > 0 ? 2.5 : 1) *
+                 (petNear('pollen', x + .5, iyOf(slot), z + .5, 8) ? 2 : 1);   // a tamed bee nearby
   if (Math.random() >= 1 - Math.exp(-lambda * dH)) return false;
   world[slot] = cropId(child, 0); grow[slot] = 0;
   if (!discovered.has(child)) {
@@ -1565,7 +1998,7 @@ function newDay() {                           // midnight: next day, maybe a new
 // ---- things the player does ----
 function farmAt(o) {                          // the farmland a target points at: the block itself or the soil under a crop
   let i = idx(o[0], o[1], o[2]);
-  if (!isFarm(world[i]) && (world[i] >= CROP0 || world[i] === TALL) && i >= 1024) i -= 1024;
+  if (!isFarm(world[i]) && (world[i] >= CROP0 || world[i] === TALL) && i >= LAYER) i -= LAYER;
   return isFarm(world[i]) ? i : -1;
 }
 function till(o, tier) {                      // hoe: grass or dirt with room above → farmland (iron and up: 3×3)
@@ -1573,10 +2006,10 @@ function till(o, tier) {                      // hoe: grass or dirt with room ab
   let n = 0;
   for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) {
     const x = x0 + dx, z = z0 + dz;
-    if ((x | z) & ~WM) continue;
-    const i = idx(x, y, z), b = world[i], up = y < WM ? world[i + 1024] : AIR;
+    if (outside(x, y, z)) continue;
+    const i = idx(x, y, z), b = world[i], up = y < YM ? world[i + LAYER] : AIR;
     if ((b === GRASS || b === DIRT) && (up === AIR || up === TALL)) {
-      if (up === TALL) world[i + 1024] = AIR;
+      if (up === TALL) world[i + LAYER] = AIR;
       world[i] = FARM; wetT[i] = 0; n++;
       puff(x + .5, y + 1.02, z + .5, '#7a5636', 5);
     }
@@ -1586,22 +2019,22 @@ function till(o, tier) {                      // hoe: grass or dirt with room ab
 }
 function plant(o, c) {
   const f = farmAt(o);
-  if (f < 0 || f >> 10 >= WM || (world[f + 1024] !== AIR && world[f + 1024] !== TALL)) return false;
-  world[f + 1024] = cropId(c, 0); grow[f + 1024] = 0;
+  if (f < 0 || f >= VOL - LAYER || (world[f + LAYER] !== AIR && world[f + LAYER] !== TALL)) return false;
+  world[f + LAYER] = cropId(c, 0); grow[f + LAYER] = 0;
   worldVer++; worldDirty = true;
   takeHeld();
-  puff((f & WM) + .5, (f >> 10) + 1.05, (f >> 5 & WM) + .5, '#6fbf4a', 5, .4, 1.4);
-  if (!inSeason(c) && !underGlass(f + 1024)) toast('⚠ ' + CROPS[c].n + '不是' + SEASONS[season()] + '天的作物,會長得很慢(溫室裡不受季節影響)');
+  puff(ixOf(f) + .5, iyOf(f) + 1.05, izOf(f) + .5, '#6fbf4a', 5, .4, 1.4);
+  if (!inSeason(c) && !underGlass(f + LAYER)) toast('⚠ ' + CROPS[c].n + '不是' + SEASONS[season()] + '天的作物,會長得很慢(溫室裡不受季節影響)');
   else if (CROPS[c].w && !waterBeside(f)) toast('💧 ' + CROPS[c].n + '要種在水旁邊(耕地緊鄰水方塊)');
   return true;
 }
 function waterAt(o) {                         // watering can: the 3×3 farmland around the target stays wet for a day
   const f = farmAt(o);
   if (f < 0) return false;
-  const x0 = f & WM, z0 = f >> 5 & WM, y = f >> 10;
+  const x0 = ixOf(f), z0 = izOf(f), y = iyOf(f);
   for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
     const x = x0 + dx, z = z0 + dz;
-    if ((x | z) & ~WM) continue;
+    if (outside(x, y, z)) continue;
     const i = idx(x, y, z);
     if (isFarm(world[i])) { wetT[i] = 24; world[i] = world[i] >= FARM_F ? FARM_FW : FARM_W; }
   }
@@ -1614,22 +2047,23 @@ function fertilize(o) {
   if (f < 0 || world[f] >= FARM_F) return false;
   world[f] += 2; worldVer++; worldDirty = true;           // FARM → FARM_F, FARM_W → FARM_FW
   takeHeld();
-  puff((f & WM) + .5, (f >> 10) + 1.05, (f >> 5 & WM) + .5, '#e8dfb8', 8);
+  puff(ixOf(f) + .5, iyOf(f) + 1.05, izOf(f) + .5, '#e8dfb8', 8);
   return true;
 }
 function harvest(i, replant) {                // ripe crop: produce + seeds; right-click replants it on the spot
-  const c = cropOf(world[i]), cr = CROPS[c], soil = world[i - 1024];
+  const c = cropOf(world[i]), cr = CROPS[c], soil = world[i - LAYER];
   const n = 1 + (Math.random() < .5) + (buffs.yield > 0 ? 1 : 0) + (soil >= FARM_F && Math.random() < .5);
   give(CROP_ITEM0 + c, n);
   const seeds = replant ? (Math.random() < .3 ? 1 : 0) : 1 + (Math.random() < .5);
   if (seeds) give(SEED0 + c, seeds);
   harvested[c]++;
+  if (cr.tier >= 4 && Math.random() < .03) { give(EGG2, 1); toast('🥚 在' + cr.n + '底下找到一顆稀有寵物蛋!', 'big'); }
   if (replant) { grow[i] = cr.r || 0; world[i] = cropId(c, cr.r ? Math.min(2, cr.r * 3 | 0) : 0); }
   else { world[i] = AIR; grow[i] = 0; }
-  if (cr.glow) relight();
+  if (cr.glow) relightAround(i);
   worldVer++; worldDirty = true; swingT = .18;
   toast('+' + n + ' ' + cr.n + (seeds ? '  +' + seeds + ' 種子' : ''));
-  puff((i & WM) + .5, (i >> 10) + .4, (i >> 5 & WM) + .5, 'rgb(' + cr.f.join(',') + ')', 10, .6, 2.6);
+  puff(ixOf(i) + .5, iyOf(i) + .4, izOf(i) + .5, 'rgb(' + cr.f.join(',') + ')', 10, .6, 2.6);
 }
 function breakFarmBlock(i, b) {               // drops for crops, weeds and farmland; true when handled here
   if (b >= CROP0) {
@@ -1639,15 +2073,16 @@ function breakFarmBlock(i, b) {               // drops for crops, weeds and farm
   }
   if (b === TALL) {                           // weeds sometimes hide a seed, usually one that likes this season
     setBlock(i, AIR);
-    puff((i & WM) + .5, (i >> 10) + .3, (i >> 5 & WM) + .5, '#5f9f3c', 6);
+    puff(ixOf(i) + .5, iyOf(i) + .3, izOf(i) + .5, '#5f9f3c', 6);
     if (Math.random() < .35) {
       let c = Math.random() * 8 | 0;
       if (!inSeason(c)) c = Math.random() * 8 | 0;
       give(SEED0 + c, 1); toast('🌱 撿到 ' + CROPS[c].n + '種子');
     }
+    if (Math.random() < .015) { give(EGG, 1); toast('🥚 草叢裡藏著一顆寵物蛋!放在地上就會慢慢孵化', 'big'); }
     return true;
   }
-  if (isFarm(b) && i >> 10 < WM && world[i + 1024] >= CROP0) breakFarmBlock(i + 1024, world[i + 1024]);
+  if (isFarm(b) && i < VOL - LAYER && world[i + LAYER] >= CROP0) breakFarmBlock(i + LAYER, world[i + LAYER]);
   return false;
 }
 function sleep() {
@@ -1659,6 +2094,7 @@ function sleep() {
   mobs.length = 0; arrows.length = 0; hp = maxHp();
   fadeSleep();
   toast('☀ 早安!第 ' + day + ' 天 · ' + SEASONS[season()] + '天', 'big');
+  petsMorning();
   saveGame();
 }
 function eat(id) {
@@ -1713,8 +2149,8 @@ function buyItem(id, price, n) {
 }
 function cookDish(j) {
   const d = DISHES[j];
-  if (!d.i.every(([c, k]) => has(CROP_ITEM0 + c, k)) || !roomFor(DISH0 + j, 1)) return;
-  for (const [c, k] of d.i) take(CROP_ITEM0 + c, k);
+  if (!d.i.every(([c, k]) => has(ingId(c), k)) || !roomFor(DISH0 + j, 1)) return;
+  for (const [c, k] of d.i) take(ingId(c), k);
   give(DISH0 + j, 1);
   toast('🍳 做好了 ' + d.n);
   drawCook();
@@ -1723,27 +2159,442 @@ function cookDish(j) {
 // ---- save / load of the farm (localStorage voxelF) ----
 function saveFarm() {
   const g = [], w = [];
-  for (let i = 0; i < VOL; i++) {
-    if (world[i] >= CROP0 && grow[i] > 0) g.push(i, Math.round(grow[i] * 1000));
+  for (const i of farmCells()) {
+    if ((world[i] >= CROP0 || isEgg(world[i])) && grow[i] > 0) g.push(i, Math.round(grow[i] * 1000));
     else if (isFarm(world[i]) && wetT[i] > 0) w.push(i, Math.round(wetT[i] * 10));
   }
-  localStorage.voxelF = JSON.stringify({ c: coins, d: day, g, w, disc: [...discovered], h: harvested, b: buffs, wx: weather });
+  const f2 = v => Math.round(v * 100) / 100;
+  const pp = tamedPets().map(p => ({ s: p.s, x: f2(p.x), y: f2(p.y), z: f2(p.z), n: p.name, a: p.aff, f: p.fed, p: p.pat, m: p.mode,
+                                     hx: f2(p.hx), hy: f2(p.hy), hz: f2(p.hz), g: Math.round(p.grown * 1000) / 1000, tr: p.tr }));
+  localStorage.voxelF3 = JSON.stringify({ c: coins, d: day, g, w, disc: [...discovered], h: harvested, b: buffs, wx: weather,
+                                          pets: pp, seen: [...petSeen], tamed: [...petTamed] });
 }
-function loadFarm() {                         // false: this save predates farming
-  const f = JSON.parse(localStorage.voxelF || 'null');
+function loadFarm(json, at = i => i) {        // false: no farm saved yet · at: turns a saved cell index into this world's
+  const f = JSON.parse(json || 'null');
   if (!f) return false;
   if (Number.isFinite(f.c)) coins = f.c;
   if (Number.isInteger(f.d) && f.d > 0) day = f.d;
-  for (let k = 0; k + 1 < (f.g || []).length; k += 2) grow[f.g[k]] = f.g[k + 1] / 1000;
-  for (let k = 0; k + 1 < (f.w || []).length; k += 2) wetT[f.w[k]] = f.w[k + 1] / 10;
+  for (let k = 0; k + 1 < (f.g || []).length; k += 2) grow[at(f.g[k])] = f.g[k + 1] / 1000;
+  for (let k = 0; k + 1 < (f.w || []).length; k += 2) wetT[at(f.w[k])] = f.w[k + 1] / 10;
   for (const c of f.disc || []) if (CROPS[c]) discovered.add(c);
   (f.h || []).forEach((n, c) => { if (c < harvested.length && Number.isFinite(n)) harvested[c] = n; });
   for (const k in f.b || {}) if (FX_NAME[k] && f.b[k] > 0) buffs[k] = f.b[k];
   if (f.wx >= 0 && f.wx <= 2) weather = f.wx;
+  pets.length = 0;
+  for (const q of f.pets || []) {             // tamed pets (wild ones are not kept: new ones turn up)
+    if (!q || !PETS[q.s] || ![q.x, q.y, q.z].every(Number.isFinite)) continue;
+    const p = newPet(q.s, q.x, q.y, q.z, false), num = (v, d) => Number.isFinite(v) ? v : d;
+    p.name = String(q.n || '').slice(0, 12) || petName();
+    p.aff = Math.max(0, Math.min(100, num(q.a, 20))); p.fed = num(q.f, 0); p.pat = num(q.p, 0); p.mode = q.m ? 1 : 0; p.tr = num(q.tr, 0);
+    p.hx = num(q.hx, q.x); p.hy = num(q.hy, q.y); p.hz = num(q.hz, q.z); p.grown = Math.max(.55, Math.min(1, num(q.g, 1)));
+    pets.push(p);
+  }
+  for (const k of f.seen || []) if (PETS[k]) petSeen.add(k);
+  for (const k of f.tamed || []) if (PETS[k]) { petTamed.add(k); petSeen.add(k); }
+  if (Array.isArray(f.pets)) petNews = false;
   return true;
 }
 function starterPack() {                      // farming tools for a save that predates farming
   for (const [id, n] of [[150, 1], [160, 1], [SEED0, 8], [SEED0 + 1, 4], [SEED0 + 2, 4]]) give(id, n);
+}
+
+// ---- pets: wild animals turn up by habitat, time of day and season; feed one its favourite food (a few times,
+//      maybe) and it follows you. Tamed ones help on the farm, bring things every morning and chase monsters ----
+// pet: id · s kind · x, y, z feet · a heading · vy · gr standing on something · wild · name · aff affection 0–100 ·
+//      fed / pat: the day it was last fed / patted · mode 0 follows you, 1 stays near hx, hy, hz · grown .55 → 1 ·
+//      t walk phase · amp leg swing · cd bite cooldown · foe the monster it chases · tr truffles today ·
+//      goal / wt: where it strolls to and for how long · life: seconds a wild one has been around · stuck · tries
+const pets = [], PET_WILD_MAX = 5, PET_MAX = 20;
+const petSeen = new Set(), petTamed = new Set();   // the 圖鑑: kinds you have met, kinds you have tamed
+let petSeq = 0, petSpawnT = 2, petThinkT = 0;
+const PET_TIME = { day: () => sky.dayf > .45, dusk: () => sky.sunEl < .35, night: () => sky.dayf < .35 };
+const HAB_NAME = { grass: '草地', forest: '樹林裡', shore: '水邊的草地', beach: '水邊的沙灘' };
+const TIME_NAME = { day: '白天', dusk: '傍晚到夜裡', night: '夜裡' };
+const petR = p => PETS[p.s].r * p.grown, petH = p => PETS[p.s].h * p.grown;
+const tamedPets = () => pets.filter(p => !p.wild);
+
+function newPet(s, x, y, z, wild) {
+  return { id: ++petSeq, s, x, y, z, a: Math.random() * 6.2832, vy: 0, gr: 0, wild, name: '', aff: 0, fed: 0, pat: 0,
+           mode: 0, hx: x, hy: y, hz: z, grown: 1, t: 0, amp: 0, cd: 0, foe: null, tr: 0, goal: null, wt: 0, life: 0,
+           stuck: 0, tries: 0, at: Math.random(), lift: 0, side: 1, sideT: 0 };
+}
+function petName() {                          // a name none of your pets has yet
+  const used = new Set(pets.map(p => p.name)), free = PET_NAMES.filter(n => !used.has(n));
+  return free.length ? free[Math.random() * free.length | 0] : PET_NAMES[Math.random() * PET_NAMES.length | 0] + (pets.length + 1);
+}
+
+// habitats: grass · forest (grass under a tree) · shore (grass near water) · beach (sand near water)
+function groundAt(x, z) {                     // what an animal would stand on in this column, looking past tree tops
+  let y = YM, leafy = false;
+  for (; y > 0; y--) {
+    const b = world[idx(x, y, z)];
+    if (b === LEAF || b === WOOD) { leafy = true; continue; }
+    if (SOLID[b] || b === WATER) break;
+  }
+  return { y, b: world[idx(x, y, z)], leafy };
+}
+function waterNear(x, y, z, r) {
+  for (let dy = -3; dy <= 0; dy++) for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++)
+    if (blockAt(x + dx, y + dy, z + dz) === WATER) return true;
+  return false;
+}
+function habitatAt(x, z) {
+  const g = groundAt(x, z), hab = [];
+  if (g.b === GRASS) {
+    if (g.leafy) hab.push('forest');
+    else { hab.push('grass'); if (waterNear(x, g.y, z, 4)) hab.push('shore'); }
+  } else if (g.b === SAND && waterNear(x, g.y, z, 3)) hab.push('beach');
+  return { y: g.y, hab };
+}
+function spawnAnimal() {                      // every few seconds: maybe a wild animal, 14–34 blocks away and out of sight
+  let wild = 0;
+  for (const p of pets) if (p.wild) wild++;
+  if (wild >= PET_WILD_MAX) return;
+  for (let tries = 6; tries--;) {
+    const ang = Math.random() * 6.2832, r = 14 + Math.random() * 20;
+    if (Math.sin(ang + P.a) > .6 && r < 28) continue;                 // not right in front of you
+    const x = P.x + Math.cos(ang) * r | 0, z = P.z + Math.sin(ang) * r | 0;
+    if (x < 2 || z < 2 || x > SX - 3 || z > SZ - 3) continue;
+    const { y, hab } = habitatAt(x, z);
+    if (!hab.length || y >= YM - 3 || SOLID[world[idx(x, y + 1, z)]] || SOLID[world[idx(x, y + 2, z)]]) continue;
+    if (hab.length === 1 && hab[0] === 'grass' && tries > 1 && Math.random() < .5) continue;   // woods and water's edges get a fair share
+    const pool = [];
+    let total = 0;
+    for (const [s, d] of PETS.entries()) {
+      if (!d.w || !d.hab.some(hh => hab.includes(hh)) || !PET_TIME[d.time]() || !((d.sea || 15) >> season() & 1)) continue;
+      pool.push(s, d.w); total += d.w;
+    }
+    if (!total) continue;
+    let roll = Math.random() * total, s = pool[0];
+    for (let k = 0; k < pool.length; k += 2) if ((roll -= pool[k + 1]) < 0) { s = pool[k]; break; }
+    pets.push(newPet(s, x + .5, y + 1 + (PETS[s].fly || 0) * .6, z + .5, true));
+    return;
+  }
+}
+
+// ---- movement: boxes against the blocks, like the mobs; flyers hover, swimmers float, rabbits bound ----
+function petHits(p) {
+  const r = petR(p), h = petH(p);
+  for (let y = p.y | 0; y <= (p.y + h | 0); y++)
+    for (let z = p.z - r | 0; z <= (p.z + r | 0); z++)
+      for (let x = p.x - r | 0; x <= (p.x + r | 0); x++)
+        if (solidAt(x, y, z)) return true;
+  return false;
+}
+function petMove(p, dx, dy, dz) {
+  p.x += dx; if (petHits(p)) p.x -= dx;
+  p.z += dz; if (petHits(p)) p.z -= dz;
+  p.y += dy;
+  if (petHits(p)) {
+    p.y -= dy;
+    if (dy < 0) {                             // landed: settle exactly on the block top
+      p.gr = 1;
+      const y0 = p.y, fy = Math.floor(y0);
+      if (y0 - fy < .1) { p.y = fy; if (petHits(p)) p.y = y0; }
+    }
+    p.vy = 0;
+  } else p.gr = 0;
+}
+function groundBelow(p) {                     // the height of the first solid (or water) surface under a flyer
+  const x = p.x | 0, z = p.z | 0;
+  for (let y = Math.min(YM, p.y | 0), n = 0; y > 0 && n < 20; y--, n++) {
+    const b = blockAt(x, y - 1, z);
+    if (SOLID[b] || b === WATER) return y;
+  }
+  return p.y - 20;
+}
+function petTeleport(p) {                     // pops up next to you (behind you, if there is room)
+  const pos = [p.x, p.y, p.z];
+  puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
+  const d = PETS[p.s], fx = Math.sin(P.a), fz = Math.cos(P.a);
+  for (const [bk, sd] of [[1.6, 0], [1.3, 1.1], [1.3, -1.1], [0, 1.5], [0, -1.5], [-1.5, 0]]) {
+    const x = P.x - fx * bk + fz * sd, z = P.z - fz * bk - fx * sd;
+    for (const dy of [0, 1, -1]) {
+      const y = Math.floor(P.y) + dy;
+      p.x = x; p.z = z; p.y = y + (d.fly ? d.fly * .6 : 0);
+      if (!petHits(p) && (d.fly || solidAt(x, y - 1, z))) {
+        p.vy = 0; p.stuck = 0; p.goal = null;
+        puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
+        return;
+      }
+    }
+  }
+  const [x0, y0, z0] = pos;                    // nowhere to stand: on your spot, if it fits, else it stays put for now
+  p.x = P.x; p.y = P.y; p.z = P.z;
+  if (petHits(p)) { p.x = x0; p.y = y0; p.z = z0; } else { p.vy = 0; p.stuck = 0; }
+}
+function petWander(p, h, cx, cz, rad) {       // strolls between random spots near (cx, cz), with pauses; null = standing
+  if ((p.wt -= h) <= 0) {
+    p.wt = 2 + Math.random() * 4;
+    p.goal = null;
+    if (Math.random() < .6) {
+      const x = Math.max(1.5, Math.min(SX - 1.5, cx + (Math.random() * 2 - 1) * rad));
+      const z = Math.max(1.5, Math.min(SZ - 1.5, cz + (Math.random() * 2 - 1) * rad));
+      const d = PETS[p.s];
+      if (d.fly || d.abil === 'weed' || d.abil === 'wet' || groundAt(x | 0, z | 0).b !== WATER) p.goal = [x, z];
+    }
+  }
+  if (p.goal && Math.hypot(p.goal[0] - p.x, p.goal[1] - p.z) < .3) p.goal = null;
+  return p.goal;
+}
+function petStep(p, h, gx, gz, speed, look) { // one physics step toward (gx, gz); look: what to face when standing
+  const d = PETS[p.s], ph = petH(p);
+  const ddx = gx - p.x, ddz = gz - p.z, dl = Math.sqrt(ddx * ddx + ddz * ddz), go = speed > 0 && dl > .05;
+  const wet = blockAt(p.x | 0, p.y + ph * .4 | 0, p.z | 0) === WATER, k = wet && !d.fly ? .6 : 1;
+  let ux = go ? ddx / dl : 0, uz = go ? ddz / dl : 0;
+  if (go && p.sideT > 0) {                    // walking around something too tall to hop onto
+    p.sideT -= h;
+    const sx = ux * .3 - uz * p.side, sz = uz * .3 + ux * p.side, sl = Math.hypot(sx, sz);
+    ux = sx / sl; uz = sz / sl;
+  }
+  const vx = ux * speed * k, vz = uz * speed * k;
+  const ta = go ? Math.atan2(vx, vz) : look ? Math.atan2(look[0] - p.x, look[1] - p.z) : p.a;
+  let da = (ta - p.a) % 6.28319;
+  if (da > 3.14159) da -= 6.28319; else if (da < -3.14159) da += 6.28319;
+  p.a = (p.a + da * Math.min(1, h * 9)) % 6.28319;
+  if (d.fly) {                                // flyers hover above the ground, bobbing, and climb over what is in the way
+    const goal = groundBelow(p) + d.fly * (.5 + p.grown * .5) + Math.sin(p.t * .35) * .12 + p.lift;
+    p.vy = Math.max(-2.5, Math.min(4, (goal - p.y) * 3));
+  } else if (wet) p.vy = Math.min(p.vy + 24 * h, 1.4);   // floats up to the surface
+  else p.vy = Math.max(p.vy - 18 * h, -30);
+  const ox = p.x, oz = p.z;
+  petMove(p, vx * h, p.vy * h, vz * h);
+  const moved = Math.hypot(p.x - ox, p.z - oz);
+  if (go && moved < speed * k * h * .5) {     // something in the way: hop onto it, or walk around it (flyers climb)
+    if (d.fly) p.lift = Math.min(7, p.lift + 5 * h);
+    else if (p.gr) { p.vy = 6.8; if (p.stuck > .3 && p.sideT <= 0) { p.side = Math.random() < .5 ? 1 : -1; p.sideT = .7; } }
+    p.stuck += h;
+  } else {
+    p.stuck = Math.max(0, p.stuck - h);
+    if (d.fly) p.lift = Math.max(0, p.lift - 1.2 * h);
+  }
+  if (d.hop && go && p.gr && !wet) p.vy = Math.max(p.vy, 4.2);   // rabbits bound along
+  p.amp += ((go && moved > 1e-3 && !d.fly ? 1 : 0) - p.amp) * Math.min(1, h * 10);
+  p.t += h * (d.fly ? 9 : 1.2) + moved * 4.5 / Math.max(.45, ph);
+  if (p.t > 6283.185307) p.t -= 6283.185307;  // every wave the animation uses repeats over 2π × 1000: no jump
+}
+
+// ---- behaviour, run with the physics sub-steps ----
+function tickPets(h) {
+  if ((petSpawnT -= h) <= 0) { petSpawnT = 4 + Math.random() * 3; spawnAnimal(); }
+  const think = (petThinkT -= h) <= 0;
+  if (think) petThinkT = .25;
+  const held = heldItem();
+  let nf = 0, fi = 0;
+  for (const p of pets) if (!p.wild && p.mode === 0) nf++;
+  for (let k = pets.length - 1; k >= 0; k--) {
+    const p = pets[k], d = PETS[p.s];
+    if (petHits(p)) {                         // a block was put where it stands: climb on top, or else get out of there
+      const y0 = p.y;
+      p.y = Math.floor(p.y) + 1;
+      if (petHits(p)) { p.y = y0; if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p); }
+    }
+    if (p.y < -4) { if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p); }
+    const dx = P.x - p.x, dz = P.z - p.z, dist = Math.sqrt(dx * dx + dz * dz);
+    let gx = 0, gz = 0, speed = 0, look = null;
+    p.cd = Math.max(0, p.cd - h);
+    if (p.wild) {
+      p.life += h;
+      if (dist > 56 || (p.life > 300 && dist > 24)) { pets.splice(k, 1); continue; }
+      if (think && dist < 12 && !petSeen.has(p.s) && !lineBlocked(p.x, p.y + petH(p) / 2, p.z, Math.hypot(dist, P.y + EYE - p.y - petH(p) / 2))) {
+        petSeen.add(p.s);
+        toast('🐾 發現野生的' + d.n + '!最愛吃' + nameOf(d.food) + '(P 看圖鑑)');
+      }
+      if (held === d.food && dist < 8 && !dead) {           // it smells its favourite food and comes over
+        if (dist > 1.5) { gx = P.x; gz = P.z; speed = d.spd * .6; } else look = [P.x, P.z];
+      } else { const g = petWander(p, h, p.x, p.z, 5); if (g) { gx = g[0]; gz = g[1]; speed = d.spd * .4; } }
+    } else if (p.mode === 0) {                              // following: its own spot in a fan behind you
+      const j = fi++, row = j / 7 | 0, col = j % 7, inRow = Math.min(7, nf - row * 7);
+      const ang = P.a + Math.PI + (col - (inRow - 1) / 2) * .5, rad = 1.9 + row * 1.3 + d.r;
+      gx = P.x + Math.sin(ang) * rad; gz = P.z + Math.cos(ang) * rad;
+      if (dist > 20 || Math.abs(P.y - p.y) > (d.fly ? 18 : 10) || (p.stuck > 3 && dist > 5)) { petTeleport(p); continue; }
+      const gd = Math.hypot(gx - p.x, gz - p.z);
+      if (gd > .6) speed = Math.min(d.spd * 2.4, gd * 3);               // the further behind, the faster it runs
+      else look = [P.x, P.z];
+    } else {                                                // staying: strolls around its spot
+      const g = petWander(p, h, p.hx, p.hz, 4);
+      if (g) { gx = g[0]; gz = g[1]; speed = d.spd * .4; }
+      if (Math.hypot(p.x - p.hx, p.z - p.hz) > 12 || p.y < p.hy - 8) { p.x = p.hx; p.y = p.hy; p.z = p.hz; p.vy = 0; }
+    }
+    if (d.dmg && !p.wild) {                                 // guards: chase and bite monsters near you (or near home)
+      if (think) {
+        p.foe = null;
+        let best = 10;
+        const cx = p.mode ? p.hx : P.x, cz = p.mode ? p.hz : P.z;
+        for (const m of mobs) {
+          const md = Math.hypot(m.x - p.x, m.z - p.z);
+          if (md < best && Math.hypot(m.x - cx, m.z - cz) < 12 && Math.abs(m.y - p.y) < 5) { best = md; p.foe = m; }
+        }
+      }
+      const m = p.foe;
+      if (m && mobs.includes(m)) {
+        gx = m.x; gz = m.z; speed = d.spd * 1.3; look = null;
+        if (Math.hypot(m.x - p.x, m.z - p.z) < petR(p) + .75 && Math.abs(m.y - p.y) < 2 && p.cd <= 0) {
+          p.cd = .8;
+          puff(m.x, m.y + 1, m.z, '#fff', 4, .4, 1.5);
+          if (hurtMob(m, d.dmg, p.x, p.z)) { mobs.splice(mobs.indexOf(m), 1); p.foe = null; }
+        }
+      } else p.foe = null;
+    }
+    if (!p.wild && (p.at -= h) <= 0) { p.at = 1; petChores(p); }
+    petStep(p, h, gx, gz, speed, look);
+  }
+}
+function petChores(p) {                       // once a second: the duck eats weeds, the pig sniffs for truffles
+  const d = PETS[p.s];
+  if (d.abil === 'weed') {
+    const i = nearestBlock(p, TALL, 6);
+    if (i < 0) return;
+    world[i] = AIR; grassEdit();
+    puff(ixOf(i) + .5, iyOf(i) + .3, izOf(i) + .5, '#5f9f3c', 6);
+    if (Math.random() < .25) { const c = Math.random() * 8 | 0; give(SEED0 + c, 1); toast('🦆 ' + p.name + ' 從草裡翻出了' + CROPS[c].n + '種子'); }
+  } else if (d.abil === 'truffle' && p.mode === 0 && p.amp > .5 && p.tr < 3 && p.grown >= 1 &&
+             blockAt(p.x | 0, p.y - .5 | 0, p.z | 0) === GRASS && Math.random() < .015) {
+    p.tr++; give(ITEM_TRUFFLE, 1);
+    puff(p.x, p.y + .2, p.z, '#6b4a32', 8, .4, 1.8);
+    toast('🐷 ' + p.name + ' 拱出了一顆松露!');
+  }
+}
+function nearestBlock(p, id, r) {             // the closest cell holding this block within r (and 2 up or down)
+  const X = p.x | 0, Y = p.y | 0, Z = p.z | 0;
+  let best = -1, bd = 1e9;
+  for (let dy = -2; dy <= 2; dy++) for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) {
+    if (dx * dx + dz * dz > r * r || blockAt(X + dx, Y + dy, Z + dz) !== id) continue;
+    const dd = dx * dx + dz * dz + dy * dy;
+    if (dd < bd) { bd = dd; best = idx(X + dx, Y + dy, Z + dz); }
+  }
+  return best;
+}
+function petNear(abil, x, y, z, r, dy = 4) {  // a tamed pet with this ability within r blocks (sideways) of a point
+  for (const p of pets)
+    if (!p.wild && PETS[p.s].abil === abil && Math.abs(p.y - y) <= dy && (p.x - x) * (p.x - x) + (p.z - z) * (p.z - z) <= r * r) return p;
+  return null;
+}
+function flowersNear(p, r) {                  // grown flower crops near the bee (for honey)
+  for (const i of farmCells()) {
+    const b = world[i];
+    if (b < CROP0 || stageOf(b) < 2 || CROPS[cropOf(b)].arch !== 'flower') continue;
+    const dx = ixOf(i) + .5 - p.x, dz = izOf(i) + .5 - p.z;
+    if (dx * dx + dz * dz <= r * r && Math.abs(iyOf(i) - p.y) <= 4) return true;
+  }
+  return false;
+}
+
+// ---- every morning at 6:00: what the tamed animals bring you (babies are still too small to help) ----
+function petsMorning() {
+  const got = {}, news = [];
+  let cash = 0;
+  const add = (id, n) => { if (n > 0) { give(id, n); got[id] = (got[id] || 0) + n; } };
+  for (const p of pets) {
+    if (p.wild) continue;
+    const d = PETS[p.s];
+    p.aff = Math.min(100, p.aff + 1); p.tr = 0;
+    if (p.grown < 1) continue;
+    if (d.abil === 'egg') { add(ITEM_EGG, 1 + (p.aff >= 60) + (p.aff >= 100)); if (Math.random() < .04) { add(EGG, 1); news.push('🥚 ' + p.name + ' 下了一顆寵物蛋!'); } }
+    else if (d.abil === 'milk') add(ITEM_MILK, 1 + (p.aff >= 70));
+    else if (d.abil === 'pollen') { if (flowersNear(p, 8)) add(ITEM_HONEY, 1 + (p.aff >= 80)); }
+    else if (d.abil === 'coin') { const n = 5 + (p.aff / 4 | 0) + (Math.random() * 6 | 0); coins += n; cash += n; if (Math.random() < .03) { add(EGG2, 1); news.push('🥚 ' + p.name + ' 撿回一顆稀有寵物蛋!'); } }
+    else if (d.abil === 'forage') { const known = [...discovered].filter(c => CROPS[c].tier <= 3); add(CROP_ITEM0 + known[Math.random() * known.length | 0], 1 + (p.aff >= 60)); }
+    else if (d.abil === 'gift') {
+      const known = [...discovered];
+      add(SEED0 + known[Math.random() * known.length | 0], 2);
+      if (Math.random() < .2) {                // now and then: a crop you have not found yet, from parents you know
+        const next = CROPS.map((_, c) => c).filter(c => !discovered.has(c) && CROPS[c].a !== undefined && discovered.has(CROPS[c].a) && discovered.has(CROPS[c].b));
+        if (next.length) {
+          const c = next[Math.random() * next.length | 0];
+          add(SEED0 + c, 1); discovered.add(c);
+          news.push('🐱 ' + p.name + ' 叼回了沒見過的種子:' + CROPS[c].n + '!');
+        }
+      }
+      if (Math.random() < .03) { add(EGG, 1); news.push('🥚 ' + p.name + ' 叼回一顆寵物蛋!'); }
+    }
+  }
+  const parts = Object.keys(got).map(id => nameOf(+id) + '×' + got[id]);
+  if (cash) { parts.push('金幣 +' + cash); drawCoins(); }
+  if (parts.length) toast('🐾 寵物們帶來了:' + parts.join('、'));
+  for (const n of news) toast(n, 'big');
+  if (invOpen && panelTab === 'pets') drawPets();
+}
+function hatchEgg(i) {                        // the egg cracks: a baby that already knows you
+  const b = world[i], pool = EGG_POOL[b];
+  let roll = Math.random() * pool.reduce((a, q) => a + q[1], 0), s = pool[0][0];
+  for (const [k, w] of pool) if ((roll -= w) < 0) { s = k; break; }
+  world[i] = AIR; grow[i] = 0;
+  const p = newPet(s, ixOf(i) + .5, iyOf(i), izOf(i) + .5, false);
+  p.grown = .55; p.aff = 40; p.name = petName(); p.fed = day;
+  pets.push(p); petSeen.add(s); petTamed.add(s);
+  puff(p.x, p.y + .4, p.z, '#fff6d8', 14, .5, 2);
+  toast('🐣 蛋孵出來了!是一隻' + PETS[s].n + '寶寶,取名叫「' + p.name + '」', 'big');
+  if (invOpen && panelTab === 'pets') drawPets();
+}
+function oreEgg(i, b) {                       // eggs hidden in the rock: dragon eggs next to diamonds, rare eggs deep down
+  if (b === DIAMOND && Math.random() < .08) { give(EGG3, 1); toast('🐉 鑽石礦裡藏著一顆龍蛋!', 'big'); }
+  else if (b === STONE && iyOf(i) < 8 && Math.random() < .005) { give(EGG2, 1); toast('🥚 石頭裡挖出一顆稀有寵物蛋!', 'big'); }
+}
+
+// ---- you and your pets: picking one out with the crosshair, feeding, taming, patting ----
+function rayBox(ox, oy, oz, dx, dy, dz, x0, y0, z0, x1, y1, z1) {   // distance along the ray to the box, or Infinity
+  let tn = -Infinity, tf = Infinity;
+  const axis = (o, d, a, b) => {
+    if (Math.abs(d) < 1e-9) { if (o < a || o > b) tf = -1; return; }
+    let t0 = (a - o) / d, t1 = (b - o) / d;
+    if (t0 > t1) { const t = t0; t0 = t1; t1 = t; }
+    if (t0 > tn) tn = t0; if (t1 < tf) tf = t1;
+  };
+  axis(ox, dx, x0, x1); axis(oy, dy, y0, y1); axis(oz, dz, z0, z1);
+  return tn <= tf && tf > 0 ? Math.max(tn, 0) : Infinity;
+}
+function pickPet(o) {                         // the pet under the crosshair within 4 blocks, unless a block is in front of it
+  const cp = Math.cos(P.b), dx = Math.sin(P.a) * cp, dy = Math.sin(P.b), dz = Math.cos(P.a) * cp, ey = P.y + EYE;
+  let tMax = 4, best = null;
+  if (o) tMax = Math.min(tMax, rayBox(P.x, ey, P.z, dx, dy, dz, o[0], o[1], o[2], o[0] + 1, o[1] + 1, o[2] + 1));
+  for (const p of pets) {
+    const r = petR(p) + .08, t = rayBox(P.x, ey, P.z, dx, dy, dz, p.x - r, p.y, p.z - r, p.x + r, p.y + petH(p) + .05, p.z + r);
+    if (t < tMax) { tMax = t; best = p; }
+  }
+  return best;
+}
+function petLove(p, n) {
+  p.aff = Math.min(100, p.aff + n);
+  puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 4, .5, 1.3, '♥');
+}
+function petTame(p) {
+  const d = PETS[p.s];
+  p.wild = false; p.name = petName(); p.aff = 20; p.mode = 0; p.fed = day; p.life = 0; p.goal = null;
+  petTamed.add(p.s); petSeen.add(p.s);
+  puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 10, .8, 1.6, '♥');
+  toast('💕 ' + d.n + '願意跟著你了!取名叫「' + p.name + '」(按 P 看寵物)', 'big');
+  if (invOpen && panelTab === 'pets') drawPets();
+}
+function petUse(p, held) {                    // right-click on an animal; false = not for it (the click goes to the block)
+  const used = petUse1(p, held);
+  if (used) swingT = .18;
+  return used;
+}
+function petUse1(p, held) {
+  const d = PETS[p.s], it = info(held), food = held === d.food, edible = food || it.crop !== undefined || it.dish !== undefined;
+  if (p.wild) {
+    if (tamedPets().length >= PET_MAX) { showHint('寵物已經 ' + PET_MAX + ' 隻了', 2); return true; }
+    if (creative) { petTame(p); return true; }                        // creative: any animal comes along at once
+    if (!food) {
+      if (held && !edible) return false;
+      showHint(d.n + '最愛吃' + nameOf(d.food), 2); return true;
+    }
+    takeHeld();
+    if (Math.random() < d.tame * (1 + p.tries * .35)) petTame(p);
+    else { p.tries++; puff(p.x, p.y + petH(p), p.z, 'rgba(210,210,210,.9)', 5, .3, 1); showHint(d.n + '吃掉了……再餵一次試試', 1.6); }
+    return true;
+  }
+  if (edible) {
+    if (p.fed === day) { showHint(p.name + '今天吃飽了', 1.5); return true; }
+    takeHeld(); p.fed = day; petLove(p, food ? 15 : 5);
+    showHint(p.name + (food ? '最愛這個了!好感 +15' : '吃得很開心,好感 +5'), 1.6);
+    return true;
+  }
+  if (held) return false;                     // holding a tool or a block: use that instead
+  if (p.pat !== day) { p.pat = day; petLove(p, 5); showHint('摸摸' + p.name + ',好感 +5', 1.4); }
+  else puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 2, .4, 1.2, '♥');
+  return true;
 }
 
 // ---- sky: sun, colours, clouds (updated once per frame) ----
@@ -1752,7 +2603,9 @@ const sky = { sunA: 0, sunEl: 0, sdx: 0, sdy: 1, sdz: 0, light: 1, dayf: 1, flk:
 function updateSky(dt, tm) {
   const dTod = dt / 1440 * (K.t ? 100 : 1);                         // full day = 24 min (hold T = 100×)
   if (tod + dTod >= 1) newDay();
+  const was = tod;
   tod = (tod + dTod) % 1;
+  if (was < .25 && tod >= .25) petsMorning();                        // 6:00: the pets bring what they found
   farmHours += dTod * 24;
   const s = sky;
   s.sunA = (tod - .25) * 6.2832; s.sunEl = Math.sin(s.sunA);        // sun elevation -1..1
@@ -1772,6 +2625,7 @@ function updateSky(dt, tm) {
   s.ct = weather ? -.1 : .42;                                        // cloud threshold (lower = more cloud)
   s.cbr = (weather ? 140 : 70) + (weather ? 70 : 180) * s.dayf;     // cloud brightness
   if (buffs.night > 0) s.light = Math.max(s.light, .62);           // night vision
+  if (s.dayf < .6 && petNear('night', P.x, P.y, P.z, 12)) s.light = Math.max(s.light, .55);   // an owl by your side
 }
 
 // ---- season look: grass and leaf tints, blended over a season's first morning, and snow in winter ----
@@ -1811,7 +2665,8 @@ function tintCPU() {                          // the CPU renderer's flat colours
 // GFX holds the look. v1 equivalents: steps 24, shadowSteps 16, fog false, shade [1,1,1].
 const GFX = { steps: 100, shadowSteps: 48, fog: true, shade: [.86, 1, .74] };  // shade = x / y / z face ambient
 // px: pixel budget for the CPU renderer (中 = v1's 280×168) · s: GPU resolution scale (0 = the screen's full pixel density)
-const QUALITY = [{ n: '低', px: 28224, s: .5 }, { n: '中', px: 47040, s: .75 }, { n: '高', px: 84672, s: 1 }, { n: '超高', px: 150528, s: 0 }];
+const QUALITY = [{ n: '低', px: 28224, s: .5, far: 48 }, { n: '中', px: 47040, s: .75, far: 60 },
+                 { n: '高', px: 84672, s: 1, far: 72 }, { n: '超高', px: 150528, s: 0, far: 96 }];   // far: GPU view distance
 const view = { w: 0, h: 0, f: 1, cxo: 0, cyo: 0, ui: 1, img: null, buf: null, colX: null, colZ: null };
 const shadowCache = new Uint8Array(VOL * 6);  // per block face: 0 unknown · 1 lit · 2 shadowed
 let shadowKey = NaN, shadowVer = -1, needRender = true, viewDirty = true, autoLevel = 1;
@@ -1865,19 +2720,19 @@ function shadowRay(px, py, pz) {
       tz = sdz ? (gz + (sdz > 0) - pz) / sdz : Infinity;
   for (let n = GFX.shadowSteps; n--;) {
     if (tx < ty) {
-      if (tx < tz) { tx += dx; gx += sx; if (gx & ~WM && (gx < 0) === (sx < 0)) return false; }
-      else { tz += dz; gz += sz; if (gz & ~WM && (gz < 0) === (sz < 0)) return false; }
-    } else if (ty < tz) { ty += dy; gy += sy; if (gy & ~WM && (gy < 0) === (sy < 0)) return false; }
-    else { tz += dz; gz += sz; if (gz & ~WM && (gz < 0) === (sz < 0)) return false; }
-    if ((gx | gy | gz) & ~WM) continue;
-    const b = world[gy << 10 | gz << 5 | gx];
-    if (b !== AIR && b !== GLASS && b !== WATER && b !== TALL && b < CROP0) return true;
+      if (tx < tz) { tx += dx; gx += sx; if (gx & ~XM && (gx < 0) === (sx < 0)) return false; }
+      else { tz += dz; gz += sz; if (gz & ~ZM && (gz < 0) === (sz < 0)) return false; }
+    } else if (ty < tz) { ty += dy; gy += sy; if (gy & ~YM && (gy < 0) === (sy < 0)) return false; }
+    else { tz += dz; gz += sz; if (gz & ~ZM && (gz < 0) === (sz < 0)) return false; }
+    if (gx & ~XM | gy & ~YM | gz & ~ZM) continue;
+    const b = world[gy << YSH | gz << ZSH | gx];
+    if (b !== AIR && b !== GLASS && b !== WATER && b !== TALL && b < CROP0 && (b < EGG || b > EGG3)) return true;
   }
   return false;
 }
 
 function plantTexel(b, X, Y, Z, ox, oy, oz, dx, dy, dz, t0, t1) {   // CPU: nearest opaque texel of a crop / weed sprite
-  const layer = (b === TALL ? TALL_L : PLANT0 + b - CROP0) * 1024;
+  const layer = (b === TALL ? TALL_L : b < CROP0 ? EGG_L + b - EGG : PLANT0 + b - CROP0) * 1024;
   let best = 1e9, col = -1;
   const test = (t, u, v) => {
     if (t < t0 || t > t1 || t >= best || u < 0 || u >= 1 || v < 0 || v >= 1) return;
@@ -1885,7 +2740,7 @@ function plantTexel(b, X, Y, Z, ox, oy, oz, dx, dy, dz, t0, t1) {   // CPU: near
     if (texData[k + 3] < 128) return;
     best = t; col = texData[k] << 16 | texData[k + 1] << 8 | texData[k + 2];
   };
-  if (b === TALL) {                           // weeds: two diagonal planes
+  if (b < CROP0) {                            // weeds and eggs: two diagonal planes
     const lx = ox - X, lz = oz - Z, ly = oy - Y;
     if (dx !== dz) { const t = (lz - lx) / (dx - dz); test(t, lx + dx * t, ly + dy * t); }
     if (dx !== -dz) { const t = (1 - lx - lz) / (dx + dz); test(t, lx + dx * t, ly + dy * t); }
@@ -1913,9 +2768,11 @@ function renderWorld() {
   const shadows = settings.shadows && dayf > .02;
   if (shadows) {                              // results stay valid until the sun moves ~0.5° or a block changes
     const key = Math.round(sky.sunA * 115);
-    if (key !== shadowKey || worldVer !== shadowVer) { shadowCache.fill(0); shadowKey = key; shadowVer = worldVer; }
+    if (key !== shadowKey || geomVer !== shadowVer) { shadowCache.fill(0); shadowKey = key; shadowVer = geomVer; }
   }
-  const fog = GFX.fog, fogStart = weather ? 5 : 14, fogK = 1 / ((weather ? 30 : 46) - fogStart), fogMax = weather ? .85 : .72;
+  // view distance: rays stop there, and the fog has fully turned into the sky colour by then
+  const fog = GFX.fog, far = fog ? (weather ? 30 : [40, 48, 56, 56][qualityLevel()]) : Infinity;
+  const fogStart = weather ? 5 : far * .4, fogK = 1 / (far - fogStart);
   const starOn = sunEl < .06, nf = Math.max(0, Math.min(1, -sunEl * 4)), sunOn = sunEl > -.06, moonOn = sunEl < .12;
   const water0 = eyeUnderWater() ? 2 : 0;     // under water, everything looks blue
   let k = 0;
@@ -1931,20 +2788,22 @@ function renderWorld() {
       let tx = dirX !== 0 ? (X0 + (dirX > 0) - ox) / dirX : Infinity, ty = ty0,
           tz = dirZ !== 0 ? (Z0 + (dirZ > 0) - oz) / dirZ : Infinity;
       let X = X0, Y = Y0, Z = Z0, face = 1, t = 0, glass = 0, id = 0, water = water0, plantC = -1;
+      const tFar = fog ? far / Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ) : Infinity;
       // DDA. The camera's own cell is skipped, so a torch at eye level can't fill the screen.
       // A ray that leaves the world while moving away from it can never hit anything: stop.
       for (let n = nSteps; n > 0; n--) {
         if (tx < ty) {
-          if (tx < tz) { t = tx; tx += ddx; X += stX; face = 0; if (X & ~WM && (X < 0) === (stX < 0)) break; }
-          else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~WM && (Z < 0) === (stZ < 0)) break; }
-        } else if (ty < tz) { t = ty; ty += ddy; Y += stY; face = 1; if (Y & ~WM && (Y < 0) === (stY < 0)) break; }
-        else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~WM && (Z < 0) === (stZ < 0)) break; }
-        if ((X | Y | Z) & ~WM) continue;
-        const b = world[Y << 10 | Z << 5 | X];
+          if (tx < tz) { t = tx; tx += ddx; X += stX; face = 0; if (X & ~XM && (X < 0) === (stX < 0)) break; }
+          else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~ZM && (Z < 0) === (stZ < 0)) break; }
+        } else if (ty < tz) { t = ty; ty += ddy; Y += stY; face = 1; if (Y & ~YM && (Y < 0) === (stY < 0)) break; }
+        else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~ZM && (Z < 0) === (stZ < 0)) break; }
+        if (t > tFar) break;
+        if (X & ~XM | Y & ~YM | Z & ~ZM) continue;
+        const b = world[Y << YSH | Z << ZSH | X];
         if (b === AIR) continue;
         if (b === GLASS) { glass++; continue; }                     // glass tints and lets the ray through
         if (b === WATER) { water++; continue; }
-        if (b === TALL || b >= CROP0) {                             // plants: see-through sprites
+        if (b === TALL || b >= CROP0 || (b >= EGG && b <= EGG3)) {  // plants (and eggs): see-through sprites
           plantC = plantTexel(b, X, Y, Z, ox, oy, oz, dirX, dirY, dirZ, t, Math.min(tx, ty, tz));
           if (plantC >= 0) { id = b; break; }
           continue;
@@ -1956,7 +2815,7 @@ function renderWorld() {
         const Q = plantC >= 0 ? plantC : COL[id], qr = Q >> 16, qg = Q >> 8 & 255, qb = Q & 255;
         const nx = face === 0 ? -stX : 0, ny = face === 1 ? -stY : 0, nz = face === 2 ? -stZ : 0;
         if (plantC >= 0) {                                           // plant: soft light from sky, sun and torches
-          const tl = torch[Y << 10 | Z << 5 | X] / 14, m = light * .85 + dayf * .35 + tl * tl * flk;
+          const tl = torch[Y << YSH | Z << ZSH | X] / 14, m = light * .85 + dayf * .35 + tl * tl * flk;
           cr = qr * m; cg = qg * m; cb = qb * m;
         } else if (id === TORCH) {                                   // torch: emissive, never dark
           const m = 1.18 * flk; cr = qr * m; cg = qg * m; cb = qb * m;
@@ -1964,7 +2823,7 @@ function renderWorld() {
           let diff = nx * sdx + ny * sdy + nz * sdz;                 // how squarely the face meets the sun
           if (diff < 0) diff = 0;
           if (shadows && diff > 0) {
-            const fi = (Y << 10 | Z << 5 | X) * 6 + face * 2 + (nx + ny + nz > 0 ? 1 : 0);
+            const fi = (Y << YSH | Z << ZSH | X) * 6 + face * 2 + (nx + ny + nz > 0 ? 1 : 0);
             let sc = shadowCache[fi];
             if (sc === 0) sc = shadowCache[fi] = shadowRay(X + .5 + nx, Y + .5 + ny, Z + .5 + nz) ? 2 : 1;
             if (sc === 2) diff = 0;
@@ -1972,14 +2831,15 @@ function renderWorld() {
           const m = light * (.6 + .22 * (ny > 0 ? ny : 0)) * (face === 0 ? shX : face === 1 ? shY : shZ) + diff * dayf * .8;
           cr = qr * m; cg = qg * m; cb = qb * m;
           const lx = X + nx, ly = Y + ny, lz = Z + nz;               // torch light on the air cell in front of the face
-          const tl0 = (lx | ly | lz) & ~WM ? 0 : torch[ly << 10 | lz << 5 | lx];
+          const tl0 = outside(lx, ly, lz) ? 0 : torch[ly << YSH | lz << ZSH | lx];
           if (tl0) { let tl = tl0 / 14; tl = tl * tl * flk; cr += qr * tl * 1.3; cg += qg * tl * .82; cb += qb * tl * .42; }
         }
-        if (fog) {                                                   // distance fog toward the horizon colour
-          const dist = t * Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+        if (fog) {                                                   // distance fog toward the sky colour in that direction
+          const len = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ), dist = t * len;
           if (dist > fogStart) {
-            let fa = (dist - fogStart) * fogK; if (fa > 1) fa = 1; fa *= fogMax;
-            cr += (hR - cr) * fa; cg += (hG - cg) * fa; cb += (hB - cb) * fa;
+            let fa = (dist - fogStart) * fogK; if (fa > 1) fa = 1;
+            let up = dirY / len * 1.6 + .25; up = up > 1 ? 1 : up < 0 ? 0 : up;
+            cr += (hR + (zR - hR) * up - cr) * fa; cg += (hG + (zG - hG) * up - cg) * fa; cb += (hB + (zB - hB) * up - cb) * fa;
           }
         }
       } else {                                                       // ---- sky ----
@@ -2042,21 +2902,29 @@ uniform sampler3D uWorld;                       // block id / 255, texel (x, z, 
 uniform sampler3D uLight;                       // torch light level / 255, linear filtered
 uniform sampler2DArray uTex;                    // block textures (id*3 + face), crack stages, plant sprites
 uniform sampler2D uHeight;                      // per column: y of the highest solid block (snow settles there), tree id
+uniform sampler3D uBrick;                       // 1 where a 4×4×4 brick holds anything but air, texel (x, z, y) / 4
 uniform vec2 uRes;
 uniform vec3 uEye, uFwd, uRight, uUp;
 uniform float uFocal;
 uniform vec3 uSun, uZen, uHor, uFog, uShade;
-uniform float uSunEl, uAmb, uDayf, uFlk, uWt, uCt, uCbr, uTod, uMine, uTime, uSnow, uLeafMix;
+uniform float uSunEl, uAmb, uDayf, uFlk, uWt, uCt, uCbr, uTod, uMine, uTime, uSnow, uLeafMix, uFar;
 uniform vec3 uGrass, uLeaf, uLeaf2;             // season tints: grass, leaves, and a share of trees (blossom / red)
 uniform int uShadows, uMobN, uUnder;
 uniform ivec4 uTarget;
 uniform vec4 uMob[14];                          // feet position, yaw
 uniform float uMobHurt[14];
+uniform sampler2D uAnimal;                      // pet shapes (see animalTexture): part boxes, kinds, colours
+uniform vec4 uPetA[12];                         // feet position, kind
+uniform vec4 uPetB[12];                         // cos(heading) / size, sin(heading) / size, 1 / size, walk phase
+uniform vec4 uPetC[12];                         // a sphere around the whole animal: centre, radius
+uniform vec4 uPetD[12];                         // leg swing 0–1, radius of its shadow
+uniform int uPetN;
 out vec4 outColor;
 
 const int AIR = 0, LEAF = 4, GLASS = 5, TORCH = 6, GRASS = 11, FARM = 12, FARM_FW = 15, WATER = 16, TALL = 17,
-          SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21, CROP0 = 128;
+          SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21, EGG = 22, EGG3 = 24, CROP0 = 128;
 const float CRACK0 = 96.0, PLANT0 = 112.0, TALL_L = 240.0, WATER_Y = .875;
+const ivec3 WDIM = ivec3(${SX}, ${SY}, ${SZ});    // the world's size in cells
 const vec3 PMIN[6] = vec3[6](vec3(-.24, 0., -.12), vec3(.01, 0., -.12), vec3(-.24, .72, -.13),
                              vec3(-.46, 1.12, -.12), vec3(.24, 1.12, -.12), vec3(-.23, 1.36, -.23));
 const vec3 PMAX[6] = vec3[6](vec3(-.01, .72, .12), vec3(.24, .72, .12), vec3(.24, 1.36, .13),
@@ -2065,15 +2933,27 @@ const vec3 PCOL[6] = vec3[6](vec3(.2, .15, .3), vec3(.2, .15, .3), vec3(.26, .19
                              vec3(.3, .22, .44), vec3(.3, .22, .44), vec3(.33, .25, .47));
 
 int cellId(ivec3 c) {
-  if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, ivec3(31)))) return AIR;
+  if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, WDIM - 1))) return AIR;
   return int(texelFetch(uWorld, c.xzy, 0).r * 255.0 + 0.5);
 }
 bool solidB(int b) { return (b > AIR && b < WATER && b != GLASS && b != TORCH) || b == PLANK; }   // full, opaque cubes
 bool occludes(ivec3 c) { return solidB(cellId(c)); }
 bool isPlant(int b) { return b == TALL || b >= CROP0; }
-bool isModel(int b) { return b == SPRINK || b == SPRINK2 || b == BED; }
+// in an empty 4×4×4 brick, set the march up so that its next step lands on the first cell past the brick
+bool skipBrick(inout ivec3 c, inout vec3 tM, float t, vec3 ro, vec3 rd, vec3 r, vec3 inv, ivec3 st) {
+  if (texelFetch(uBrick, ivec3(c.x >> 2, c.z >> 2, c.y >> 2), 0).r > .5) return false;
+  vec3 tB = (vec3(c & ivec3(~3)) + vec3(greaterThan(r, vec3(0.))) * 4. - ro) * inv;   // where the ray leaves the brick, per axis
+  float tE = min(min(tB.x, tB.y), tB.z);
+  if (tE < t + 1.) return true;                 // nearly out anyway: take the ordinary step
+  ivec3 nc = ivec3(floor(ro + rd * tE + r * 1e-3));
+  tM = (vec3(nc) + max(vec3(st), 0.) - ro) * inv;
+  if (tB.x == tE) { nc.x -= st.x; tM.x = tE; } else if (tB.y == tE) { nc.y -= st.y; tM.y = tE; } else { nc.z -= st.z; tM.z = tE; }
+  c = nc;
+  return true;
+}
+bool isModel(int b) { return b == SPRINK || b == SPRINK2 || b == BED || (b >= EGG && b <= EGG3); }
 float hash3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
-float torchAt(vec3 p) { return texture(uLight, p.xzy / 32.0).r * (255.0 / 14.0); }
+float torchAt(vec3 p) { return texture(uLight, p.xzy / vec3(WDIM.xzy)).r * (255.0 / 14.0); }
 vec2 faceUV(vec3 f, int axis, vec3 n) {         // f = point inside the cell; v = 0 at the top of side faces
   if (axis == 1) return vec2(f.x, n.y > 0.0 ? f.z : 1.0 - f.z);
   if (axis == 0) return vec2(n.x > 0.0 ? f.z : 1.0 - f.z, 1.0 - f.y);
@@ -2087,8 +2967,8 @@ vec3 axisN(int axis, ivec3 st) {
   return axis == 0 ? vec3(-float(st.x), 0., 0.) : axis == 1 ? vec3(0., -float(st.y), 0.) : vec3(0., 0., -float(st.z));
 }
 bool leaving(ivec3 c, ivec3 st) {               // outside the world and moving away from it
-  return (c.x < 0 && st.x < 0) || (c.x > 31 && st.x > 0) || (c.y < 0 && st.y < 0) ||
-         (c.y > 31 && st.y > 0) || (c.z < 0 && st.z < 0) || (c.z > 31 && st.z > 0);
+  return (c.x < 0 && st.x < 0) || (c.x >= WDIM.x && st.x > 0) || (c.y < 0 && st.y < 0) ||
+         (c.y >= WDIM.y && st.y > 0) || (c.z < 0 && st.z < 0) || (c.z >= WDIM.z && st.z > 0);
 }
 vec2 boxT(vec3 o, vec3 inv, vec3 mn, vec3 mx, out vec3 n) {   // slab test: (t near, t far) and entry normal
   vec3 a = (mn - o) * inv, b = (mx - o) * inv, tn = min(a, b), tf = max(a, b);
@@ -2126,28 +3006,42 @@ float plantHit(int b, ivec3 c, vec3 o, vec3 d, float t0, float t1, out vec4 tx, 
   }
   return best;
 }
-bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed and sprinklers are a few boxes, in 1/16ths
+bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed, sprinklers and eggs are a few boxes, in 1/16ths
   mn = vec3(0.); mx = vec3(16., 9., 16.);
   if (b == BED) return k == 0;
+  if (b >= EGG) {                               // an egg: three stacked boxes, widest a third of the way up
+    mn = k == 0 ? vec3(5., 0., 5.) : k == 1 ? vec3(4., 2., 4.) : vec3(5., 7., 5.);
+    mx = k == 0 ? vec3(11., 2., 11.) : k == 1 ? vec3(12., 7., 12.) : vec3(11., 10., 11.);
+    return true;
+  }
   float h = b == SPRINK2 ? 5. : 4.;
   if (k == 0) { mn = vec3(6., 0., 6.); mx = vec3(10., 9., 10.); }             // post
   else if (k == 1) { mn = vec3(8. - h, 9., 8. - h); mx = vec3(8. + h, 12., 8. + h); }   // head
   else { mn = vec3(7., 12., 7.); mx = vec3(9., b == SPRINK2 ? 15. : 14., 9.); }        // nozzle
   return true;
 }
+vec3 petOff(int fl, float ph, float amp) {      // pet animation: legs step in diagonal pairs, wings flap, tails wag
+  vec3 o = vec3(0.);
+  if ((fl & 1) != 0) o.z = sin(ph) * .07 * amp * ((fl & 32) != 0 ? -1. : 1.);
+  if ((fl & 4) != 0) o.y = sin(ph * 2.3) * .035;
+  if ((fl & 8) != 0) o.x = sin(ph * .9 + 1.) * .03;
+  return o;
+}
 
 bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves and plants let light through their gaps
   vec3 r = d + vec3(equal(d, vec3(0.))) * 1e-6;
   ivec3 c = ivec3(floor(p)), st = ivec3(sign(r));
   vec3 tD = abs(1.0 / r), tM = (vec3(c) + max(vec3(st), 0.) - p) / r;
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < 96; i++) {
     int axis; float t;
     if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; c.x += st.x; axis = 0; }
     else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; c.y += st.y; axis = 1; }
     else { t = tM.z; tM.z += tD.z; c.z += st.z; axis = 2; }
-    if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, ivec3(31)))) { if (leaving(c, st)) return false; continue; }
+    if (t > 40.) return false;                  // shadows are cast by things within 40 blocks
+    if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, WDIM - 1))) { if (leaving(c, st)) return false; continue; }
+    if (skipBrick(c, tM, t, p, d, r, 1. / r, st)) continue;
     int b = cellId(c);
-    if (b == AIR || b == GLASS || b == TORCH || b == WATER || b == SPRINK || b == SPRINK2) continue;
+    if (b == AIR || b == GLASS || b == TORCH || b == WATER || b == SPRINK || b == SPRINK2 || (b >= EGG && b <= EGG3)) continue;
     if (b == LEAF) {
       vec3 n = axisN(axis, st);
       if (textureLod(uTex, vec3(faceUV(p + d * t - vec3(c), axis, n), layerOf(LEAF, n)), 0.).a < .5) continue;
@@ -2163,17 +3057,18 @@ bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves 
   return false;
 }
 
-vec3 light(vec3 base, vec3 n, vec3 hp, float ao, float shade, bool plant) {   // sky + sun (+ shadow) + torches
+vec3 light(vec3 base, vec3 n, vec3 hp, float ao, float shade, bool plant, float dist) {   // sky + sun (+ shadow) + torches
   float diff = plant ? (uSunEl > 0. ? .35 + .65 * max(uSun.y, 0.) : 0.) : max(dot(n, uSun), 0.);   // sprites: lit from any side
-  if (uShadows == 1 && uDayf > .02 && diff > 0. && shadowed(hp + n * .003, uSun)) diff = 0.;
+  if (uShadows == 1 && uDayf > .02 && diff > 0. && dist < uFog.x + .4 / uFog.y && shadowed(hp + n * .003, uSun)) diff = 0.;   // no shadows deep in the fog
   vec3 c = plant ? base * (uAmb * .8 * ao + diff * uDayf * .5 * (.6 + .4 * ao))
                  : base * (uAmb * (.64 + .1 * max(n.y, 0.)) * shade * ao + diff * uDayf * .46 * (.55 + .45 * ao));
   float tl = torchAt(hp + n * .5); tl = tl * tl * uFlk;
   return c + base * tl * vec3(1.3, .82, .42) * (plant ? .85 : .5 + .5 * ao);
 }
 
+vec3 horizon(vec3 rd) { return mix(uHor, uZen, clamp(rd.y * 1.6 + .25, 0., 1.)); }   // plain sky colour: what fog turns into
 vec3 skyColor(vec3 rd) {
-  vec3 c = mix(uHor, uZen, clamp(rd.y * 1.6 + .25, 0., 1.));
+  vec3 c = horizon(rd);
   float dts = dot(rd, uSun);
   vec3 sr = normalize(cross(uSun, vec3(0., 0., 1.))), su = cross(sr, uSun);
   if (uSunEl > -.06 && dts > 0.) {              // square sun with a soft glow
@@ -2221,6 +3116,29 @@ void main() {
       if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { tMob = tt.x; mob = i; part = p; }
     }
   }
+  // ---- pets: boxes from uAnimal in each pet's own frame (it faces +z, feet at 0), animated. The frame is
+  //      scaled by 1 / size, the ray too, so distances come out in world units ----
+  float tPet = 1e9; int pet = -1, ppart = 0;
+  for (int i = 0; i < 12; i++) {
+    if (i >= uPetN) break;
+    vec3 oc = ro - uPetC[i].xyz;                  // the bounding sphere first: most rays miss every pet
+    float bq = dot(oc, rd), cq = dot(oc, oc) - uPetC[i].w * uPetC[i].w;
+    if (cq > 0. && (bq > 0. || bq * bq < cq)) continue;
+    if (-bq - sqrt(max(bq * bq - cq, 0.)) > min(tPet, tMob)) continue;
+    vec4 pb = uPetB[i];
+    vec3 o = ro - uPetA[i].xyz;
+    vec3 lo = vec3(o.x * pb.x - o.z * pb.y, o.y * pb.z, o.x * pb.y + o.z * pb.x);
+    vec3 ld = vec3(r.x * pb.x - r.z * pb.y, r.y * pb.z, r.x * pb.y + r.z * pb.x), li = 1.0 / ld, n;
+    vec4 sp = texelFetch(uAnimal, ivec2(int(uPetA[i].w), 2), 0);
+    int k0 = int(sp.x + .5), kn = int(sp.y + .5);
+    for (int k = 0; k < 10; k++) {
+      if (k >= kn) break;
+      vec4 a = texelFetch(uAnimal, ivec2(k0 + k, 0), 0);
+      vec2 tt = boxT(lo - petOff(int(a.w + .5), pb.w, uPetD[i].x), li, a.xyz, texelFetch(uAnimal, ivec2(k0 + k, 1), 0).xyz, n);
+      if (tt.x < tt.y && tt.x > 0. && tt.x < tPet) { tPet = tt.x; pet = i; ppart = k0 + k; }
+    }
+  }
+  float tEnt = min(tMob, tPet);                 // the nearest creature: the march stops there
 
   // ---- voxel march: glass and torch glow add light in front, water absorbs, leaves and plants are cut out.
   //      The loop only finds what is hit and where (few live values keep it fast); shading comes after. ----
@@ -2233,12 +3151,13 @@ void main() {
     if (rd.y > 0. && cellId(cell + ivec3(0, 1, 0)) != WATER) te = min(te, (float(cell.y) + WATER_Y - ro.y) / rd.y);
     wD = max(te, 0.);
   }
-  for (int i = 0; i < 128; i++) {
+  for (int i = 0; i < 200; i++) {
     if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; cell.x += st.x; axis = 0; }
     else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; cell.y += st.y; axis = 1; }
     else { t = tM.z; tM.z += tD.z; cell.z += st.z; axis = 2; }
-    if (t > tMob) break;
-    if (any(lessThan(cell, ivec3(0))) || any(greaterThan(cell, ivec3(31)))) { if (leaving(cell, st)) break; continue; }
+    if (t > tEnt || t > uFar) break;           // past the view distance the fog has become the sky
+    if (any(lessThan(cell, ivec3(0))) || any(greaterThan(cell, WDIM - 1))) { if (leaving(cell, st)) break; continue; }
+    if (skipBrick(cell, tM, t, ro, rd, r, inv, st)) continue;
     int b = cellId(cell);
     if (b == AIR) continue;
     if (b == WATER) {                           // the top water cell is filled to WATER_Y; add up the distance through water
@@ -2258,8 +3177,8 @@ void main() {
     }
     vec3 n = axisN(axis, st);
     if (b == GLASS) {
-      if (cell.x == 0 || cell.x == 31 || cell.z == 0 || cell.z == 31) {   // world border: one faint haze, no grid
-        if (!border) { acc += tr * .14 * uHor; tr *= .86; border = true; }
+      if (cell.x == 0 || cell.x == WDIM.x - 1 || cell.z == 0 || cell.z == WDIM.z - 1) {   // world border: one faint haze, no grid
+        if (!border) { float h = .14 * (1. - clamp((t - uFog.x) * uFog.y, 0., 1.) * uFog.z); acc += tr * h * uHor; tr *= 1. - h; border = true; }
         continue;
       }
       vec4 g = textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(GLASS, n)), texLod(t, n, rd));
@@ -2267,19 +3186,20 @@ void main() {
       tr *= 1. - g.a;
       continue;
     }
-    if (b == LEAF && textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(LEAF, n)), texLod(t, n, rd)).a < .5) continue;
+    if (b == LEAF && t < uFog.x && textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(LEAF, n)), texLod(t, n, rd)).a < .5) continue;
+    if (b == TALL && t > uFog.x * .9) continue; // in the fog: leaves count as solid, weeds are gone
     if (b == TORCH) {                           // a 2×10 px stick in the middle of the cell, with a glow
       vec3 c0 = vec3(cell), fc = c0 + vec3(.5, .62, .5), tn;
       vec3 dv = ro + rd * max(dot(fc - ro, rd), 0.) - fc;
       acc += tr * vec3(1., .62, .28) * (.5 - .32 * uDayf) * uFlk * exp(-dot(dv, dv) * 22.);
       vec2 tt = boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { hit = 2; tHit = tt.x; id = b; break; }
+      if (tt.x < tt.y && tt.x > 0. && tt.x < tEnt) { hit = 2; tHit = tt.x; id = b; break; }
       continue;
     }
     if (isPlant(b)) {
       vec4 tx; float pv;
       float th = plantHit(b, cell, ro, rd, t, min(min(tM.x, tM.y), tM.z), tx, pv);
-      if (th >= 0. && th < tMob) { hit = 4; tHit = th; id = b; break; }
+      if (th >= 0. && th < tEnt) { hit = 4; tHit = th; id = b; break; }
       continue;
     }
     if (isModel(b)) {
@@ -2290,7 +3210,7 @@ void main() {
         vec2 tt = boxT(ro, inv, vec3(cell) + mn / 16., vec3(cell) + mx / 16., bn);
         if (tt.x < tt.y && tt.x > 0.) best = min(best, tt.x);
       }
-      if (best < tMob) { hit = 3; tHit = best; id = b; break; }
+      if (best < tEnt) { hit = 3; tHit = best; id = b; break; }
       continue;
     }
     hit = 1; tHit = t; id = b; break;
@@ -2300,7 +3220,7 @@ void main() {
   vec3 col = vec3(0.), base = vec3(0.), N = vec3(0.), HP = ro + rd * tHit, c0 = vec3(cell);
   float AO = 1., SH = 1., dist = tHit, mark = 1.;
   bool lit = true, plant = false, aimed = uTarget.w == 1 && cell == uTarget.xyz;
-  if (mob >= 0 && tMob < tHit) {                // ---- mob ----
+  if (mob >= 0 && tMob < tHit && tMob <= tPet) {   // ---- mob ----
     float cy = cos(uMob[mob].w), sy = sin(uMob[mob].w);
     vec3 o = ro - uMob[mob].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
@@ -2314,6 +3234,40 @@ void main() {
     if (part == 5 && ln.z > .5 && e.y > .36 && e.y < .5 && ((e.x > .18 && e.x < .4) || (e.x > .6 && e.x < .82))) {
       col = vec3(1., .38, .2) * (1.1 + .2 * uFlk); lit = false;
     }
+  } else if (pet >= 0 && tPet < tHit) {         // ---- pet: its colours, a pattern, eyes; glowing parts shine ----
+    vec4 pb = uPetB[pet];
+    int s = int(uPetA[pet].w);
+    vec3 o = ro - uPetA[pet].xyz, lo = vec3(o.x * pb.x - o.z * pb.y, o.y * pb.z, o.x * pb.y + o.z * pb.x);
+    vec3 ld = vec3(r.x * pb.x - r.z * pb.y, r.y * pb.z, r.x * pb.y + r.z * pb.x), ln;
+    vec4 a = texelFetch(uAnimal, ivec2(ppart, 0), 0), b = texelFetch(uAnimal, ivec2(ppart, 1), 0);
+    int fl = int(a.w + .5), slot = int(b.w + .5) - s * 4, pat = int(texelFetch(uAnimal, ivec2(s, 2), 0).z + .5);
+    vec3 lq = lo - petOff(fl, pb.w, uPetD[pet].x);
+    boxT(lq, 1.0 / ld, a.xyz, b.xyz, ln);
+    vec3 lp = lq + ld * tPet;                     // the hit point in the pet's frame
+    N = normalize(vec3(ln.x * pb.x + ln.z * pb.y, ln.y * pb.z, -ln.x * pb.y + ln.z * pb.x));
+    if (slot == 0) {                              // patterns on the main colour
+      if (pat == 1 && hash3(floor(lp * 7.)) < .32) slot = 1;                             // cow spots
+      else if (pat == 2 && fract(lp.z * 9.) < .45) slot = 1;                             // bee stripes
+      else if (pat == 3 && fract(lp.z * 10. + lp.y * 4.) < .3) slot = 1;                 // tabby stripes
+      else if (pat == 4 && (fract(lp.x * 7.) < .16 || fract(lp.z * 7.) < .16)) slot = 1; // shell plates
+      else if (pat == 5 && ln.y < -.5) slot = 2;                                         // dragon: pale belly
+    }
+    if (pat == 6 && (fl & 8) != 0 && lp.z < a.z + (b.z - a.z) * .3) slot = 1;           // fox: a white tip on the tail
+    vec4 pc = texelFetch(uAnimal, ivec2(s * 4 + slot, 3), 0);
+    base = pc.rgb * (.94 + .1 * hash3(floor(lp * 24.)));
+    if (pat == 5 && slot == 0 && mod(floor(lp.x * 14.) + floor(lp.y * 14.) + floor(lp.z * 14.), 2.) < .5) base *= .88;   // scales
+    if (pc.a > .5) mark = -1.;                    // glowing parts: the dragon's wings
+    if ((fl & 16) != 0 && ln.z > .5) {            // eyes on the front of the face
+      float w = b.x - a.x, hh = b.y - a.y, er = min(w, hh) * (pat == 7 ? .17 : .09);
+      vec2 e = vec2(abs(lp.x - (a.x + b.x) * .5) - w * .27, lp.y - a.y - hh * .62);
+      if (max(abs(e.x), abs(e.y)) < er) {
+        if (pat == 7) base = max(abs(e.x), abs(e.y)) < er * .45 ? vec3(.05) : vec3(.98, .82, .25);   // owl: big yellow eyes
+        else if (pat == 5) { col = vec3(1., .85, .3) * (1.1 + .2 * uFlk); lit = false; }               // dragon: glowing eyes
+        else base = vec3(.06, .05, .05);
+      }
+    }
+    AO = ln.y < -.5 ? .7 : 1.;
+    HP = ro + rd * tPet; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tPet; aimed = false;
   } else if (hit == 2) {                        // ---- torch stick and flame ----
     vec3 tn; boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
     vec3 tp = HP - c0;
@@ -2333,7 +3287,9 @@ void main() {
     int ax = abs(N.x) > .5 ? 0 : abs(N.y) > .5 ? 1 : 2;
     vec2 uv = faceUV(f, ax, N);
     if (id == BED && ax != 1) uv.y = .5625 - f.y;   // a bed's sides: blanket, sheet, then the frame
-    base = textureLod(uTex, vec3(uv, layerOf(id, N)), texLod(tHit, N, rd)).rgb;
+    vec4 mt = textureLod(uTex, vec3(uv, layerOf(id, N)), texLod(tHit, N, rd));
+    base = mt.rgb;
+    if (id == EGG3 && mt.a < .97) mark = -1.;   // the dragon egg's marks glow
     SH = ax == 0 ? uShade.x : ax == 1 ? uShade.y : uShade.z;
   } else if (hit == 4) {                        // ---- crop or weed sprite: soft light, darker toward the ground ----
     vec3 bn; vec2 span = boxT(ro, inv, c0, c0 + 1., bn);
@@ -2354,15 +3310,24 @@ void main() {
       if (n.y > .5 || grassy) tex = mix(tex, snow, uSnow);
       else if (id == LEAF) tex = mix(tex, snow, uSnow * .3);
     }
-    ivec3 a = cell + ivec3(n);                  // ambient occlusion: the 8 cells around the air in front
-    ivec3 U = axis == 0 ? ivec3(0, 0, 1) : ivec3(1, 0, 0), V = axis == 1 ? ivec3(0, 0, 1) : ivec3(0, 1, 0);
     float fu = axis == 0 ? f.z : f.x, fv = axis == 1 ? f.z : f.y;
-    float s0 = float(occludes(a - U)), s1 = float(occludes(a + U)), s2 = float(occludes(a - V)), s3 = float(occludes(a + V));
-    float v00 = s0 * s2 > .5 ? 0. : 3. - s0 - s2 - float(occludes(a - U - V));
-    float v10 = s1 * s2 > .5 ? 0. : 3. - s1 - s2 - float(occludes(a + U - V));
-    float v01 = s0 * s3 > .5 ? 0. : 3. - s0 - s3 - float(occludes(a - U + V));
-    float v11 = s1 * s3 > .5 ? 0. : 3. - s1 - s3 - float(occludes(a + U + V));
-    AO = .42 + .58 * mix(mix(v00, v10, fu), mix(v01, v11, fu), fv) / 3.;
+    AO = .85;
+    if (t < uFog.x + 8.) {                      // ambient occlusion: the 8 cells around the air in front
+      ivec3 a = cell + ivec3(n);
+      ivec3 U = axis == 0 ? ivec3(0, 0, 1) : ivec3(1, 0, 0), V = axis == 1 ? ivec3(0, 0, 1) : ivec3(0, 1, 0);
+      float s0 = float(occludes(a - U)), s1 = float(occludes(a + U)), s2 = float(occludes(a - V)), s3 = float(occludes(a + V));
+      float v00 = s0 * s2 > .5 ? 0. : 3. - s0 - s2 - float(occludes(a - U - V));
+      float v10 = s1 * s2 > .5 ? 0. : 3. - s1 - s2 - float(occludes(a + U - V));
+      float v01 = s0 * s3 > .5 ? 0. : 3. - s0 - s3 - float(occludes(a - U + V));
+      float v11 = s1 * s3 > .5 ? 0. : 3. - s1 - s3 - float(occludes(a + U + V));
+      AO = .42 + .58 * mix(mix(v00, v10, fu), mix(v01, v11, fu), fv) / 3.;
+    }
+    if (n.y > .5 && t < uFog.x) for (int i = 0; i < 12; i++) {   // a soft dark patch under each pet
+      if (i >= uPetN) break;
+      vec3 q = HP - uPetA[i].xyz;
+      float rad = uPetD[i].y, up = -q.y, dd = length(q.xz);
+      if (up > -.05 && up < 3. && dd < rad) AO *= 1. - .45 * (1. - dd / rad) * (1. - up / 3.);
+    }
     base = tex; N = n; SH = axis == 0 ? uShade.x : axis == 1 ? uShade.y : uShade.z;
     if (aimed) {                                // outline the block under the crosshair, show cracks
       if (min(min(fu, 1. - fu), min(fv, 1. - fv)) < max(.012, 1.4 * t / uFocal)) mark = .3;
@@ -2370,10 +3335,10 @@ void main() {
       aimed = false;
     }
   } else { col = skyColor(rd); lit = false; dist = -1.; }                  // ---- sky ----
-  if (lit) col = light(base, N, HP, AO, SH, plant);
+  if (lit) col = light(base, N, HP, AO, SH, plant, dist);
   if (mark < 0.) col = max(col, base * (1.05 + .15 * uFlk)); else col *= mark;
   if (aimed) col = col * 1.22 + .03;            // the plant or model under the crosshair lights up a little
-  if (dist > 0.) col = mix(col, uHor, clamp((dist - uFog.x) * uFog.y, 0., 1.) * uFog.z);
+  if (dist > 0.) col = mix(col, horizon(rd), clamp((dist - uFog.x) * uFog.y, 0., 1.) * uFog.z);
   if (wD > 0.) col = mix(vec3(.06, .2, .32) * (uAmb * .9 + .1), col, exp(-wD * 1.15));   // water swallows what lies behind
   if (wT >= 0.) {                               // the water surface: rippled sky reflection (Fresnel) and a sun glint
     vec3 hp = ro + rd * wT;
@@ -2381,7 +3346,7 @@ void main() {
                             .045 * cos(hp.z * 5.7 + uTime * 1.3) + .03 * cos(hp.x * 6.7 + uTime * 1.9)));
     vec3 rr = reflect(rd, n);
     float F = .04 + .96 * pow(1. - max(dot(-rd, n), 0.), 5.);
-    vec3 refl = mix(skyColor(rr) * .92, uHor, clamp((wT - uFog.x) * uFog.y, 0., 1.) * uFog.z);
+    vec3 refl = mix(skyColor(rr) * .92, horizon(rd), clamp((wT - uFog.x) * uFog.y, 0., 1.) * uFog.z);
     col = mix(col, refl, F) + (uSunEl > 0. ? pow(max(dot(rr, uSun), 0.), 150.) * uDayf * 2. : 0.);
   }
   outColor = vec4(acc + tr * col, 1.);
@@ -2389,8 +3354,91 @@ void main() {
 
 const glCanvas = $('gl');
 const GPU = { gl: null, u: {}, tWorld: null, tLight: null, ver: -1, f: 1 };
-const heightBuf = new Uint8Array(WS * WS * 2), woodCol = new Uint8Array(WS * WS);   // per column: top solid block, tree id
+const heightBuf = new Uint8Array(LAYER * 2);  // per column: top solid block, tree id (for snow and tree colours)
+// The GPU keeps a copy of the world and the torch light. After an edit, only the 16×16-column tiles that
+// differ from what it has are uploaded again (16 KB each instead of the whole megabyte).
+const gpuWorld = new Uint8Array(VOL), gpuTorch = new Uint8Array(VOL);
+const W32 = new Uint32Array(world.buffer), T32 = new Uint32Array(torch.buffer),
+      GW32 = new Uint32Array(gpuWorld.buffer), GT32 = new Uint32Array(gpuTorch.buffer);
+function tileSync(src, dst, tx, tz, force) {  // bring one tile of the copy up to date; true when it changed
+  let diff = force;
+  for (let y = 0; y < SY && !diff; y++)
+    for (let z = 0, o = (y << YSH | tz * TILE << ZSH | tx * TILE) >> 2; z < TILE; z++, o += SX >> 2)
+      if (src[o] !== dst[o] || src[o + 1] !== dst[o + 1] || src[o + 2] !== dst[o + 2] || src[o + 3] !== dst[o + 3]) { diff = true; break; }
+  if (diff) for (let y = 0; y < SY; y++)
+    for (let z = 0, o = (y << YSH | tz * TILE << ZSH | tx * TILE) >> 2; z < TILE; z++, o += SX >> 2) {
+      dst[o] = src[o]; dst[o + 1] = src[o + 1]; dst[o + 2] = src[o + 2]; dst[o + 3] = src[o + 3];
+    }
+  return diff;
+}
+function tileUpload(gl, target, data, tx, tz, depth, format) {   // one tile of a 3D texture, or of the 2D height map
+  gl.pixelStorei(gl.UNPACK_ROW_LENGTH, SX); gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, SZ);
+  gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, tx * TILE); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, tz * TILE);
+  if (depth) gl.texSubImage3D(target, 0, tx * TILE, tz * TILE, 0, TILE, TILE, depth, format, gl.UNSIGNED_BYTE, data);
+  else gl.texSubImage2D(target, 0, tx * TILE, tz * TILE, TILE, TILE, format, gl.UNSIGNED_BYTE, data);
+  for (const p of [gl.UNPACK_ROW_LENGTH, gl.UNPACK_IMAGE_HEIGHT, gl.UNPACK_SKIP_PIXELS, gl.UNPACK_SKIP_ROWS]) gl.pixelStorei(p, 0);
+}
+const BX = SX >> 2, BY = SY >> 2, BZ = SZ >> 2, bricks = new Uint8Array(BX * BY * BZ);   // 4×4×4 bricks: 255 = not all air
+function brickTile(gl, tx, tz) {              // rays skip empty bricks in one step
+  for (let by = 0; by < BY; by++) for (let bz = tz * 4; bz < tz * 4 + 4; bz++) for (let bx = tx * 4; bx < tx * 4 + 4; bx++) {
+    let any = 0;
+    for (let y = by * 4; y < by * 4 + 4 && !any; y++) for (let z = bz * 4; z < bz * 4 + 4; z++) {
+      const o = y << YSH | z << ZSH | bx * 4;
+      if (world[o] | world[o + 1] | world[o + 2] | world[o + 3]) { any = 255; break; }
+    }
+    bricks[(by * BZ + bz) * BX + bx] = any;
+  }
+  gl.activeTexture(gl.TEXTURE4);
+  gl.pixelStorei(gl.UNPACK_ROW_LENGTH, BX); gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, BZ);
+  gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, tx * 4); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, tz * 4);
+  gl.texSubImage3D(gl.TEXTURE_3D, 0, tx * 4, tz * 4, 0, 4, 4, BY, gl.RED, gl.UNSIGNED_BYTE, bricks);
+  for (const p of [gl.UNPACK_ROW_LENGTH, gl.UNPACK_IMAGE_HEIGHT, gl.UNPACK_SKIP_PIXELS, gl.UNPACK_SKIP_ROWS]) gl.pixelStorei(p, 0);
+}
+const woodNear = new Uint8Array((TILE + 2) * (TILE + 2));   // scratch: which columns around a tile hold a trunk
+function heightTile(tx, tz) {                 // snow height and tree colour key for one tile's columns
+  const x0 = tx * TILE - 1, z0 = tz * TILE - 1, W = TILE + 2;
+  for (let j = 0; j < W; j++) for (let k = 0; k < W; k++) {
+    const x = x0 + k, z = z0 + j;
+    let w = 0;
+    if (!outside(x, 0, z)) for (let y = 0; y < SY; y++) if (world[idx(x, y, z)] === WOOD) { w = 1; break; }
+    woodNear[j * W + k] = w;
+  }
+  for (let z = tz * TILE; z < tz * TILE + TILE; z++) for (let x = tx * TILE; x < tx * TILE + TILE; x++) {
+    let tX = x, tZ = z;                       // leaves take their colour from the nearest trunk, so a tree turns as one
+    if (!woodNear[(z - z0) * W + x - x0]) for (let k = 0; k < 9; k++) {
+      const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
+      if (woodNear[(Z - z0) * W + X - x0]) { tX = X; tZ = Z; break; }
+    }
+    heightBuf[(z * SX + x) * 2] = topSolid(x, z);
+    heightBuf[(z * SX + x) * 2 + 1] = (Math.imul(tX, 73856093) ^ Math.imul(tZ, 19349663)) >>> 3 & 255;
+  }
+}
+
 const mobBuf = new Float32Array(14 * 4), mobHurtBuf = new Float32Array(14);
+const petBufA = new Float32Array(12 * 4), petBufB = new Float32Array(12 * 4), petBufC = new Float32Array(12 * 4),
+      petBufD = new Float32Array(12 * 4), petNear12 = [], PET_BOUND = [];   // PET_BOUND: each kind's box centre and half diagonal
+// pet shapes for the shader, a 128×4 float texture: rows 0 / 1 the part boxes (min + flags, max + colour slot kind*4+c),
+// row 2 per kind (first part, part count, pattern), row 3 the colours (alpha 1 = glows)
+function animalTexture() {
+  const W = 128, a = new Float32Array(W * 4 * 4), put = (row, k, v) => a.set(v, (row * W + k) * 4);
+  let k = 0;
+  for (const [s, d] of PETS.entries()) {
+    const mn = [9, 9, 9], mx = [-9, -9, -9];
+    let legs = 0;
+    put(2, s, [k, d.parts.length, d.pat || 0, 0]);
+    for (const q of d.parts) {
+      let fl = q[7];
+      if (fl & 1) { if (legs === 1 || legs === 2) fl |= 32; legs++; }   // legs step in diagonal pairs (32: the other pair)
+      put(0, k, [q[0], q[1], q[2], fl]); put(1, k, [q[3], q[4], q[5], s * 4 + q[6]]);
+      for (let j = 0; j < 3; j++) { mn[j] = Math.min(mn[j], q[j]); mx[j] = Math.max(mx[j], q[3 + j]); }
+      k++;
+    }
+    PET_BOUND[s] = [(mn[0] + mx[0]) / 2, (mn[1] + mx[1]) / 2, (mn[2] + mx[2]) / 2,
+                    Math.hypot(mx[0] - mn[0], mx[1] - mn[1], mx[2] - mn[2]) / 2 + .12];   // room for the animation
+    d.pal.forEach((c, j) => put(3, s * 4 + j, [c[0] / 255, c[1] / 255, c[2] / 255, c[3] || 0]));
+  }
+  return a;
+}
 function initGL() {
   if (FORCE_CPU) return false;
   let gl;
@@ -2411,14 +3459,14 @@ function initGL() {
     for (const n of ['uWorld', 'uLight', 'uTex', 'uRes', 'uEye', 'uFwd', 'uRight', 'uUp', 'uFocal', 'uSun', 'uZen', 'uHor',
                      'uFog', 'uShade', 'uSunEl', 'uAmb', 'uDayf', 'uFlk', 'uWt', 'uCt', 'uCbr', 'uTod', 'uMine', 'uShadows',
                      'uMobN', 'uTarget', 'uMob', 'uMobHurt', 'uHeight', 'uTime', 'uSnow', 'uLeafMix', 'uGrass', 'uLeaf',
-                     'uLeaf2', 'uUnder']) GPU.u[n] = gl.getUniformLocation(prog, n);
+                     'uLeaf2', 'uUnder', 'uFar', 'uBrick', 'uAnimal', 'uPetA', 'uPetB', 'uPetC', 'uPetD', 'uPetN']) GPU.u[n] = gl.getUniformLocation(prog, n);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     const tex3 = (unit, filter) => {
       const t = gl.createTexture();
       gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_3D, t);
       gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, filter);
       for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R]) gl.texParameteri(gl.TEXTURE_3D, p, gl.CLAMP_TO_EDGE);
-      gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, WS, WS, WS, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+      gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, SX, SZ, SY, 0, gl.RED, gl.UNSIGNED_BYTE, null);   // texel (x, z, y)
       return t;
     };
     GPU.tWorld = tex3(0, gl.NEAREST); GPU.tLight = tex3(1, gl.LINEAR);
@@ -2434,8 +3482,20 @@ function initGL() {
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
     for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST],
                           [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG8, WS, WS, 0, gl.RG, gl.UNSIGNED_BYTE, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG8, SX, SZ, 0, gl.RG, gl.UNSIGNED_BYTE, null);
+    gl.activeTexture(gl.TEXTURE4);
+    gl.bindTexture(gl.TEXTURE_3D, gl.createTexture());
+    for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE],
+                          [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_3D, p, v);
+    gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, BX, BZ, BY, 0, gl.RED, gl.UNSIGNED_BYTE, null);
     gl.uniform1i(GPU.u.uWorld, 0); gl.uniform1i(GPU.u.uLight, 1); gl.uniform1i(GPU.u.uTex, 2); gl.uniform1i(GPU.u.uHeight, 3);
+    gl.uniform1i(GPU.u.uBrick, 4);
+    gl.activeTexture(gl.TEXTURE5);              // pet shapes: sent once
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST],
+                          [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 128, 4, 0, gl.RGBA, gl.FLOAT, animalTexture());
+    gl.uniform1i(GPU.u.uAnimal, 5);
     gl.bindVertexArray(gl.createVertexArray());
   } catch (e) {
     console.warn('WebGL2 unavailable, using the CPU renderer:', e.message);
@@ -2446,23 +3506,17 @@ function initGL() {
 }
 function renderGL(tg) {
   const gl = GPU.gl, u = GPU.u, s = sky;
-  if (GPU.ver !== worldVer) {                   // world or torch light changed: re-upload both (2 × 32 KB)
-    gl.activeTexture(gl.TEXTURE0); gl.texSubImage3D(gl.TEXTURE_3D, 0, 0, 0, 0, WS, WS, WS, gl.RED, gl.UNSIGNED_BYTE, world);
-    gl.activeTexture(gl.TEXTURE1); gl.texSubImage3D(gl.TEXTURE_3D, 0, 0, 0, 0, WS, WS, WS, gl.RED, gl.UNSIGNED_BYTE, torch);
-    woodCol.fill(0);
-    for (let i = 0; i < VOL; i++) if (world[i] === WOOD) woodCol[i & 1023] = 1;
-    for (let z = 0; z < WS; z++) for (let x = 0; x < WS; x++) {
-      let y = WM;
-      while (y > 0 && !SOLID[world[y << 10 | z << 5 | x]]) y--;
-      let tx = x, tz = z;                     // leaves take their colour from the nearest trunk, so a tree turns as one
-      if (!woodCol[z * WS + x]) for (let k = 0; k < 9; k++) {
-        const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
-        if (X >= 0 && Z >= 0 && X < WS && Z < WS && woodCol[Z * WS + X]) { tx = X; tz = Z; break; }
+  if (GPU.ver !== worldVer) {                   // something changed: send the tiles that differ
+    const full = GPU.ver < 0;
+    for (let tz = 0; tz < TILES_Z; tz++) for (let tx = 0; tx < TILES_X; tx++) {
+      if (tileSync(W32, GW32, tx, tz, full)) {
+        gl.activeTexture(gl.TEXTURE0); tileUpload(gl, gl.TEXTURE_3D, gpuWorld, tx, tz, SY, gl.RED);
+        heightTile(tx, tz);
+        gl.activeTexture(gl.TEXTURE3); tileUpload(gl, gl.TEXTURE_2D, heightBuf, tx, tz, 0, gl.RG);
+        brickTile(gl, tx, tz);
       }
-      heightBuf[(z * WS + x) * 2] = y;
-      heightBuf[(z * WS + x) * 2 + 1] = (Math.imul(tx, 73856093) ^ Math.imul(tz, 19349663)) >>> 3 & 255;
+      if (tileSync(T32, GT32, tx, tz, full)) { gl.activeTexture(gl.TEXTURE1); tileUpload(gl, gl.TEXTURE_3D, gpuTorch, tx, tz, SY, gl.RED); }
     }
-    gl.activeTexture(gl.TEXTURE3); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, WS, WS, gl.RG, gl.UNSIGNED_BYTE, heightBuf);
     GPU.ver = worldVer;
   }
   const w = glCanvas.width, h = glCanvas.height;
@@ -2474,8 +3528,9 @@ function renderGL(tg) {
   gl.uniform1f(u.uFocal, GPU.f / fovK);
   gl.uniform3f(u.uSun, s.sdx, s.sdy, s.sdz);
   gl.uniform3f(u.uZen, s.zR / 255, s.zG / 255, s.zB / 255); gl.uniform3f(u.uHor, s.hR / 255, s.hG / 255, s.hB / 255);
-  const fs = weather ? 5 : 16;
-  gl.uniform3f(u.uFog, fs, 1 / ((weather ? 30 : 48) - fs), GFX.fog ? (weather ? .85 : .7) : 0);
+  const far = GFX.fog ? (weather ? 32 : QUALITY[qualityLevel()].far) : 400, fs = weather ? 5 : far * .45;   // view distance
+  gl.uniform3f(u.uFog, fs, 1 / (far - fs), GFX.fog ? 1 : 0);
+  gl.uniform1f(u.uFar, far);
   gl.uniform3f(u.uShade, GFX.shade[0], GFX.shade[1], GFX.shade[2]);
   gl.uniform1f(u.uSunEl, s.sunEl); gl.uniform1f(u.uAmb, s.light); gl.uniform1f(u.uDayf, s.dayf); gl.uniform1f(u.uFlk, s.flk);
   gl.uniform1f(u.uWt, s.wt); gl.uniform1f(u.uCt, s.ct); gl.uniform1f(u.uCbr, s.cbr / 255); gl.uniform1f(u.uTod, tod);
@@ -2496,6 +3551,20 @@ function renderGL(tg) {
   }
   gl.uniform1i(u.uMobN, n);
   gl.uniform4fv(u.uMob, mobBuf); gl.uniform1fv(u.uMobHurt, mobHurtBuf);
+  petNear12.length = 0;                         // the nearest twelve animals within the view distance
+  for (const p of pets) { const d2 = (p.x - P.x) ** 2 + (p.y - P.y) ** 2 + (p.z - P.z) ** 2; if (d2 < far * far) petNear12.push([d2, p]); }
+  petNear12.sort((a, b) => a[0] - b[0]);
+  const np = Math.min(12, petNear12.length);
+  for (let i = 0; i < np; i++) {
+    const p = petNear12[i][1], k = i * 4, c = Math.cos(p.a), sn = Math.sin(p.a), g = p.grown, bd = PET_BOUND[p.s];
+    petBufA[k] = p.x; petBufA[k + 1] = p.y; petBufA[k + 2] = p.z; petBufA[k + 3] = p.s;
+    petBufB[k] = c / g; petBufB[k + 1] = sn / g; petBufB[k + 2] = 1 / g; petBufB[k + 3] = p.t;
+    petBufC[k] = p.x + (bd[0] * c + bd[2] * sn) * g; petBufC[k + 1] = p.y + bd[1] * g; petBufC[k + 2] = p.z + (bd[2] * c - bd[0] * sn) * g;
+    petBufC[k + 3] = bd[3] * g;
+    petBufD[k] = p.amp; petBufD[k + 1] = petR(p) * 1.4 + .05;
+  }
+  gl.uniform1i(u.uPetN, np);
+  gl.uniform4fv(u.uPetA, petBufA); gl.uniform4fv(u.uPetB, petBufB); gl.uniform4fv(u.uPetC, petBufC); gl.uniform4fv(u.uPetD, petBufD);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -2515,9 +3584,9 @@ function project(wx, wy, wz) {                // world point → canvas pixel, o
 }
 // sprinkler spray and the little bursts from farm work (their own random numbers, so the game's stay put)
 const fxRand = seeded(777), puffs = [];
-function puff(x, y, z, col, n, spread = .5, up = 2.2) {
+function puff(x, y, z, col, n, spread = .5, up = 2.2, ch = '') {   // ch: float a symbol (♥) instead of a square
   for (let k = 0; k < n; k++) puffs.push({ x: x + (fxRand() - .5) * spread, y: y + fxRand() * .2, z: z + (fxRand() - .5) * spread,
-    vx: (fxRand() - .5) * 1.8, vy: up * (.5 + fxRand() * .7), vz: (fxRand() - .5) * 1.8, life: .45 + fxRand() * .4, col });
+    vx: (fxRand() - .5) * 1.8, vy: up * (.5 + fxRand() * .7), vz: (fxRand() - .5) * 1.8, life: .45 + fxRand() * .4 + (ch ? .5 : 0), col, ch });
   if (puffs.length > 300) puffs.splice(0, puffs.length - 300);
 }
 function drawPuffs(dt) {
@@ -2525,19 +3594,21 @@ function drawPuffs(dt) {
   for (let i = puffs.length; i--;) {
     const p = puffs[i];
     if ((p.life -= dt) <= 0) { puffs.splice(i, 1); continue; }
-    p.vy -= 9 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+    p.vy -= (p.ch ? 1.2 : 9) * dt; p.x += p.vx * dt * (p.ch ? .3 : 1); p.y += p.vy * dt; p.z += p.vz * dt * (p.ch ? .3 : 1);
     const s = project(p.x, p.y, p.z);
     if (!s) continue;
     const sz = Math.max(1, f * .055 / Math.hypot(p.x - P.x, p.y - P.y - EYE, p.z - P.z));
-    g2d.globalAlpha = Math.min(1, p.life * 3); g2d.fillStyle = p.col; g2d.fillRect(s[0] - sz / 2, s[1] - sz / 2, sz, sz);
+    g2d.globalAlpha = Math.min(1, p.life * 3); g2d.fillStyle = p.col;
+    if (p.ch) { g2d.font = Math.max(7, sz * 3.4 | 0) + 'px sans-serif'; g2d.fillText(p.ch, s[0] - sz * 1.2, s[1]); }
+    else g2d.fillRect(s[0] - sz / 2, s[1] - sz / 2, sz, sz);
   }
   g2d.globalAlpha = 1;
 }
 function drawSpray() {
-  if (!sprinklers.length || dead) return;
+  if (dead) return;
   const f = view.f / fovK, T = performance.now() / 1000;
   g2d.fillStyle = 'rgb(190,226,255)';
-  for (const [x, y, z, r] of sprinklers) {
+  for (const [x, y, z, r] of sprinklerList()) {
     const d = Math.hypot(x + .5 - P.x, y + .9 - P.y - EYE, z + .5 - P.z);
     if (d > 16 || lineBlocked(x + .5, y + .9, z + .5, d)) continue;
     for (let k = 0; k < 8 + r * 6; k++) {    // droplets fly out in a ring and fall onto the reach
@@ -2610,9 +3681,38 @@ function makeParticles() {
   particles = [];
   for (let i = Math.round(200 * vw / 280); i--;) particles.push({ x: Math.random() * vw, y: Math.random() * vh, ph: Math.random() * 6.28 });
 }
+function drawPetSprites(gpu) {                // CPU: each pet is its portrait, standing up · both: name tags over your pets
+  const f = view.f / fovK, list = [];
+  for (const p of pets) { const dx = p.x - P.x, dy = p.y + petH(p) / 2 - P.y - EYE, dz = p.z - P.z; list.push([dx * dx + dy * dy + dz * dz, p]); }
+  list.sort((a, b) => b[0] - a[0]);
+  g2d.imageSmoothingEnabled = false;
+  for (const [d2, p] of list) {
+    const d = Math.sqrt(d2), h = petH(p);
+    if (d > (gpu ? 9 : 40) || lineBlocked(p.x, p.y + h * .6, p.z, d)) continue;
+    if (!gpu) {
+      const ft = project(p.x, p.y, p.z), ic = ICON_CANVAS[PET_ICON0 + p.s];
+      if (ft && ic) {
+        const W = f / Math.max(.4, d) * 16 / PET_ICON_K[p.s] * p.grown;
+        g2d.save(); g2d.translate(ft[0], ft[1]); if (Math.sin(p.a - P.a) < 0) g2d.scale(-1, 1);   // it faces the way it walks
+        g2d.drawImage(ic, -W / 2, -W * 15 / 16, W, W); g2d.restore();
+      }
+    }
+    if (p.wild || d > 9) continue;
+    const top = project(p.x, p.y + h + .15, p.z);
+    if (!top) continue;
+    const fs = gpu ? Math.max(10, Math.round(3.6 * view.ui)) : 7, n = Math.round(p.aff / 20), hs = '♥'.repeat(n) + '♡'.repeat(5 - n);
+    g2d.font = fs + 'px sans-serif'; g2d.textAlign = 'center';
+    const w = Math.max(g2d.measureText(p.name).width, g2d.measureText(hs).width) + fs * .8;
+    g2d.globalAlpha = Math.min(1, (9 - d) / 2);
+    g2d.fillStyle = 'rgba(0,0,0,.42)'; g2d.fillRect(top[0] - w / 2, top[1] - fs * 2.3, w, fs * 2.45);
+    g2d.fillStyle = '#fff'; g2d.fillText(p.name, top[0], top[1] - fs * 1.2);
+    g2d.fillStyle = '#ff7b95'; g2d.fillText(hs, top[0], top[1] - fs * .02);
+    g2d.globalAlpha = 1; g2d.textAlign = 'left';
+  }
+}
 function drawOverlays(dt, tg) {
-  const gpu = !!GPU.gl;                       // the GPU draws mobs and the block outline itself
-  drawEntities(gpu);
+  const gpu = !!GPU.gl;                       // the GPU draws mobs, pets and the block outline itself
+  drawEntities(gpu); drawPetSprites(gpu);
   drawSpray(); drawPuffs(dt);
   if (!gpu && tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {   // outline the face under the crosshair
     const [gx, gy, gz] = tg, fx = gx - tg[3], fy = gy - tg[4], fz = gz - tg[5];
@@ -2727,7 +3827,7 @@ function toggleInv(open) {
 }
 function respawn() {
   hp = maxHp(); dead = false; hurtT = 0; regenT = 0;
-  P.x = 16; P.y = 30; P.z = 16; P.g = 0;
+  placeAtSpawn();
   mobs.length = 0; arrows.length = 0;
   deadEl.classList.remove('on'); drawHP();
 }
@@ -2762,9 +3862,14 @@ function drawBuffs() {
   if (s !== lastBuffs) { buffsEl.innerHTML = s; lastBuffs = s; }
 }
 let lastTip = '';
-function updateTip(tg) {                      // what the crosshair is on, for farm things
+function updateTip(tg, pk) {                  // what the crosshair is on: an animal, or a farm thing
   let s = '';
-  if (tg) {
+  if (pk) {
+    const d = PETS[pk.s];
+    s = pk.wild ? '野生的' + d.n + ' · 最愛吃' + nameOf(d.food) + (heldItem() === d.food ? ' · 右鍵餵牠' : '')
+                : pk.name + '(' + d.n + (pk.grown < 1 ? '寶寶' : '') + ')♥' + pk.aff + ' · ' + (pk.fed === day ? '今天吃飽了' : '拿食物右鍵餵牠') +
+                  (pk.pat === day ? '' : ' · 空手右鍵摸摸');
+  } else if (tg) {
     const i = idx(tg[0], tg[1], tg[2]), b = world[i];
     if (b >= CROP0) {
       const c = cropOf(b), g = growInfo(i);
@@ -2774,6 +3879,8 @@ function updateTip(tg) {                      // what the crosshair is on, for f
     else if (b === TALL) s = '雜草 · 拔掉有機會掉種子';
     else if (b === BED) s = '床 · 晚上右鍵睡到天亮';
     else if (b === SPRINK || b === SPRINK2) s = (b === SPRINK ? '灑水器 · 周圍 3×3' : '高級灑水器 · 周圍 5×5') + '的耕地保持濕潤';
+    else if (isEgg(b)) s = nameOf(b) + ' · 孵化 ' + Math.floor(grow[i] * 100) + '%' +
+                           (grow[i] >= 1 ? ' · 寵物太多了,孵不出來' : torch[i] >= 12 ? ' · 火把保暖中,孵得快一倍' : ' · 旁邊放火把孵得快一倍');
   }
   if (s !== lastTip) { tipEl.textContent = s; tipEl.style.display = s ? 'block' : 'none'; lastTip = s; }
 }
@@ -2785,7 +3892,7 @@ function showTab(t) {
   for (const b of document.querySelectorAll('#ptabs .tab')) b.classList.toggle('on', b.dataset.p === t);
   for (const p of document.querySelectorAll('#pbody .pg')) p.classList.toggle('on', p.id === 'pg-' + t);
   if (t === 'bag') drawInv(); else if (t === 'shop') drawShop(); else if (t === 'cook') drawCook();
-  else if (t === 'tree') drawTree(); else if (t === 'map') drawMap();
+  else if (t === 'tree') drawTree(); else if (t === 'map') drawMap(); else if (t === 'pets') drawPets();
 }
 for (const b of document.querySelectorAll('#ptabs .tab')) b.onclick = () => showTab(b.dataset.p);
 $('pclose').onclick = () => toggleInv(false);
@@ -2828,11 +3935,11 @@ function drawCook() {
   if (!invOpen || panelTab !== 'cook') return;
   let h = '';
   for (const [j, d] of DISHES.entries()) {
-    const ok = d.i.every(([c, k]) => has(CROP_ITEM0 + c, k));
+    const ok = d.i.every(([c, k]) => has(ingId(c), k));
     const ing = d.i.map(([c, k]) => {
-      const n = INV.reduce((a, s) => a + (s.id === CROP_ITEM0 + c ? s.n : 0), 0);
-      return discovered.has(c) ? '<span class="ing' + (n >= k ? '' : ' miss') + '">' + iconImg(CROP_ITEM0 + c) + CROPS[c].n + ' ' + n + '/' + k + '</span>'
-                               : '<span class="ing miss">❔ 未發現 ×' + k + '</span>';
+      const id = ingId(c), n = INV.reduce((a, s) => a + (s.id === id ? s.n : 0), 0);
+      return ingKnown(c) ? '<span class="ing' + (n >= k ? '' : ' miss') + '">' + iconImg(id) + nameOf(id) + ' ' + n + '/' + k + '</span>'
+                         : '<span class="ing miss">❔ 未發現 ×' + k + '</span>';
     }).join('');
     h += '<div class="dish' + (ok ? ' ok' : '') + '">' + iconImg(DISH0 + j, 'big') + '<div class="dx"><b>' + d.n + '</b> <span class="pr">💰' + d.p + '</span>' +
          '<div class="fx">' + fxText(d) + '</div><div>' + ing + '</div></div><button data-cook="' + j + '"' + (ok ? '' : ' disabled') + '>煮</button></div>';
@@ -2906,78 +4013,226 @@ function drawTreeInfo() {
 }
 $('treesvg').onclick = e => { const g = e.target.closest('g[data-c]'); if (g) { treeSel = +g.dataset.c; drawTree(); } };
 
-// farm map: the world seen from above, one cell per block column
-const mapC = $('mapc'), mapG = mapC.getContext('2d'), MAPS = 12;
-let mapSel = -1;
+// farm map: the world from above, one cell per block column. It follows you around; ＋ / − or the
+// mouse wheel zooms (the widest view shows the whole world), dragging looks around, a click shows a cell
+const mapC = $('mapc'), mapG = mapC.getContext('2d'), MAPPX = 384, MAP_ZOOM = [3, 4, 6, 8, 12];
+const mapImg = mapG.createImageData(MAPPX, MAPPX), mapBuf = new Uint32Array(mapImg.data.buffer);
+const mapView = { s: 6, x: 0, z: 0, follow: true };   // s: pixels per cell · x, z: the cell in the top-left corner
+let mapSel = -1, mapDrag = null;
 function columnTop(x, z) {                    // the cell a top-down view shows: crops and farmland win, glass is seen through
   let glass = false;
-  for (let y = WM; y >= 0; y--) {
+  for (let y = YM; y >= 0; y--) {
     const b = world[idx(x, y, z)];
     if (b === AIR || b === TORCH) continue;
-    if (b === GLASS && x && z && x !== WM && z !== WM) { glass = true; continue; }
+    if (b === GLASS && x && z && x !== XM && z !== ZM) { glass = true; continue; }
     return { y, b, glass };
   }
   return { y: 0, b: AIR, glass };
 }
+function mapClamp() {
+  const n = MAPPX / mapView.s;
+  mapView.x = Math.round(Math.max(0, Math.min(SX - n, mapView.x)));
+  mapView.z = Math.round(Math.max(0, Math.min(SZ - n, mapView.z)));
+}
+const MAP_GRASS = [[109, 187, 74], [90, 168, 60], [184, 164, 68], [223, 230, 234]];
+function mapColour(X, Z, y, b) {              // [r, g, b] of a column's top, a little brighter the higher it is
+  const sea = season();
+  let c, relief = true;
+  if (b >= CROP0 || isFarm(b)) { c = isWetFarm(b >= CROP0 ? world[idx(X, y - 1, Z)] : b) ? [74, 50, 32] : [122, 86, 54]; relief = false; }
+  else if (b === WATER) {                     // deeper water is darker
+    let d = 0;
+    while (d < 8 && y - d > 0 && world[idx(X, y - d - 1, Z)] === WATER) d++;
+    c = [58 - d * 4, 120 - d * 7, 216 - d * 8]; relief = false;
+  }
+  else if (b === GRASS || b === TALL) c = MAP_GRASS[sea];
+  else if (b === SAND) c = [227, 212, 160];
+  else if (b === LEAF) c = sea === 2 ? [200, 112, 42] : sea === 3 ? [200, 214, 214] : [47, 110, 42];
+  else if (b === WOOD || b === PLANK) c = [107, 74, 42];
+  else if (b === GLASS) c = [159, 196, 216];
+  else if (b === STONE || b === COAL || b === IRON || b === DIAMOND) c = [138, 138, 142];
+  else if (b === DIRT) c = [134, 96, 63];
+  else if (b === BED) c = [192, 57, 43];
+  else if (b === SPRINK || b === SPRINK2) c = [154, 160, 166];
+  else if (isEgg(b)) c = [240, 226, 190];
+  else c = [51, 51, 51];
+  if (!relief) return c;
+  const k = Math.max(.72, Math.min(1.25, .92 + (y - WATER_LVL) * .012));
+  return [c[0] * k, c[1] * k, c[2] * k];
+}
 function drawMap() {
   if (!invOpen || panelTab !== 'map') return;
-  const S = MAPS, g = mapG;
-  mapC.width = mapC.height = WS * S;
-  if (maskVer !== waterVer) buildWetMask();
-  const grassC = ['#6dbb4a', '#5aa83c', '#b8a444', '#dfe6ea'][season()];
-  for (let z = 0; z < WS; z++) for (let x = 0; x < WS; x++) {
-    const { y, b, glass } = columnTop(x, z), X = x * S, Y = z * S;
-    let c = '#333';
-    if (b >= CROP0 || isFarm(b)) c = isWetFarm(b >= CROP0 ? world[idx(x, y - 1, z)] : b) ? '#4a3220' : '#7a5636';
-    else if (b === GRASS || b === TALL) c = grassC; else if (b === WATER) c = '#3a78d8'; else if (b === SAND) c = '#e3d4a0';
-    else if (b === LEAF) c = season() === 2 ? '#c8702a' : '#2f6e2a'; else if (b === WOOD || b === PLANK) c = '#6b4a2a';
-    else if (b === GLASS) c = '#9fc4d8'; else if (b === STONE || b === COAL || b === IRON || b === DIAMOND) c = '#8a8a8e';
-    else if (b === DIRT) c = '#86603f'; else if (b === BED) c = '#c0392b'; else if (b === SPRINK || b === SPRINK2) c = '#9aa0a6';
-    g.fillStyle = c; g.fillRect(X, Y, S, S);
-    if (b >= CROP0) {                           // crop: coloured dot that grows with the plant, ring when ripe
-      const cr = CROPS[cropOf(b)], st = stageOf(b);
-      g.fillStyle = 'rgb(' + (st === 3 ? cr.f : cr.l).join(',') + ')';
-      g.beginPath(); g.arc(X + S / 2, Y + S / 2, 1.5 + st * 1.2, 0, 7); g.fill();
-      if (st === 3) { g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.stroke(); }
-    }
-    if (b === TALL) { g.fillStyle = '#3d7a2a'; g.fillRect(X + 4, Y + 4, 4, 4); }
-    if (glass) { g.strokeStyle = 'rgba(200,236,255,.9)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + .5, S - 1, S - 1); }
+  const S = mapView.s, n = MAPPX / S, g = mapG;
+  if (mapView.follow) { mapView.x = P.x - n / 2; mapView.z = P.z - n / 2; }
+  mapClamp();
+  const x0 = mapView.x, z0 = mapView.z, dots = [], weeds = [], glassy = [];
+  for (let z = 0; z < n; z++) for (let x = 0; x < n; x++) {  // ground colours, straight into the pixel buffer
+    const X = x0 + x, Z = z0 + z, { y, b, glass } = columnTop(X, Z), c = mapColour(X, Z, y, b);
+    const col = 0xff000000 | Math.min(255, c[2]) << 16 | Math.min(255, c[1]) << 8 | Math.min(255, c[0]);
+    for (let py = z * S; py < z * S + S; py++) mapBuf.fill(col, py * MAPPX + x * S, py * MAPPX + x * S + S);
+    if (b >= CROP0) dots.push(x, z, b); else if (b === TALL) weeds.push(x, z);
+    if (glass) glassy.push(x, z);
   }
-  for (let i = 0; i < VOL; i++) {               // sprinkler reach
-    const b = world[i];
-    if (b !== SPRINK && b !== SPRINK2) continue;
-    const r = b === SPRINK ? 1 : 2, x = i & WM, z = i >> 5 & WM;
-    g.fillStyle = 'rgba(120,190,255,.22)'; g.fillRect((x - r) * S, (z - r) * S, (2 * r + 1) * S, (2 * r + 1) * S);
-    g.fillStyle = b === SPRINK ? '#dfe4ea' : '#f0d070'; g.fillRect(x * S + 3, z * S + 3, S - 6, S - 6);
+  g.putImageData(mapImg, 0, 0);
+  for (let k = 0; k < dots.length; k += 3) {  // crops: a coloured dot that grows with the plant, a ring when ripe
+    const cr = CROPS[cropOf(dots[k + 2])], st = stageOf(dots[k + 2]);
+    g.fillStyle = 'rgb(' + (st === 3 ? cr.f : cr.l).join(',') + ')';
+    g.beginPath(); g.arc((dots[k] + .5) * S, (dots[k + 1] + .5) * S, Math.max(1, (1.5 + st * 1.2) * S / 12), 0, 7); g.fill();
+    if (st === 3 && S >= 6) { g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.stroke(); }
+  }
+  g.fillStyle = '#3d7a2a';
+  for (let k = 0; k < weeds.length; k += 2) g.fillRect(weeds[k] * S + S / 3, weeds[k + 1] * S + S / 3, Math.max(1, S / 3), Math.max(1, S / 3));
+  g.strokeStyle = 'rgba(200,236,255,.9)'; g.lineWidth = 1;
+  for (let k = 0; k < glassy.length; k += 2) g.strokeRect(glassy[k] * S + .5, glassy[k + 1] * S + .5, S - 1, S - 1);
+  for (const [x, , z, r] of sprinklerList()) {  // sprinkler reach
+    g.fillStyle = 'rgba(120,190,255,.22)'; g.fillRect((x - r - x0) * S, (z - r - z0) * S, (2 * r + 1) * S, (2 * r + 1) * S);
+    g.fillStyle = r === 1 ? '#dfe4ea' : '#f0d070'; g.fillRect((x - x0) * S + S / 4, (z - z0) * S + S / 4, S / 2, S / 2);
   }
   g.fillStyle = '#ff5a3c';
-  for (const m of mobs) { g.beginPath(); g.arc(m.x * S, m.z * S, 3, 0, 7); g.fill(); }
-  g.save(); g.translate(P.x * S, P.z * S); g.rotate(-P.a);        // you: an arrow pointing where you look
+  for (const m of mobs) { g.beginPath(); g.arc((m.x - x0) * S, (m.z - z0) * S, Math.max(2.5, S / 4), 0, 7); g.fill(); }
+  for (const p of pets) {                     // animals in their main colour; your pets ringed in white
+    const c = PETS[p.s].pal[0];
+    g.fillStyle = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+    g.beginPath(); g.arc((p.x - x0) * S, (p.z - z0) * S, Math.max(2.5, S / 4), 0, 7); g.fill();
+    if (!p.wild) { g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.stroke(); }
+  }
+  g.save(); g.translate((P.x - x0) * S, (P.z - z0) * S); g.rotate(-P.a);   // you: an arrow pointing where you look
   g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5;
   g.beginPath(); g.moveTo(0, 7); g.lineTo(-4.5, -4); g.lineTo(0, -1.5); g.lineTo(4.5, -4); g.closePath(); g.stroke(); g.fill();
   g.restore();
-  if (mapSel >= 0) { g.strokeStyle = '#ffe070'; g.lineWidth = 2; g.strokeRect((mapSel & WM) * S + 1, (mapSel >> 5) * S + 1, S - 2, S - 2); }
+  if (mapSel >= 0) { g.strokeStyle = '#ffe070'; g.lineWidth = 2; g.strokeRect(((mapSel & XM) - x0) * S + 1, ((mapSel >> ZSH) - z0) * S + 1, S - 2, S - 2); }
   let crops = 0, ripe = 0;
-  for (let i = 0; i < VOL; i++) if (world[i] >= CROP0) { crops++; if (stageOf(world[i]) === 3) ripe++; }
-  $('mapsum').textContent = SEASONS[season()] + '天 · 第 ' + day + ' 天 · 作物 ' + crops + ' 株,成熟 ' + ripe + ' 株';
+  for (const i of farmCells()) if (world[i] >= CROP0) { crops++; if (stageOf(world[i]) === 3) ripe++; }
+  $('mapsum').textContent = SEASONS[season()] + '天 · 第 ' + day + ' 天 · 作物 ' + crops + ' 株,成熟 ' + ripe + ' 株 · 你在 (' + (P.x | 0) + ', ' + (P.z | 0) + ')';
+  $('mapzoom').textContent = n + ' × ' + n + ' 格' + (mapView.follow ? '' : ' · 拖曳中');
   drawMapInfo();
 }
 function drawMapInfo() {
   const el = $('mapinfo');
-  if (mapSel < 0) { el.innerHTML = '<p class="dim">點地圖上的一格看詳細資料。</p>'; return; }
-  const x = mapSel & WM, z = mapSel >> 5, { y, b, glass } = columnTop(x, z);
+  if (mapSel < 0) { el.innerHTML = '<p class="dim">點地圖上的一格看詳細資料。拖曳可以移動地圖,滾輪或 ＋ / − 縮放。</p>'; return; }
+  const x = mapSel & XM, z = mapSel >> ZSH, { y, b, glass } = columnTop(x, z);
   let h = '<b>(' + x + ', ' + z + ')</b> ';
   if (b >= CROP0) {
     const i = idx(x, y, z), c = cropOf(b), cr = CROPS[c], gi = growInfo(i), left = (1 - grow[i]) * cr.g / Math.max(gi.rate, .001);
     h += cr.n + (stageOf(b) === 3 ? ' · <b>成熟</b>' : ' · ' + Math.floor(grow[i] * 100) + '% · 約 ' + (left < 1 ? Math.max(1, Math.round(left * 60)) + ' 分鐘' : left.toFixed(1) + ' 小時') + '後成熟') +
          '<br>' + (gi.notes.length ? gi.notes.join('、') : '生長狀況良好') + (glass ? ' · 在溫室裡' : '');
-  } else if (isFarm(b)) h += '耕地 · ' + (isWetFarm(b) ? '濕潤' : '乾的') + (b >= FARM_F ? ' · 已施肥' : '') + (nearWater[idx(x, y, z)] ? ' · 靠水或灑水器,一直保持濕潤' : '') + '<br>空著:旁邊兩株不同的成熟作物有機會在這裡長出新品種';
-  else h += nameOf(b) || '空地';
+  } else if (isFarm(b)) h += '耕地 · ' + (isWetFarm(b) ? '濕潤' : '乾的') + (b >= FARM_F ? ' · 已施肥' : '') + (nearWaterAt(idx(x, y, z)) ? ' · 靠水或灑水器,一直保持濕潤' : '') + '<br>空著:旁邊兩株不同的成熟作物有機會在這裡長出新品種';
+  else if (isEgg(b)) h += nameOf(b) + ' · 孵化 ' + Math.floor(grow[idx(x, y, z)] * 100) + '%';
+  else h += (nameOf(b) || '空地') + ' · 高度 ' + y;
   el.innerHTML = h;
 }
-mapC.onclick = e => {
-  const r = mapC.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * WS | 0, z = (e.clientY - r.top) / r.height * WS | 0;
-  if (x >= 0 && z >= 0 && x < WS && z < WS) { mapSel = z * 32 + x; drawMap(); }
+function mapCellAt(cx, cy) {                  // the cell under a screen point
+  const r = mapC.getBoundingClientRect(), k = MAPPX / r.width / mapView.s;
+  const x = mapView.x + Math.floor((cx - r.left) * k), z = mapView.z + Math.floor((cy - r.top) * k);
+  return x >= 0 && z >= 0 && x < SX && z < SZ ? [x, z] : null;
+}
+function mapToClient(x, z) {                  // the screen point in the middle of a cell
+  const r = mapC.getBoundingClientRect(), k = r.width / MAPPX * mapView.s;
+  return [r.left + (x - mapView.x + .5) * k, r.top + (z - mapView.z + .5) * k];
+}
+function mapZoom(d, cx, cy) {                 // one zoom step; a free view keeps the point under the cursor still
+  const i = MAP_ZOOM.indexOf(mapView.s), j = Math.max(0, Math.min(MAP_ZOOM.length - 1, i + d));
+  if (j === i) return;
+  const r = mapC.getBoundingClientRect(), k = MAPPX / r.width;
+  const fx = cx === undefined ? MAPPX / 2 : (cx - r.left) * k, fz = cy === undefined ? MAPPX / 2 : (cy - r.top) * k;
+  const wx = mapView.x + fx / mapView.s, wz = mapView.z + fz / mapView.s;
+  mapView.s = MAP_ZOOM[j];
+  if (!mapView.follow) { mapView.x = wx - fx / mapView.s; mapView.z = wz - fz / mapView.s; }
+  drawMap();
+}
+mapC.onpointerdown = e => {
+  mapDrag = { x: e.clientX, y: e.clientY, vx: mapView.x, vz: mapView.z, moved: false };
+  if (mapC.setPointerCapture) mapC.setPointerCapture(e.pointerId);
+};
+mapC.onpointermove = e => {
+  if (!mapDrag) return;
+  const dx = e.clientX - mapDrag.x, dy = e.clientY - mapDrag.y, k = MAPPX / mapC.getBoundingClientRect().width / mapView.s;
+  if (!mapDrag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;       // a small wobble is still a click
+  mapDrag.moved = true; mapView.follow = false;
+  mapView.x = mapDrag.vx - dx * k; mapView.z = mapDrag.vz - dy * k;
+  drawMap();
+};
+mapC.onpointerup = e => {
+  if (mapDrag && !mapDrag.moved) { const c = mapCellAt(e.clientX, e.clientY); if (c) { mapSel = c[1] * SX + c[0]; drawMap(); } }
+  mapDrag = null;
+};
+mapC.onpointercancel = () => { mapDrag = null; };
+mapC.addEventListener('wheel', e => { e.preventDefault(); mapZoom(e.deltaY < 0 ? 1 : -1, e.clientX, e.clientY); }, { passive: false });
+$('mapin').onclick = () => mapZoom(1);
+$('mapout').onclick = () => mapZoom(-1);
+$('mapme').onclick = () => { mapView.follow = true; drawMap(); };
+
+// ---- the pets page: your pets (rename, follow / stay, call, let go), eggs being hatched, and the 圖鑑 ----
+const escHTML = t => String(t).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
+let petFreeArm = 0, petFreeTimer = 0, petUiT = 0, petRenaming = false;
+const petById = id => pets.find(p => p.id === id && !p.wild);
+function drawPets() {
+  if (!invOpen || panelTab !== 'pets' || petRenaming) return;
+  const mine = tamedPets();
+  $('petsum').textContent = '我的寵物 ' + mine.length + ' / ' + PET_MAX + ' · 圖鑑 ' + petSeen.size + ' / ' + PETS.length + '(馴服過 ' + petTamed.size + ' 種)';
+  let h = '';
+  for (const p of mine) {
+    const d = PETS[p.s], n = Math.round(p.aff / 20);
+    h += '<div class="pet">' + iconImg(PET_ICON0 + p.s, 'big') + '<div class="dx">' +
+      '<b class="pn" data-rename="' + p.id + '" title="點名字可以改名">' + escHTML(p.name) + '</b> <span class="dim">' + d.n +
+      (p.grown < 1 ? '寶寶 ' + Math.round(p.grown * 100) + '%' : '') + '</span> ' +
+      '<span class="hearts" title="好感 ' + p.aff + ' / 100">' + '♥'.repeat(n) + '♡'.repeat(5 - n) + '</span>' +
+      '<div class="ab">' + d.text + '</div>' +
+      '<div class="dim">最愛:' + nameOf(d.food) + ' · ' + (p.fed === day ? '今天餵過了' : '今天還沒餵') + ' · ' + (p.pat === day ? '摸過了' : '還沒摸') + ' · ' +
+      (p.mode ? '待在 (' + (p.hx | 0) + ', ' + (p.hz | 0) + ')' : '跟著你') + '</div>' +
+      '<div class="btns"><button data-mode="' + p.id + '">' + (p.mode ? '跟我走' : '待在這裡') + '</button><button data-call="' + p.id + '">叫過來</button>' +
+      '<button data-free="' + p.id + '">' + (petFreeArm === p.id ? '確定放生?' : '放生') + '</button></div></div></div>';
+  }
+  $('petlist').innerHTML = h || '<p class="dim">還沒有寵物。拿著野生動物最愛的食物對牠按右鍵(有時要多餵幾次),牠就會跟你走。' +
+    '草叢、稀有作物和礦石裡偶爾藏著寵物蛋,放在地上就會孵化。</p>';
+  const eggs = farmCells().filter(i => isEgg(world[i]));
+  $('petegg').innerHTML = eggs.length ? '<h3>孵蛋中</h3>' + eggs.map(i => '<div class="row">' + iconImg(world[i]) + '<span class="nm">' + nameOf(world[i]) +
+    ' · (' + ixOf(i) + ', ' + izOf(i) + ')' + (torch[i] >= 12 ? ' · 🔥 火把保暖' : '') + '</span><span class="pr">' + Math.floor(grow[i] * 100) + '%</span></div>').join('') : '';
+  let dex = '';
+  for (const [k, d] of PETS.entries()) {
+    const seen = petSeen.has(k), tamed = petTamed.has(k);
+    const where = d.w ? d.hab.map(x => HAB_NAME[x]).join('、') + ' · ' + TIME_NAME[d.time] + (d.sea ? ' · ' + seasonText(d.sea) + '天' : '') : '只能從龍蛋孵出來';
+    dex += '<div class="dex' + (tamed ? ' t' : '') + '">' + (seen ? iconImg(PET_ICON0 + k, 'big') : '<span class="q">?</span>') + '<div><b>' + (seen ? d.n : '???') + '</b>' +
+      (tamed ? ' <span class="ok">✓ 馴服過</span>' : seen ? ' <span class="dim">見過</span>' : '') + '<br><span class="dim">' + where + '</span>' +
+      (seen ? '<br><span class="dim">最愛:' + nameOf(d.food) + '</span>' : '') + '</div></div>';
+  }
+  $('petdex').innerHTML = dex;
+}
+function startRename(id, el) {                // the name becomes a text box: Enter (or clicking away) keeps it, Esc cancels
+  const p = petById(id);
+  if (!p) return;
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.className = 'petname'; inp.maxLength = 8; inp.value = p.name;
+  let done = false;
+  const finish = keep => {
+    if (done) return;
+    done = true; petRenaming = false;
+    const v = inp.value.trim();
+    if (keep && v) p.name = v.slice(0, 8);
+    drawPets();
+  };
+  inp.onkeydown = e => {
+    if (e.isComposing) return;                // Enter that picks an IME candidate is not the end of the name
+    if (e.key === 'Enter') finish(true);
+    else if (e.key === 'Escape') { e.stopPropagation(); finish(false); }
+  };
+  inp.onblur = () => finish(true);
+  petRenaming = true;
+  el.replaceWith(inp); inp.focus(); inp.select();
+}
+$('pg-pets').onclick = e => {
+  const t = e.target, d = t.dataset;
+  if (t.id === 'petcall') { for (const p of tamedPets()) { p.mode = 0; petTeleport(p); } drawPets(); return; }
+  if (d.rename) { startRename(+d.rename, t); return; }
+  const p = petById(+(d.mode || d.call || d.free));
+  if (!p) return;
+  if (d.mode) { p.mode ^= 1; p.hx = p.x; p.hy = p.y; p.hz = p.z; p.goal = null; }
+  else if (d.call) { p.mode = 0; petTeleport(p); }
+  else if (d.free) {                          // letting a pet go takes two clicks
+    clearTimeout(petFreeTimer);
+    if (petFreeArm !== p.id) { petFreeArm = p.id; petFreeTimer = setTimeout(() => { petFreeArm = 0; drawPets(); }, 3000); }
+    else { petFreeArm = 0; toast('👋 ' + p.name + ' 回到野外去了'); p.wild = true; p.name = ''; p.life = 0; p.aff = 0; p.tries = 0; p.goal = null; }
+  }
+  drawPets();
 };
 
 // ---- menu & settings ----
@@ -3076,6 +4331,7 @@ function keyOf(e) {
 }
 let autoMenuAt = -1e9;
 addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') return;   // typing a pet's name
   const k = keyOf(e);
   if (k === 'escape') {                       // Esc: bag first, then the menu
     if (performance.now() - autoMenuAt < 400) return;               // losing the pointer lock already opened it
@@ -3096,6 +4352,7 @@ addEventListener('keydown', e => {
   if (k >= '1' && k <= '6' && k.length === 1) selectSlot(+k - 1);
   else if (k === 'i' || k === 'tab') toggleInv(!invOpen);
   else if (k === 'm') { if (!invOpen) { panelTab = 'map'; toggleInv(true); } else if (panelTab === 'map') toggleInv(false); else showTab('map'); }
+  else if (k === 'p') { if (!invOpen) { panelTab = 'pets'; toggleInv(true); } else if (panelTab === 'pets') toggleInv(false); else showTab('pets'); }
   else if (k === 'c') setCreative(!creative);
   else if (k === 'g') { settings.shadows ^= 1; applySettings(); saveSettings(); }
   else if (k === 'h') { settings.help ^= 1; applySettings(); saveSettings(); }
@@ -3147,7 +4404,7 @@ addEventListener('mousemove', e => {
   P.b = Math.max(-1.5, Math.min(1.5, P.b - e.movementY * s * settings.invY));
 });
 addEventListener('wheel', e => {
-  if (paused || dead || !e.deltaY) return;
+  if (paused || dead || invOpen || !e.deltaY) return;
   let i = selI + (e.deltaY > 0 ? 1 : -1);
   const pages = Math.ceil(PAL.length / 6);
   if (creative && PAL.length > 6) {           // wrap onto the next palette page
@@ -3330,9 +4587,9 @@ function frame(tm) {
   // ---- physics + entities in ≤20 ms sub-steps, so arrows and falls stay accurate on slow frames ----
   const steps = Math.max(1, Math.ceil(dt / .02)), h = dt / steps;
   const spd = (sprinting ? 7 : 5) * (buffs.run > 0 ? 1.35 : 1);
-  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd); tickEntities(h); }
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd); tickEntities(h); tickPets(h); }
   tickGrass(dt);
-  if (P.y < -10) { P.x = 16; P.y = 30; P.z = 16; P.g = 0; hurtPlayer(4); }
+  if (P.y < -10) { placeAtSpawn(); hurtPlayer(4); }
   if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
   hintT = Math.max(0, hintT - dt);
 
@@ -3348,13 +4605,17 @@ function frame(tm) {
   // ---- draw ----
   cam.sx = Math.sin(P.a); cam.cx = Math.cos(P.a); cam.sp = Math.sin(P.b); cam.cp = Math.cos(P.b);
   const tg = target(heldItem() === 161);      // an empty bucket aims at water
-  updateTip(handsOff ? null : tg);
+  updateTip(handsOff ? null : tg, handsOff ? null : pickPet(tg));
   if (invOpen && panelTab === 'map' && (mapT -= dt) <= 0) { mapT = 1; drawMap(); }
+  if (invOpen && panelTab === 'pets' && (petUiT -= dt) <= 0) { petUiT = 1; drawPets(); }
   if (GPU.gl) { renderGL(tg); g2d.clearRect(0, 0, view.w, view.h); } else renderWorld();
   drawOverlays(dt, tg);
 
   // ---- autosave (silently skipped where storage is blocked) + clock ----
-  if (dt > 0 && (saveT -= dt) <= 0) { saveT = 8; saveGame(); }
+  if (dt > 0 && (saveT -= dt) <= 0) {         // every 8 s, in the browser's next idle moment
+    saveT = 8;
+    if (window.requestIdleCallback) requestIdleCallback(saveGame, { timeout: 3000 }); else saveGame();
+  }
   const hh = tod * 24 | 0, mm = (tod * 24 - hh) * 60 | 0;
   const clock = (sky.sunEl > .12 ? '☀' : sky.sunEl < -.12 ? '🌙' : '🌆') + (weather === 1 ? '🌧' : weather === 2 ? '❄' : '') +
                 ' ' + pad2(hh) + ':' + pad2(mm) + (creative ? ' ∞' : '');
@@ -3372,8 +4633,14 @@ loadSettings();
 makeTextures(); makeIcons(); makeIconCSS();
 if (initGL()) { glCanvas.style.display = 'block'; autoLevel = 2; }   // GPU starts at 高, CPU at 中
 newKit();
-if (!loadGame()) { generateWorld(); bootMsg = '🌱 出生點附近有池塘和一小塊菜園:鋤頭翻土、右鍵播種、成熟後右鍵收成'; }
-else if (needStarter) { starterPack(); bootMsg = '🌱 新功能:種菜!鋤頭、澆水壺和種子已經放進背包'; }
+if (!loadGame()) {
+  generateWorld(); placeAtSpawn();
+  bootMsg = '🌱 出生點附近有池塘和一小塊菜園:鋤頭翻土、右鍵播種、成熟後右鍵收成\n🐾 草地上的動物可以馴服:拿牠最愛的食物對牠右鍵(狗最愛背包裡的麵包)';
+} else {
+  if (needStarter) starterPack();
+  bootMsg = [loadNote, needStarter ? '🌱 新功能:種菜!鋤頭、澆水壺和種子已經放進背包' : '',
+             petNews ? '🐾 新功能:寵物!拿野生動物最愛的食物對牠右鍵就能馴服 · P 看寵物和圖鑑' : ''].filter(Boolean).join('\n');
+}
 relight();
 applySettings();
 drawBar(); drawHP(); drawCoins(); drawBuffs();
