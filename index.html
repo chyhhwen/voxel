@@ -11,7 +11,10 @@
   html,body{margin:0;height:100%;background:#111;overflow:hidden;overscroll-behavior:none;
        -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none}
-  #c{display:block;image-rendering:pixelated;touch-action:none;cursor:crosshair;background:#000}
+  #view{position:relative;flex:none;background:#000}
+  #view canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none}
+  #view #gl{display:none}
+  #c{cursor:crosshair}
   #hud{position:fixed;top:calc(8px + var(--st));left:calc(8px + var(--sl));right:calc(128px + var(--sr));
        color:#fff;font:12px/1.4 monospace;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.85}
   #hud.off{display:none}
@@ -38,35 +41,135 @@
        border:2px solid rgba(255,255,255,.28);background:rgba(0,0,0,.22);pointer-events:none}
   #knb{position:absolute;width:36px;height:36px;border-radius:50%;
        background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.65)}
+  #knb.run{background:rgba(255,214,120,.8);border-color:#fff}
   #bar{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);
        display:flex;gap:6px;z-index:2}
   .slot{width:42px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
-        position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);cursor:pointer;touch-action:none}
+        position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);cursor:pointer;touch-action:none;
+        background-color:rgba(16,18,22,.55);background-repeat:no-repeat;background-position:center;
+        background-size:78%;image-rendering:pixelated}
   .slot.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
   .slot span{position:absolute;top:1px;left:4px;font:10px monospace;color:#fff;text-shadow:0 1px 1px #000}
   .slot i{position:absolute;right:3px;bottom:0;font:11px/1.4 monospace;font-style:normal;
           color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
-  .slot.e{background:rgba(255,255,255,.07)!important}
+  .slot.e{background-color:rgba(255,255,255,.07)}
   #clock{position:fixed;top:calc(8px + var(--st));right:calc(10px + var(--sr));color:#fff;font:14px monospace;
          text-shadow:0 1px 2px #000;pointer-events:none;opacity:.9}
-  #fps{position:fixed;top:calc(44px + var(--st));right:calc(10px + var(--sr));color:#fff;font:11px monospace;
+  #fps{position:fixed;top:calc(82px + var(--st));right:calc(10px + var(--sr));color:#fff;font:11px monospace;
        text-shadow:0 1px 2px #000;pointer-events:none;opacity:.8;display:none;white-space:nowrap}
   #fps.on{display:block}
-  #inv{position:fixed;inset:0;z-index:5;display:none;flex-direction:column;
-       align-items:center;justify-content:center;gap:12px;color:#fff;font:12px/1.6 monospace;
-       background:rgba(8,10,14,.8);backdrop-filter:blur(3px)}
+  #inv{position:fixed;inset:0;z-index:5;display:none;
+       align-items:center;justify-content:center;color:#fff;font:12px/1.6 monospace;
+       background:rgba(8,10,14,.72);backdrop-filter:blur(3px)}
   #inv.on{display:flex}
   #invg{display:grid;grid-template-columns:repeat(6,46px);gap:5px;touch-action:none}
   #invg .slot{width:46px;height:46px}
   #invg .slot.hb{border-color:rgba(255,215,120,.75)}
   #invg .slot.src{opacity:.35}
   #ghost{position:fixed;width:46px;height:46px;border-radius:6px;pointer-events:none;
-         z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6)}
+         z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6);
+         background-color:rgba(16,18,22,.75);background-repeat:no-repeat;background-position:center;
+         background-size:78%;image-rendering:pixelated}
   #hp{position:fixed;left:calc(8px + var(--sl));bottom:calc(70px + var(--sb));display:flex;gap:3px;z-index:2;pointer-events:none}
   #hp b{width:11px;height:11px;border-radius:2px;background:#3a1520;
         box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
   #hp b.f{background:#e2455c}
   #hp b.h{background:linear-gradient(90deg,#e2455c 50%,#3a1520 50%)}
+  #hp b.g{background:#f2c94c}
+  #hp b.gh{background:linear-gradient(90deg,#f2c94c 50%,#3a1520 50%)}
+  #coin{position:fixed;top:calc(42px + var(--st));right:calc(10px + var(--sr));color:#fff;font:12px/1.5 monospace;
+        text-align:right;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.92}
+  #coin b{font-weight:400;color:#ffd766}
+  #buffs{position:fixed;left:calc(8px + var(--sl));bottom:calc(88px + var(--sb));display:flex;gap:5px;flex-wrap:wrap;
+         max-width:60vw;color:#fff;font:11px monospace;text-shadow:0 1px 2px #000;pointer-events:none;z-index:2}
+  #buffs span{background:rgba(0,0,0,.38);border-radius:9px;padding:1px 7px}
+  #toasts{position:fixed;bottom:calc(98px + var(--sb));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;
+          align-items:center;gap:5px;z-index:6;pointer-events:none;width:max-content;max-width:72vw}
+  .toast{background:rgba(0,0,0,.62);color:#fff;font:12px/1.4 monospace;padding:4px 12px;border-radius:12px;text-align:center;
+         transition:opacity .5s,transform .5s;animation:tin .25s ease-out}
+  .toast.big{font-size:15px;padding:6px 16px;background:rgba(52,38,6,.82);border:1px solid rgba(255,215,102,.75);color:#ffe9a8}
+  .toast.out{opacity:0;transform:translateY(-8px)}
+  @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  #tip{position:fixed;top:calc(50% + 12px);left:50%;transform:translateX(-50%);display:none;pointer-events:none;z-index:2;
+       color:#fff;font:11px/1.4 monospace;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:5px;white-space:nowrap}
+  #sleep{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:4}
+  body.inv #bi{display:none!important}         /* the panel has its own ✕ */
+  /* the panel: bag · market · cooking · breeding graph · farm map */
+  #inv .pw{width:min(840px,96vw);height:min(580px,94vh);display:flex;flex-direction:column;box-sizing:border-box;
+           background:rgba(18,22,28,.95);border:1px solid rgba(255,255,255,.16);border-radius:10px;overflow:hidden;
+           box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  #ptabs{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.1);flex:none}
+  #ptabs .tab{font:12px monospace;color:rgba(255,255,255,.72);background:none;border:1px solid transparent;
+              border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+  #ptabs .tab:hover{background:rgba(255,255,255,.08)}
+  #ptabs .tab.on{color:#fff;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.32)}
+  #pcoin{margin-left:auto;color:#ffd766;padding:0 6px;white-space:nowrap}
+  #pclose{font:14px monospace;color:#fff;background:none;border:1px solid rgba(255,255,255,.3);border-radius:6px;
+          width:30px;height:28px;cursor:pointer;flex:none}
+  #pbody{flex:1;min-height:0;overflow:auto;padding:10px 12px;box-sizing:border-box;-webkit-overflow-scrolling:touch}
+  .pg{display:none}
+  .pg.on{display:block}
+  #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:100%}
+  #inv h3{margin:0 0 6px;font:600 13px monospace}
+  #inv p{margin:4px 0}
+  #inv .dim{opacity:.55;font-size:11px}
+  .ic{display:inline-block;width:24px;height:24px;flex:none;vertical-align:middle;background-size:contain;
+      background-repeat:no-repeat;background-position:center;image-rendering:pixelated}
+  .ic.big{width:34px;height:34px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pr{color:#ffd766;white-space:nowrap}
+  .pr em{font-style:normal;color:#8fe0a0;font-size:10px;margin-left:4px}
+  .row button,.dish button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
+        border-radius:5px;padding:3px 8px;cursor:pointer;flex:none}
+  .row button:disabled,.dish button:disabled{opacity:.3;cursor:default}
+  #cooklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:6px}
+  .dish{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.05);
+        border:1px solid rgba(255,255,255,.08)}
+  .dish.ok{border-color:rgba(143,224,160,.55);background:rgba(80,140,90,.14)}
+  .dish .dx{flex:1;min-width:0;line-height:1.45}
+  .dish .fx{color:#9cc8ff;font-size:11px}
+  .ing{display:inline-flex;align-items:center;gap:2px;margin-right:7px;font-size:11px;white-space:nowrap}
+  .ing .ic{width:16px;height:16px}
+  .ing.miss{color:#ff9a8a}
+  #pg-tree.on{display:flex;flex-direction:column;gap:6px;height:100%}
+  #treewrap{flex:1;min-height:150px;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:7px;background:rgba(0,0,0,.25)}
+  #treesvg{display:block}
+  #treesvg .e{fill:none;stroke:rgba(255,255,255,.13);stroke-width:1.5}
+  #treesvg .e.k{stroke:rgba(143,224,160,.5)}
+  #treesvg .e.hot{stroke:#ffd766;stroke-width:2.5}
+  #treesvg .n{cursor:pointer}
+  #treesvg .n rect{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.24);stroke-dasharray:4 3}
+  #treesvg .n.k rect{fill:rgba(56,92,58,.72);stroke:rgba(143,224,160,.75);stroke-dasharray:none}
+  #treesvg .n.sel rect{stroke:#ffd766;stroke-width:2.5}
+  #treesvg text{fill:#fff;font:12px monospace}
+  #treesvg text.s{fill:rgba(255,255,255,.62);font-size:10px}
+  #treesvg text.q{fill:rgba(255,255,255,.45);font-size:20px}
+  #treesvg text.h{fill:rgba(255,255,255,.5);font-size:11px}
+  #treesvg image{image-rendering:pixelated}
+  #treeinfo{flex:none;min-height:56px;padding:2px}
+  #treeinfo .ti{display:flex;align-items:center;gap:8px}
+  .sz{display:inline-block;padding:0 5px;margin-right:2px;border-radius:3px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.35)}
+  .sz.on{background:#4c7f3c;color:#fff}
+  .mapbox{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:6px}
+  #mapc{width:min(384px,100%);aspect-ratio:1;image-rendering:pixelated;border:1px solid rgba(255,255,255,.2);border-radius:4px;
+        cursor:crosshair;flex:none;touch-action:manipulation}
+  .mapside{flex:1;min-width:200px}
+  #mapinfo{min-height:64px}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;opacity:.75;margin-top:8px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+  @media (max-width:600px){.cols{grid-template-columns:1fr}}
+  @media (max-width:560px){#ptabs .tab span{display:none} #ptabs .tab{padding:4px 9px;font-size:16px}}
+  @media (max-height:480px){                  /* landscape phones: the panel takes the whole screen */
+    #inv .pw{width:100vw;height:100vh;border-radius:0;border:0}
+    #ptabs{padding:3px 6px}
+    #pbody{padding:6px 10px}
+    #pg-bag.on{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;align-content:center;justify-content:center}
+    #invt,#invx{grid-column:1/-1;text-align:center}
+    #craft{max-height:200px;max-width:none}
+    #mapc{width:min(300px,100%)}
+  }
   #dmg{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;
        background:radial-gradient(ellipse at center,transparent 35%,rgba(190,20,40,.55) 100%)}
   #dead{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;
@@ -111,12 +214,15 @@
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="c"></canvas></div>
-<div id="hud"><span class="kb">WASD 移動 · 拖曳/點擊鎖定看視角 · 空白跳 · 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭<br>
-</span><span class="tc">左半邊按住拖出搖桿 · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
-</span><span class="kb">選方塊:1–6 / 滾輪 / 點欄位 · I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
-</span><span class="tc">選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明)<br>
+<div id="wrap"><div id="view"><canvas id="gl"></canvas><canvas id="c"></canvas></div></div>
+<div id="hud"><span class="kb">WASD 移動 · Shift 或連按兩下 W 奔跑 · 空白跳 · 點擊畫面鎖定滑鼠看視角<br>
+左鍵/F 攻擊或挖 · 右鍵/E 放或射箭 · 1–6 / 滾輪 / 點欄位 選方塊<br>
+I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
+</span><span class="tc">左半邊拖出搖桿(推過外圈就奔跑) · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
+選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明)<br>
 </span>夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
+種菜:鋤頭翻土 → 右鍵播種 → 保持濕潤(水 4 格內、灑水器、澆水壺、下雨)→ 成熟右鍵收成<br>
+背包上方的分頁:市集、料理、雜交培育圖、農場平面圖<span class="kb"> · M 農場圖</span> · 晚上對床右鍵睡到天亮<br>
 按住挖掘持續挖 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<span class="kb"><br>
 按住 T 快轉時間 · G 陰影 · R 天氣 · X(按兩次)重置世界 · H 隱藏說明 · Esc 或 ⚙ 開選單/設定</span></div>
 <div id="cross"></div>
@@ -129,13 +235,54 @@
 <div id="stk"><div id="knb"></div></div>
 <div id="bar"></div>
 <div id="hp"></div>
+<div id="buffs"></div>
+<div id="coin"></div>
+<div id="toasts"></div>
+<div id="tip"></div>
+<div id="sleep"></div>
 <div id="dmg"></div>
-<div id="inv">
-  <div id="invt">背包 — 拖曳搬移方塊,第一排是快捷欄</div>
-  <div id="invg"></div>
-  <div id="craft"></div>
-  <div id="invx">I / Tab / Esc 關閉 · C 切換生存↔創造</div>
-</div>
+<div id="inv"><div class="pw">
+  <div id="ptabs">
+    <button class="tab on" data-p="bag">🎒<span> 背包</span></button>
+    <button class="tab" data-p="shop">🏪<span> 市集</span></button>
+    <button class="tab" data-p="cook">🍳<span> 料理</span></button>
+    <button class="tab" data-p="tree">🧬<span> 培育圖</span></button>
+    <button class="tab" data-p="map">🗺<span> 農場圖</span></button>
+    <span id="pcoin"></span>
+    <button id="pclose" title="關閉">✕</button>
+  </div>
+  <div id="pbody">
+    <div class="pg on" id="pg-bag">
+      <div id="invt">背包 — 拖曳搬移方塊,第一排是快捷欄</div>
+      <div id="invg"></div>
+      <div id="craft"></div>
+      <div id="invx">I / Tab / Esc 關閉 · C 切換生存↔創造</div>
+    </div>
+    <div class="pg" id="pg-shop"><div class="cols"><div id="sell"></div><div id="buy"></div></div></div>
+    <div class="pg" id="pg-cook">
+      <p class="dim">材料夠了就能煮。拿著料理按右鍵吃掉會回血並得到效果,也可以拿去市集賣。</p>
+      <div id="cooklist"></div>
+    </div>
+    <div class="pg" id="pg-tree">
+      <div id="treecount"></div>
+      <div id="treewrap"><svg id="treesvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div id="treeinfo"></div>
+    </div>
+    <div class="pg" id="pg-map">
+      <div id="mapsum"></div>
+      <div class="mapbox">
+        <canvas id="mapc" width="384" height="384"></canvas>
+        <div class="mapside">
+          <div id="mapinfo"></div>
+          <div class="legend"><span><i style="background:#7a5636"></i>乾耕地</span><span><i style="background:#4a3220"></i>濕耕地</span>
+            <span><i style="background:#3a78d8"></i>水</span><span><i style="background:rgba(120,190,255,.5)"></i>灑水範圍</span>
+            <span><i style="border:1px solid #c8ecff"></i>溫室</span><span><i style="background:#fff;border-radius:50%"></i>成熟作物</span>
+            <span><i style="background:#ff5a3c;border-radius:50%"></i>怪物</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
 <div id="dead">
   <div>你被擊倒了</div>
   <div style="opacity:.7;font-size:13px">背包會保留,重生在出生點</div>
@@ -146,7 +293,7 @@
 <div id="mnu">
   <div id="home">
     <h1>VOXEL</h1>
-    <p class="tag">方塊世界 · 日夜 · 天氣 · 怪物</p>
+    <p class="tag">方塊世界 · 種田 · 季節 · 日夜 · 怪物</p>
     <div style="display:flex;flex-direction:column;gap:9px">
       <button id="bstart">開始遊戲</button>
       <button id="bset">設定</button>
@@ -168,23 +315,26 @@
     <div class="tog"><span>顯示 FPS</span><button id="sFp">關</button></div>
     <div class="tog"><span>操作說明</span><button id="sHp">開</button></div>
     <div class="tog"><span>模式</span><button id="sCr">生存</button></div>
+    <div class="tog"><span>和平模式(不生怪)</span><button id="sPc">關</button></div>
     <button id="bback" style="margin-top:4px">返回</button>
   </div>
 </div>
 <script>
 'use strict';
 // =============================================================================
-//  VOXEL — a software-raycast voxel sandbox in one file, no libraries.
-//  Every pixel casts one DDA ray into a 32³ block world; the frame is written
-//  straight into an ImageData buffer. Sections, in order:
-//    DOM · world · torch light · items · save/load · player · mining ·
-//    entities · renderer · overlays · HUD & inventory · menu & settings ·
+//  VOXEL — a raycast voxel sandbox and farming game in one file, no libraries.
+//  Every pixel casts one DDA ray into a 32³ block world: on the graphics card
+//  (WebGL2) when it can, else in JavaScript into an ImageData buffer. Sections, in order:
+//    DOM · world · torch light · items & crops · textures & icons · save/load ·
+//    player · mining & farm tools · entities · farming · sky · CPU renderer ·
+//    GPU renderer · overlays · HUD & panel · farm UI · menu & settings ·
 //    input · main loop · boot
 // =============================================================================
 
 // ---- DOM ---------------------------------------------------------------------
 const $ = id => document.getElementById(id);
-const canvas = $('c'), g2d = canvas.getContext('2d', { alpha: false });
+const canvas = $('c'), g2d = canvas.getContext('2d'), viewEl = $('view');   // 2D canvas: the world on CPU, overlays on GPU
+const FORCE_CPU = /[?&]cpu\b/.test(location.search);                          // ?cpu forces the software renderer
 const hudEl = $('hud'), clockEl = $('clock'), fpsEl = $('fps'), barEl = $('bar'), hpEl = $('hp'),
       dmgEl = $('dmg'), deadEl = $('dead'), menuEl = $('mnu'), setpEl = $('setp'),
       invEl = $('inv'), invGrid = $('invg'), invTitle = $('invt'), ghostEl = $('ghost'),
@@ -195,19 +345,50 @@ const hudEl = $('hud'), clockEl = $('clock'), fpsEl = $('fps'), barEl = $('bar')
 // below (<<5, <<10, &31) both assume WS = 32.
 const WS = 32, WM = WS - 1, VOL = WS * WS * WS;
 const AIR = 0, SAND = 1, DIRT = 2, WOOD = 3, LEAF = 4, GLASS = 5, TORCH = 6,
-      STONE = 7, COAL = 8, IRON = 9, DIAMOND = 10;
+      STONE = 7, COAL = 8, IRON = 9, DIAMOND = 10, GRASS = 11;
+const FARM = 12, FARM_W = 13, FARM_F = 14, FARM_FW = 15;       // farmland: dry · wet · fertilised dry · fertilised wet
+const WATER = 16, TALL = 17, SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21;
+const CROP0 = 128;                                              // crop cells: 128 + crop*4 + stage
+const isFarm = b => b >= FARM && b <= FARM_FW, isWetFarm = b => b === FARM_W || b === FARM_FW;
+const cropOf = b => b - CROP0 >> 2, stageOf = b => b - CROP0 & 3, cropId = (c, st) => CROP0 + c * 4 + st;
+const glows = b => b >= CROP0 && (b - CROP0 & 3) === 3 && !!CROPS[b - CROP0 >> 2].glow;   // ripe 金南瓜 / 星光果 / 月光花
+const SOLID = new Uint8Array(256), PASS = new Uint8Array(256); // SOLID stops bodies · PASS lets torch light through
+for (let b = 1; b < 256; b++) SOLID[b] = b < CROP0 ? 1 : 0;
+for (const b of [TORCH, WATER, TALL, SPRINK, SPRINK2, BED]) SOLID[b] = 0;
+for (let b = 0; b < 256; b++) PASS[b] = !SOLID[b] || b === GLASS ? 1 : 0;
 const world = new Uint8Array(VOL);            // block id per cell
 const torch = new Uint8Array(VOL);            // torch light 0..14 per cell
 const idx = (x, y, z) => (y * WS + z) * WS + x;
 const blockAt = (x, y, z) => (x | y | z) & ~WM ? AIR : world[idx(x, y, z)];
 const lightAt = (x, y, z) => (x | y | z) & ~WM ? 0 : torch[idx(x, y, z)];
-const solidAt = (x, y, z) => { const b = blockAt(x | 0, y | 0, z | 0); return b !== AIR && b !== TORCH; };
+const solidAt = (x, y, z) => SOLID[blockAt(x | 0, y | 0, z | 0)] === 1;
 let worldVer = 0;                             // bumped on every edit: invalidates the shadow cache
 let worldDirty = false;                       // world differs from the last save
 
 function setBlock(i, id) {
+  const old = world[i];
   world[i] = id; worldVer++; worldDirty = true;
+  if (old === WATER || id === WATER || old === SPRINK || id === SPRINK || old === SPRINK2 || id === SPRINK2) waterVer++;
+  grow[i] = 0;
   relight();
+}
+
+function tickGrass(dt) {                      // grass creeps onto open dirt, covered grass turns to dirt, weeds come and go
+  for (let n = Math.round(dt * 240); n-- > 0;) {
+    const i = Math.random() * VOL | 0, b = world[i];
+    if (b === TALL) { if (Math.random() < (season() === 3 ? .12 : .01)) { world[i] = AIR; worldVer++; worldDirty = true; } continue; }
+    if (b !== DIRT && b !== GRASS) continue;
+    const above = i >> 10 === WM ? AIR : world[i + 1024];
+    const open = !SOLID[above] || above === GLASS || above === LEAF;
+    if (b === GRASS ? !open : open && grassNear(i)) { world[i] = b === GRASS ? DIRT : GRASS; worldVer++; worldDirty = true; }
+    else if (b === GRASS && above === AIR && i >> 10 < WM && season() !== 3 && Math.random() < .0015) { world[i + 1024] = TALL; worldVer++; worldDirty = true; }
+  }
+}
+function grassNear(i) {
+  const x = i & WM, z = i >> 5 & WM, y = i >> 10;
+  for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++)
+    if ((dx || dy || dz) && blockAt(x + dx, y + dy, z + dz) === GRASS) return true;
+  return false;
 }
 
 function generateWorld() {
@@ -217,7 +398,8 @@ function generateWorld() {
     const h = 12 + 4 * Math.sin(X / 4) * Math.cos(Z / 4) | 0;        // 8..16
     for (let y = h + 3; y--;) {
       let id;
-      if (y >= h) id = DIRT;                                         // 3 blocks of dirt on top
+      if (y === h + 2) id = GRASS;                                   // grass on top of 3 blocks of dirt
+      else if (y >= h) id = DIRT;
       else if (y >= h - 4) id = SAND;                                // then sand
       else {                                                         // stone with ores
         const r = Math.random();
@@ -234,7 +416,7 @@ function generateWorld() {
     if (Math.abs(X - 16) < 3 && Math.abs(Z - 16) < 3) continue;      // keep the spawn point clear
     let g = WM;                                                      // g = first air cell above the ground
     while (g > 0 && world[idx(X, g - 1, Z)] === AIR) g--;
-    if (g >= 18 || world[idx(X, g - 1, Z)] !== DIRT || Math.random() >= .05) continue;
+    if (g >= 18 || world[idx(X, g - 1, Z)] !== GRASS || Math.random() >= .05) continue;
     const top = g + 4 + (Math.random() * 2 | 0);                     // trunk is 4–5 tall
     for (let y = g; y < top; y++) world[idx(X, y, Z)] = WOOD;
     for (let k = 0; k < 27; k++) {                                   // 3×3×3 canopy around the trunk top
@@ -242,6 +424,60 @@ function generateWorld() {
       if (world[j] === AIR && (k === 22 || Math.random() < .85)) world[j] = LEAF;   // k 22 = crown centre
     }
   }
+  resetFarm();
+  // a clearing for a pond and a starter garden: the spot near spawn needing the least levelling and tree felling
+  const isTree = b => b === WOOD || b === LEAF;
+  const groundY = (x, z) => { let y = WM; while (y > 0 && (world[idx(x, y, z)] === AIR || isTree(world[idx(x, y, z)]))) y--; return y; };
+  let pond = null, best = 1e9;
+  for (let pz = 6; pz <= 25; pz++) for (let px = 9; px <= 22; px++) {
+    const d = (px - 16) ** 2 + (pz - 16) ** 2;
+    if (d < 36) continue;                                            // not on top of the spawn point
+    let sum = 0, n = 0, trees = 0;
+    for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {
+      const x = px + dx, z = pz + dz;
+      if (Math.abs(dx) <= 7 && Math.abs(dz) <= 3) { sum += groundY(x, z); n++; }
+      if (world[idx(x, groundY(x, z) + 1, z)] === WOOD) trees++;
+    }
+    const y0 = Math.round(sum / n);
+    let cost = d * .3 + trees * 8;
+    for (let dz = -3; dz <= 3; dz++) for (let dx = -7; dx <= 7; dx++) cost += Math.abs(groundY(px + dx, pz + dz) - y0) * 2;
+    if (cost < best) { best = cost; pond = [px, y0, pz]; }
+  }
+  if (pond) {
+    const [px, y0, pz] = pond;
+    for (let dz = -5; dz <= 5; dz++) for (let dx = -9; dx <= 9; dx++) {  // fell whole trees standing in or next to it
+      const x = px + dx, z = pz + dz, g = groundY(x, z);
+      if (world[idx(x, g + 1, z)] !== WOOD) continue;
+      for (let y = g + 1; y < WS; y++) if (world[idx(x, y, z)] === WOOD) world[idx(x, y, z)] = AIR;
+      for (let k = 0; k < 9; k++) {
+        const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
+        if (X < 1 || Z < 1 || X > WM - 1 || Z > WM - 1) continue;
+        for (let y = groundY(X, Z) + 1; y < WS; y++) if (world[idx(X, y, Z)] === LEAF) world[idx(X, y, Z)] = AIR;
+      }
+    }
+    for (let dz = -4; dz <= 4; dz++) for (let dx = -8; dx <= 8; dx++) {  // level it: flat middle, half-way edge
+      const x = px + dx, z = pz + dz, t = groundY(x, z);
+      const goal = Math.abs(dx) === 8 || Math.abs(dz) === 4 ? Math.round((t + y0) / 2) : y0;
+      for (let y = t; y > goal; y--) world[idx(x, y, z)] = AIR;
+      for (let y = t; y < goal; y++) world[idx(x, y, z)] = DIRT;
+      for (let y = goal + 1; y < WS; y++) if (isTree(world[idx(x, y, z)])) world[idx(x, y, z)] = AIR;
+      world[idx(x, goal, z)] = GRASS;
+    }
+    for (let dz = -3; dz <= 3; dz++) for (let dx = -4; dx <= 4; dx++) {   // a small pond with a sandy rim…
+      const e = (dx / 3.5) ** 2 + (dz / 2.5) ** 2, i = idx(px + dx, y0, pz + dz);
+      if (e <= 1) world[i] = WATER; else if (e <= 1.7) world[i] = SAND;
+    }
+    const gx = px + (px < 16 ? 6 : -6) - 1, gz = pz - 1;               // …and a 3×3 starter garden on the side toward spawn
+    for (let dz = 0; dz < 3; dz++) for (let dx = 0; dx < 3; dx++) {
+      const x = gx + dx, z = gz + dz;
+      if (world[idx(x, y0, z)] !== GRASS) continue;
+      world[idx(x, y0, z)] = FARM;
+      if ((dx + dz) % 2 === 0) { world[idx(x, y0 + 1, z)] = cropId(0, 0); grow[idx(x, y0 + 1, z)] = .15; }
+    }
+  }
+  for (let i = 0; i < VOL - 1024; i++)                               // weeds in the grass
+    if (world[i] === GRASS && world[i + 1024] === AIR && Math.random() < .07 &&
+        Math.abs((i & WM) - 16) + Math.abs((i >> 5 & WM) - 16) > 3) world[i + 1024] = TALL;
   for (let x = 0; x < WS; x++) for (let z = 0; z < WS; z++)          // glass boundary walls
     if (!x || x === WM || !z || z === WM)
       for (let y = 0; y < WS; y++) if (world[idx(x, y, z)] === AIR) world[idx(x, y, z)] = GLASS;
@@ -249,11 +485,12 @@ function generateWorld() {
 }
 
 // ---- torch light: BFS flood through air / glass / torches, one level lost per block ----
-const lightQ = new Int32Array(VOL);           // each cell is enqueued at most once
+const lightQ = new Int32Array(VOL * 2);       // torches, then glowing crops: a cell is enqueued at most twice
 function relight() {
   torch.fill(0);
   let tail = 0;
   for (let i = 0; i < VOL; i++) if (world[i] === TORCH) { torch[i] = 14; lightQ[tail++] = i; }
+  for (let i = 0; i < VOL; i++) if (glows(world[i])) { torch[i] = Math.max(torch[i], 10); lightQ[tail++] = i; }   // ripe glowing crops
   for (let head = 0; head < tail; head++) {
     const i = lightQ[head], lv = torch[i] - 1;
     if (lv < 1) continue;
@@ -262,7 +499,7 @@ function relight() {
       const nx = x + (d === 0) - (d === 1), ny = y + (d === 2) - (d === 3), nz = z + (d === 4) - (d === 5);
       if ((nx | ny | nz) & ~WM) continue;
       const ni = ny << 10 | nz << 5 | nx, b = world[ni];
-      if (b !== AIR && b !== GLASS && b !== TORCH) continue;         // opaque blocks stop light
+      if (!PASS[b]) continue;                                        // opaque blocks stop light
       if (torch[ni] >= lv) continue;
       torch[ni] = lv; lightQ[tail++] = ni;
     }
@@ -270,8 +507,8 @@ function relight() {
 }
 
 // ---- items -------------------------------------------------------------------
-// ids: blocks 1–10 · materials 100–106 · tools 110+ (kind p=鎬 w=劍 a=斧 s=鏟)
-// fields: c colour · n name · hd seconds to break by hand · tl tool kind that is fast on it ·
+// ids: blocks 1–11 · materials 100–106 · tools 110+ (kind p=鎬 w=劍 a=斧 s=鏟)
+// fields: c colour (CPU renderer) · n name · hd seconds to break by hand · tl tool kind that is fast on it ·
 //         tr tool tier needed · dp drop · st max stack · bow · kind/tier/spd/dmg for tools
 const NONE = {};
 const IT = {
@@ -282,25 +519,137 @@ const IT = {
   8: { c: '#39393E', n: '煤礦', hd: 2.2, tl: 'p', tr: 1, dp: 104 },
   9: { c: '#C99A6E', n: '鐵礦', hd: 2.8, tl: 'p', tr: 2, dp: 105 },
   10: { c: '#5FE0D8', n: '鑽石礦', hd: 4.2, tl: 'p', tr: 3, dp: 106 },
+  11: { c: '#5D9E38', n: '草地', hd: .6, tl: 's', dp: DIRT },
   100: { c: '#8A6A3A', n: '弓', bow: 1, st: 1 }, 101: { c: '#D9D2C0', n: '箭' },
   102: { c: '#7B4FA8', n: '暗核' },               103: { c: '#9B7B4A', n: '木棒' },
   104: { c: '#2C2C30', n: '煤炭' }, 105: { c: '#D8B08C', n: '鐵錠' }, 106: { c: '#6FF0E6', n: '鑽石' },
 };
 const TMAT = [0, { m: WOOD, n: '木' }, { m: STONE, n: '石' }, { m: 105, n: '鐵' }, { m: 106, n: '鑽石' }]; // tiers 1..4
 const TKIND = [{ k: 'p', n: '鎬', b: 110, c: 3, d: 2, tiers: 4 }, { k: 'w', n: '劍', b: 120, c: 2, d: 4, tiers: 4 },
-               { k: 'a', n: '斧', b: 130, c: 3, d: 3, tiers: 3 }, { k: 's', n: '鏟', b: 140, c: 1, d: 1, tiers: 3 }];
+               { k: 'a', n: '斧', b: 130, c: 3, d: 3, tiers: 3 }, { k: 's', n: '鏟', b: 140, c: 1, d: 1, tiers: 3 },
+               { k: 'h', n: '鋤', b: 150, c: 2, d: 1, tiers: 4 }];
 const TCOL = ['', '#C8A06A', '#9AA0A6', '#E0BE9A', '#7FF0E6'];      // tool colour by tier
 for (const tk of TKIND) for (let t = 1; t <= tk.tiers; t++)
   IT[tk.b + t - 1] = { c: TCOL[t], n: TMAT[t].n + tk.n, st: 1, kind: tk.k, tier: t,
                        spd: +(1 + t * 1.9).toFixed(1), dmg: tk.d + t * 1.4 | 0 };
+// ---- farming data: crops, dishes, market ----
+// Crop cells in the world use block ids 128–255: 128 + crop*4 + stage (0 sprout · 1 young · 2 grown · 3 ripe).
+// arch: how the plant is drawn · ic: produce icon · s: seasons (1 春 2 夏 4 秋 8 冬) · g: game hours to ripen
+// r: after harvest it regrows from this progress (0 = replanted from scratch) · w: needs water right next to its soil
+// p: sell price · sd: seed price · a, b: parents (hybrids only) · l / f / x: leaf, fruit, extra colour · glow: shines
+const CROPS = [
+  { n: '小麥', arch: 'grain', ic: 'ear', s: 7, g: 4, p: 6, sd: 3, f: [222, 190, 92] },
+  { n: '胡蘿蔔', arch: 'root', ic: 'carrot', s: 7, g: 4, p: 8, sd: 4, f: [240, 128, 36] },
+  { n: '馬鈴薯', arch: 'root', ic: 'potato', s: 7, g: 5, p: 9, sd: 4, f: [196, 156, 96], l: [86, 136, 58] },
+  { n: '番茄', arch: 'bush', ic: 'round', s: 2, g: 6, r: .55, p: 10, sd: 6, f: [222, 48, 40] },
+  { n: '玉米', arch: 'tall', ic: 'cob', s: 6, g: 7, p: 12, sd: 6, f: [246, 210, 70] },
+  { n: '高麗菜', arch: 'leafy', ic: 'head', s: 13, g: 5, p: 10, sd: 5, f: [176, 218, 124], l: [96, 158, 70] },
+  { n: '稻米', arch: 'grain', ic: 'rice', s: 2, g: 6, w: 1, p: 11, sd: 5, f: [226, 214, 158], l: [88, 150, 64] },
+  { n: '甘蔗', arch: 'cane', ic: 'cane', s: 6, g: 6, w: 1, p: 10, sd: 5, f: [150, 196, 96], l: [98, 160, 70] },
+  { n: '甜椒', arch: 'bush', ic: 'bell', s: 2, g: 7, r: .55, p: 22, sd: 11, a: 3, b: 1, f: [250, 196, 36], x: [226, 60, 40] },
+  { n: '洋蔥', arch: 'root', ic: 'onion', s: 3, g: 6, p: 20, sd: 10, a: 2, b: 5, f: [214, 170, 206], l: [90, 150, 70] },
+  { n: '草莓', arch: 'low', ic: 'berry', s: 3, g: 7, r: .55, p: 28, sd: 14, a: 3, b: 7, f: [232, 36, 58] },
+  { n: '地瓜', arch: 'root', ic: 'yam', s: 6, g: 7, p: 24, sd: 12, a: 2, b: 7, f: [184, 70, 108], l: [80, 130, 70] },
+  { n: '南瓜', arch: 'gourd', ic: 'pumpkin', s: 6, g: 9, p: 35, sd: 17, a: 4, b: 1, f: [236, 138, 30] },
+  { n: '茄子', arch: 'bush', ic: 'eggplant', s: 6, g: 7, r: .55, p: 24, sd: 12, a: 3, b: 2, f: [108, 48, 140] },
+  { n: '大豆', arch: 'bush', ic: 'pod', s: 6, g: 6, p: 20, sd: 10, a: 0, b: 6, f: [150, 192, 80] },
+  { n: '白蘿蔔', arch: 'root', ic: 'daikon', s: 12, g: 6, p: 22, sd: 11, a: 1, b: 5, f: [242, 242, 236] },
+  { n: '向日葵', arch: 'flower', ic: 'sunflower', s: 2, g: 8, p: 30, sd: 15, a: 4, b: 0, f: [250, 200, 30], x: [110, 70, 30], tall: 1 },
+  { n: '辣椒', arch: 'bush', ic: 'chili', s: 2, g: 8, r: .6, p: 45, sd: 22, a: 8, b: 9, f: [222, 28, 28] },
+  { n: '西瓜', arch: 'gourd', ic: 'melon', s: 2, g: 11, p: 70, sd: 35, a: 10, b: 12, f: [58, 150, 60], x: [30, 96, 36] },
+  { n: '藍莓', arch: 'bush', ic: 'berries', s: 2, g: 9, r: .6, p: 50, sd: 25, a: 10, b: 13, f: [72, 92, 204] },
+  { n: '芋頭', arch: 'root', ic: 'taro', s: 6, g: 9, w: 1, p: 55, sd: 27, a: 11, b: 6, f: [152, 112, 162], l: [70, 140, 80], big: 1 },
+  { n: '花椰菜', arch: 'leafy', ic: 'cauli', s: 9, g: 9, p: 60, sd: 30, a: 15, b: 5, f: [246, 240, 218] },
+  { n: '鬱金香', arch: 'flower', ic: 'tulip', s: 1, g: 6, p: 40, sd: 20, a: 9, b: 16, f: [242, 96, 160] },
+  { n: '茶', arch: 'bush', ic: 'leaf', s: 3, g: 8, r: .6, p: 42, sd: 21, a: 14, b: 5, f: [130, 200, 96], l: [44, 110, 44] },
+  { n: '薰衣草', arch: 'flower', ic: 'lavender', s: 2, g: 7, p: 48, sd: 24, a: 16, b: 13, f: [158, 108, 222] },
+  { n: '咖啡', arch: 'bush', ic: 'beans', s: 6, g: 10, r: .6, p: 85, sd: 42, a: 23, b: 17, f: [186, 38, 40], x: [96, 56, 30] },
+  { n: '鳳梨', arch: 'pine', ic: 'pineapple', s: 2, g: 13, p: 150, sd: 75, a: 18, b: 17, f: [238, 196, 60], l: [70, 140, 70] },
+  { n: '葡萄', arch: 'bush', ic: 'grape', s: 4, g: 11, r: .6, p: 110, sd: 55, a: 19, b: 7, f: [112, 58, 150] },
+  { n: '玫瑰', arch: 'flower', ic: 'rose', s: 3, g: 10, p: 120, sd: 60, a: 22, b: 10, f: [212, 28, 50] },
+  { n: '金南瓜', arch: 'gourd', ic: 'pumpkin', s: 4, g: 14, p: 220, sd: 110, a: 18, b: 11, f: [250, 204, 56], glow: 1 },
+  { n: '星光果', arch: 'star', ic: 'star', s: 2, g: 16, p: 400, sd: 200, a: 26, b: 27, f: [255, 228, 90], glow: 1 },
+  { n: '月光花', arch: 'flower', ic: 'moon', s: 12, g: 14, p: 350, sd: 175, a: 28, b: 24, f: [140, 204, 255], glow: 1 },
+];
+const HYBRID = {};                            // "a,b" (sorted) → child crop
+for (const [i, c] of CROPS.entries()) {
+  c.l = c.l || [70, 138, 50];
+  c.tier = c.a === undefined ? 1 : Math.max(CROPS[c.a].tier, CROPS[c.b].tier) + 1;
+  if (c.a !== undefined) HYBRID[Math.min(c.a, c.b) + ',' + Math.max(c.a, c.b)] = i;
+}
+const SEED0 = 200, CROP_ITEM0 = 300, DISH0 = 400;
+const SEASONS = ['春', '夏', '秋', '冬'], SEASON_ICON = ['🌸', '🌻', '🍁', '⛄'], DAYS_PER_SEASON = 2;
+const seasonText = s => SEASONS.filter((_, k) => s >> k & 1).join('');
+
+// dishes: i = ingredients [[crop, count]…] · heal (half hearts) · p sell price · fx: [effect, seconds, …]
+// effects: run 跑快 · jump 跳高 · night 夜視 · dig 挖快 · yield 豐收(多收一個) · breed 雜交機率 · hp 生命上限 +2 心
+const DISHES = [
+  { n: '麵包', i: [[0, 3]], heal: 4, p: 30, ic: 'bread', col: [214, 160, 90] },
+  { n: '烤馬鈴薯', i: [[2, 2]], heal: 5, p: 28, ic: 'plate', col: [206, 160, 90] },
+  { n: '白飯', i: [[6, 2]], heal: 5, p: 30, ic: 'bowl', col: [246, 244, 236] },
+  { n: '玉米濃湯', i: [[4, 2], [2, 1]], heal: 8, p: 55, ic: 'bowl', col: [248, 214, 110] },
+  { n: '蔬菜沙拉', i: [[5, 1], [3, 1], [1, 1]], heal: 6, p: 50, fx: ['run', 60], ic: 'salad', col: [120, 190, 80] },
+  { n: '胡蘿蔔湯', i: [[1, 2], [9, 1]], heal: 4, p: 60, fx: ['night', 180], ic: 'bowl', col: [240, 140, 50] },
+  { n: '番茄義大利麵', i: [[0, 2], [3, 2]], heal: 7, p: 65, fx: ['dig', 120], ic: 'pasta', col: [220, 70, 50] },
+  { n: '飯糰', i: [[6, 2], [14, 1]], heal: 7, p: 60, ic: 'onigiri', col: [246, 244, 236] },
+  { n: '味噌湯', i: [[14, 2], [9, 1]], heal: 6, p: 70, fx: ['hp', 300], ic: 'bowl', col: [190, 140, 80] },
+  { n: '炒甜椒', i: [[8, 2], [9, 1]], heal: 6, p: 80, fx: ['jump', 90], ic: 'plate', col: [250, 190, 40] },
+  { n: '辣炒茄子', i: [[13, 1], [17, 1]], heal: 6, p: 110, fx: ['run', 120], ic: 'plate', col: [130, 50, 120] },
+  { n: '草莓蛋糕', i: [[0, 2], [10, 2], [7, 1]], heal: 10, p: 150, fx: ['jump', 120], ic: 'cake', col: [236, 60, 80] },
+  { n: '地瓜球', i: [[11, 2], [7, 1]], heal: 8, p: 90, ic: 'balls', col: [230, 150, 70] },
+  { n: '南瓜派', i: [[12, 1], [0, 1], [7, 1]], heal: 10, p: 120, fx: ['yield', 300], ic: 'pie', col: [230, 130, 40] },
+  { n: '關東煮', i: [[15, 1], [20, 1], [14, 1]], heal: 12, p: 170, ic: 'bowl', col: [220, 190, 150] },
+  { n: '花椰菜焗烤', i: [[21, 1], [2, 1], [0, 1]], heal: 10, p: 160, fx: ['dig', 180], ic: 'plate', col: [246, 222, 150] },
+  { n: '西瓜汁', i: [[18, 1]], heal: 4, p: 110, fx: ['run', 90, 'jump', 90], ic: 'cup', col: [236, 70, 80] },
+  { n: '藍莓果醬', i: [[19, 2], [7, 1]], heal: 3, p: 140, fx: ['breed', 300], ic: 'jar', col: [80, 90, 200] },
+  { n: '綠茶', i: [[23, 2]], heal: 3, p: 110, fx: ['dig', 150, 'run', 60], ic: 'cup', col: [140, 200, 100] },
+  { n: '咖啡', i: [[25, 2], [7, 1]], heal: 2, p: 230, fx: ['run', 180], ic: 'cup', col: [90, 56, 36] },
+  { n: '鳳梨酥', i: [[26, 1], [0, 2], [7, 1]], heal: 20, p: 360, fx: ['yield', 300], ic: 'cake', col: [236, 190, 70] },
+  { n: '葡萄汁', i: [[27, 2]], heal: 8, p: 260, fx: ['night', 240], ic: 'cup', col: [120, 60, 150] },
+  { n: '玫瑰花茶', i: [[28, 1], [23, 1]], heal: 6, p: 250, fx: ['breed', 300, 'night', 120], ic: 'cup', col: [220, 90, 120] },
+  { n: '星光甜點', i: [[30, 1], [10, 1], [7, 1]], heal: 20, p: 800, fx: ['run', 300, 'jump', 300, 'night', 300, 'yield', 300, 'breed', 300], ic: 'starcake', col: [255, 226, 110] },
+  { n: '月光花茶', i: [[31, 1], [23, 1]], heal: 10, p: 700, fx: ['night', 300, 'breed', 400], ic: 'cup', col: [150, 200, 255] },
+];
+const FX_NAME = { run: '跑快', jump: '跳高', night: '夜視', dig: '挖快', yield: '豐收', breed: '雜交↑', hp: '生命+2心' };
+const FX_ICON = { run: '🏃', jump: '🦘', night: '🌙', dig: '⛏', yield: '🌾', breed: '🧬', hp: '💛' };
+
+// new blocks (ids 12–21) and farm items
+IT[FARM] = { c: '#5A3D26', n: '耕地', hd: .55, tl: 's', dp: DIRT };
+IT[FARM_W] = { c: '#3F2A1A', n: '濕潤的耕地', hd: .55, tl: 's', dp: DIRT };
+IT[FARM_F] = { c: '#5A3D26', n: '施過肥的耕地', hd: .55, tl: 's', dp: DIRT };
+IT[FARM_FW] = { c: '#3F2A1A', n: '施過肥的耕地', hd: .55, tl: 's', dp: DIRT };
+IT[WATER] = { c: '#3A6FC8', n: '水' };
+IT[TALL] = { c: '#5D9E38', n: '雜草', hd: .05 };
+IT[SPRINK] = { c: '#9AA0A6', n: '灑水器', hd: .4, sell: 60 };
+IT[SPRINK2] = { c: '#E0C060', n: '高級灑水器', hd: .4, sell: 200 };
+IT[BED] = { c: '#C0392B', n: '床', hd: .4, sell: 30 };
+IT[PLANK] = { c: '#B08850', n: '木板', hd: 1, tl: 'a', sell: 1 };
+IT[160] = { c: '#7FB0C0', n: '澆水壺', st: 1, can: 1 };
+IT[161] = { c: '#A0A4AA', n: '水桶', st: 1, bucket: 1 };
+IT[162] = { c: '#3A6FC8', n: '裝水的水桶', st: 1, wbucket: 1 };
+IT[163] = { c: '#8B6A40', n: '肥料', fert: 1, sell: 4 };
+for (const [i, c] of CROPS.entries()) {
+  IT[SEED0 + i] = { c: '#C8A870', n: c.n + '種子', seed: i };
+  IT[CROP_ITEM0 + i] = { c: '#' + c.f.map(v => v.toString(16).padStart(2, '0')).join(''), n: c.n, crop: i };
+}
+for (const [j, d] of DISHES.entries()) IT[DISH0 + j] = { c: '#E0B070', n: d.n, dish: j, st: 16 };
+Object.assign(IT[WOOD], { sell: 2 }); Object.assign(IT[STONE], { sell: 1 }); Object.assign(IT[GLASS], { sell: 2 });
+Object.assign(IT[104], { sell: 5 }); Object.assign(IT[105], { sell: 15 }); Object.assign(IT[106], { sell: 80 }); Object.assign(IT[102], { sell: 10 });
+
+// market: things to buy (seeds of every crop you have discovered are added on top of these)
+const SHOP = [
+  [150, 20], [152, 150], [160, 30], [161, 40], [163, 12], [SPRINK, 160], [SPRINK2, 480],
+  [BED, 80], [GLASS, 3], [PLANK, 2], [TORCH, 3],
+];
+const BUY_SEED_MUL = 1;                        // seed price in the market = crop's sd × this
+
 const info = id => IT[id] || NONE;
-const colorOf = id => info(id).c || '';
 const nameOf = id => info(id).n || '';
-const placeable = id => id > 0 && id < 100;
+const placeable = id => id > 0 && id < 100 && !isFarm(id) && id !== WATER && id !== TALL;
 const maxStack = id => info(id).st || 64;
-const PAL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];  // creative palette (infinite)
-const COL = new Int32Array(16);               // 0xRRGGBB per block id, for the renderer
-for (let i = 1; i < 16; i++) if (IT[i]) COL[i] = parseInt(IT[i].c.slice(1), 16);
+const PAL = [11, 2, 1, 3, PLANK, 4, 5, 6, 7, 8, 9, 10, SPRINK, SPRINK2, BED];   // creative palette (infinite)
+const COL = new Int32Array(256);              // 0xRRGGBB per block id, for the CPU renderer (crops use their sprites)
+for (let i = 1; i < CROP0; i++) if (IT[i]) COL[i] = parseInt(IT[i].c.slice(1), 16);
 
 // recipes: [[ingredient id, count]...], [result id, count], label
 const RCP = [
@@ -315,6 +664,487 @@ for (const tk of TKIND) for (let t = 1; t <= tk.tiers; t++) {
   const out = tk.b + t - 1;
   RCP.push([[[TMAT[t].m, tk.c], [103, 2]], [out, 1], TMAT[t].n + '×' + tk.c + '+棒×2 → ' + IT[out].n]);
 }
+RCP.push(
+  [[[WOOD, 1]], [PLANK, 4], '木頭×1 → 木板×4'],
+  [[[105, 3]], [161, 1], '鐵錠×3 → 水桶'],
+  [[[105, 2], [PLANK, 1]], [160, 1], '鐵錠×2+木板×1 → 澆水壺'],
+  [[[105, 2], [GLASS, 1]], [SPRINK, 1], '鐵錠×2+玻璃×1 → 灑水器'],
+  [[[105, 2], [106, 1]], [SPRINK2, 1], '鐵錠×2+鑽石×1 → 高級灑水器'],
+  [[[PLANK, 3], [CROP_ITEM0, 3]], [BED, 1], '木板×3+小麥×3 → 床'],
+  [[[102, 1]], [163, 4], '暗核×1 → 肥料×4'],
+  [[[CROP_ITEM0, 4]], [163, 2], '小麥×4 → 肥料×2'],
+);
+
+// ---- textures: procedural 16×16 pixel art, shared by the GPU renderer and the UI ----
+// layer = block id * 3 + face (0 top · 1 side · 2 bottom); mining cracks at CRACK0..CRACK0+9
+const TEX = 16, TEX_LAYERS = 256, CRACK0 = 96, PLANT0 = 112, TALL_L = 240;   // PLANT0 + crop*4 + stage
+const texData = new Uint8Array(TEX * TEX * 4 * TEX_LAYERS);
+function seeded(s) {                          // tiny deterministic PRNG, so textures look the same every run
+  return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function paintLayer(layer, fn) {              // fn(x, y) → [r, g, b, a?]
+  const o = layer * TEX * TEX * 4;
+  for (let y = 0; y < TEX; y++) for (let x = 0; x < TEX; x++) {
+    const c = fn(x, y), i = o + (y * TEX + x) * 4;
+    texData[i] = c[0]; texData[i + 1] = c[1]; texData[i + 2] = c[2]; texData[i + 3] = c.length > 3 ? c[3] : 255;
+  }
+}
+const shadeC = (c, k) => [Math.min(255, c[0] * k), Math.min(255, c[1] * k), Math.min(255, c[2] * k)];
+function speckled(r, base, spread, specks) { // base colour with brightness jitter and random specks
+  return () => {
+    const p = r();
+    for (const [chance, col] of specks) if (p < chance) return shadeC(col, 1 + (r() - .5) * spread * .6);
+    return shadeC(base, 1 + (r() - .5) * spread);
+  };
+}
+function blobs(r, n, size) {                  // a few clusters of cells, for ores and stone blotches
+  const set = new Set();
+  for (let b = 0; b < n; b++) {
+    let x = 1 + r() * 13 | 0, y = 1 + r() * 13 | 0;
+    for (let k = 0; k < size; k++) { set.add(y * 16 + x); x = Math.max(0, Math.min(15, x + (r() * 3 | 0) - 1)); y = Math.max(0, Math.min(15, y + (r() * 3 | 0) - 1)); }
+  }
+  return set;
+}
+function makeTextures() {
+  const all = (id, fn) => { for (let f = 0; f < 3; f++) paintLayer(id * 3 + f, fn); };
+  let r;
+  // grass: green top, dirt sides with a ragged green fringe, dirt bottom
+  const GRASS_C = [84, 138, 50], DIRT_C = [134, 96, 67];
+  const grassPix = (rr) => speckled(rr, GRASS_C, .16, [[.2, [68, 116, 40]], [.3, [104, 158, 62]]]);
+  const dirtPix = (rr) => speckled(rr, DIRT_C, .14, [[.03, [118, 110, 102]], [.2, [106, 75, 52]], [.3, [156, 114, 82]]]);
+  r = seeded(11); { const g = grassPix(r); paintLayer(GRASS * 3, g); }
+  r = seeded(12); { const g = grassPix(r), d = dirtPix(r), fringe = [];
+    for (let x = 0; x < 16; x++) fringe.push(3 + (r() < .5) + (r() < .25));
+    paintLayer(GRASS * 3 + 1, (x, y) => y < fringe[x] ? shadeC(g(), y === fringe[x] - 1 ? .86 : 1) : d()); }
+  r = seeded(13); paintLayer(GRASS * 3 + 2, dirtPix(r));
+  r = seeded(21); all(DIRT, dirtPix(r));
+  r = seeded(31); all(SAND, speckled(r, [219, 206, 160], .08, [[.14, [199, 184, 138]], [.24, [233, 224, 184]]]));
+  // stone and ores
+  const stonePix = (rr) => { const dark = blobs(rr, 5, 6), s = speckled(rr, [128, 128, 128], .12, [[.08, [148, 148, 148]]]);
+    return (x, y) => dark.has(y * 16 + x) ? shadeC([106, 106, 108], 1 + (rr() - .5) * .1) : s(); };
+  r = seeded(41); all(STONE, stonePix(r));
+  const ore = (id, seed, col, hi, lo) => {
+    const rr = seeded(seed), st = stonePix(rr), spots = blobs(rr, 5, 3);
+    const px = []; for (let i = 0; i < 256; i++) px.push(st(i & 15, i >> 4));
+    for (const i of spots) px[i] = rr() < .25 ? hi : rr() < .35 ? lo : col;
+    all(id, (x, y) => px[y * 16 + x]);
+  };
+  ore(COAL, 51, [40, 40, 42], [70, 70, 74], [24, 24, 26]);
+  ore(IRON, 52, [214, 172, 142], [236, 204, 178], [168, 124, 96]);
+  ore(DIAMOND, 53, [92, 226, 220], [196, 255, 250], [36, 160, 164]);
+  // log: bark on the sides, rings on the ends
+  r = seeded(61); { const cols = []; for (let x = 0; x < 16; x++) cols.push(r() < .3 ? .78 : 1 + (r() - .5) * .16);
+    const bark = (x, y) => shadeC([106, 84, 50], cols[x] * (1 + (r() - .5) * .1));
+    paintLayer(WOOD * 3 + 1, bark);
+    const ring = (x, y) => { const d = Math.max(Math.abs(x - 7.5), Math.abs(y - 7.5));
+      return d > 6.6 ? bark(x, y) : shadeC(Math.floor(d) % 2 ? [160, 127, 78] : [180, 146, 92], 1 + (r() - .5) * .08); };
+    paintLayer(WOOD * 3, ring); paintLayer(WOOD * 3 + 2, ring); }
+  // leaves: holes you can see through (their colour stays leafy so distant mip levels don't go dark)
+  r = seeded(71); { const g = speckled(r, [60, 122, 42], .16, [[.24, [42, 94, 30]], [.34, [84, 150, 58]]]);
+    all(LEAF, () => { const c = g(); return r() < .2 ? [60, 122, 42, 0] : c; }); }
+  // glass: bright frame, two glints, nearly clear inside
+  all(GLASS, (x, y) => (x === 0 || y === 0 || x === 15 || y === 15) ? [184, 208, 222, 125]
+    : ((x - y === 3 && x > 4 && x < 10) || (x - y === 5 && x > 8 && x < 12)) ? [236, 246, 252, 105] : [205, 232, 245, 12]);
+  // torch: a 2-px stick with a flame, only the middle columns are used by the renderer's torch box
+  all(TORCH, (x, y) => {
+    if (x < 7 || x > 8 || y < 6) return [0, 0, 0, 0];
+    if (y < 8) return y === 6 ? (x === 7 ? [255, 250, 205] : [255, 214, 92]) : (x === 7 ? [255, 206, 80] : [245, 160, 40]);
+    return x === 7 ? [138, 104, 60] : [104, 76, 42];
+  });
+  // mining cracks: thin branching lines from the middle, revealed outward in ten steps
+  r = seeded(81); { const cells = new Map();
+    const walk = (x, y, ang, len, depth) => {
+      for (let k = 0; k < len; k++) {
+        ang += (r() - .5) * .9; x += Math.cos(ang); y += Math.sin(ang);
+        const cx = Math.round(x), cy = Math.round(y);
+        if (cx < 0 || cy < 0 || cx > 15 || cy > 15) return;
+        const key = cy * 16 + cx;
+        if (!cells.has(key)) cells.set(key, Math.hypot(cx - 7.5, cy - 7.5));
+        if (depth < 2 && r() < .18) walk(x, y, ang + (r() < .5 ? 1 : -1) * (.8 + r() * .6), len - k - 1, depth + 1);
+      }
+    };
+    for (let b = 0; b < 5; b++) walk(7.5, 7.5, b * 1.256 + r() * .7, 9, 0);
+    const maxD = Math.max(...cells.values());
+    for (let st = 0; st < 10; st++) {
+      const lim = maxD * (st + 1) / 10;
+      paintLayer(CRACK0 + st, (x, y) => { const d = cells.get(y * 16 + x); return d !== undefined && d <= lim ? [20, 16, 12, 255] : [0, 0, 0, 0]; });
+    }
+  }
+  makeFarmTextures();
+}
+
+// ---- farm textures: blocks, crop sprites (PLANT0 + crop*4 + stage), weeds ----
+function px16() { return new Array(256).fill(null); }
+function putSprite(layer, px) { paintLayer(layer, (x, y) => px[y * 16 + x] || [0, 0, 0, 0]); }
+function cropSprite(c, st) {
+  const cr = CROPS[c], L = cr.l, F = cr.f, X = cr.x || shadeC(F, .72), r = seeded(1000 + c * 13 + st);
+  const px = px16(), Ld = shadeC(L, .7), Lh = shadeC(L, 1.22), ripe = st === 3;
+  const glow = col => cr.glow && ripe ? [col[0], col[1], col[2], 240] : col;       // alpha 240 = shines at night
+  const set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < 16 && y < 16) px[y * 16 + x] = col; };
+  const leafy = () => r() < .22 ? Ld : r() < .25 ? Lh : L;
+  const blob = (cx, cy, rx, ry, colf) => { for (let y = Math.floor(cy - ry); y <= cy + ry; y++) for (let x = Math.floor(cx - rx); x <= cx + rx; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy <= 1) set(x, y, colf(x, y, dx, dy)); } };
+  const stem = (x, y0, y1, col) => { for (let y = y0; y >= y1; y--) set(x, y, col); };
+  const leafLine = (x0, y0, dx, dy, n) => { for (let k = 0; k < n; k++) set(x0 + dx * k, y0 + dy * k, k === n - 1 ? Lh : leafy()); };
+  const H = [3, 7, 11, 14][st];
+  switch (cr.arch) {
+    case 'grain': {                             // wheat, rice: thin stalks with ears on top
+      for (const sx of [2, 5, 8, 11, 14]) {
+        const h = H - (r() * 3 | 0), bend = c === 6 && ripe ? 1 : 0;
+        for (let y = 15; y > 15 - h; y--) set(sx + (y < 16 - h * .5 ? bend : 0), y, ripe ? shadeC(F, y > 12 ? .62 : .82) : (y > 12 ? Ld : L));
+        if (st >= 2) for (let k = 0; k < 4; k++) { set(sx - 1 + bend, 16 - h + k, ripe ? F : Lh); set(sx + 1 + bend, 17 - h + k, ripe ? shadeC(F, 1.1) : L); }
+      }
+      break;
+    }
+    case 'root': {                              // leaves fanning out; when ripe the root shows at the ground
+      const n = st + 3, spread = cr.big ? 1.6 : 1;
+      for (let k = 0; k < n; k++) {
+        const a = -Math.PI / 2 + (k - (n - 1) / 2) * .42 * spread, len = H * (cr.big ? .8 : .9) - (k % 2) * 1.5;
+        leafLine(7.5, 15, Math.cos(a) * .9, Math.sin(a), len);
+        if (cr.big && st >= 2) blob(7.5 + Math.cos(a) * len, 15 + Math.sin(a) * len, 1.6, 1.2, () => leafy());
+      }
+      if (ripe) blob(7.5, 14.6, c === 15 ? 2.2 : 2.8, 1.8, (x, y) => y >= 15 ? shadeC(F, .8) : F);
+      break;
+    }
+    case 'bush': case 'low': case 'star': {     // a leafy bush; fruit dots when ripe
+      const low = cr.arch === 'low', R = (low ? [2, 3.2, 4.2, 4.8] : [2, 3.6, 5.2, 6.2])[st];
+      const cy = 15.5 - R * (low ? .7 : .95);
+      blob(7.5, cy, R * 1.15, R * (low ? .7 : .95), () => leafy());
+      stem(7, 15, Math.round(cy + R * .5), Ld);
+      if (st === 2 && (low || cr.arch === 'star')) for (let k = 0; k < 3; k++) set(4 + r() * 8, cy - R * .5 + r() * R, [250, 250, 240]);
+      if (ripe) {
+        const spots = cr.ic === 'grape' ? 3 : cr.ic === 'leaf' ? 0 : 6;
+        for (let k = 0; k < spots; k++) {
+          const fx = 3.5 + r() * 8.5, fy = cy - R * .6 + r() * R * 1.2;
+          if (cr.ic === 'eggplant' || cr.ic === 'chili' || cr.ic === 'pod') { for (let q = 0; q < 3; q++) set(fx, fy + q, q === 2 && cr.ic === 'chili' ? shadeC(F, .8) : F); }
+          else if (cr.ic === 'bell') { set(fx, fy, k % 2 ? X : F); set(fx + 1, fy, k % 2 ? X : F); set(fx, fy + 1, shadeC(k % 2 ? X : F, .85)); set(fx + 1, fy + 1, shadeC(k % 2 ? X : F, .85)); }
+          else if (cr.ic === 'grape') { for (let q = 0; q < 3; q++) for (let w = 0; w <= 2 - q; w++) set(fx + w + q * .5, fy + q, (q + w) % 2 ? shadeC(F, .8) : F); }
+          else if (cr.arch === 'star') { set(fx, fy, glow(F)); set(fx - 1, fy, glow(F)); set(fx + 1, fy, glow(F)); set(fx, fy - 1, glow(F)); set(fx, fy + 1, glow(shadeC(F, .85))); }
+          else { set(fx, fy, glow(F)); if (cr.ic === 'round' || cr.ic === 'berry') { set(fx + 1, fy, glow(F)); set(fx, fy + 1, glow(shadeC(F, .8))); set(fx + 1, fy + 1, glow(shadeC(F, .8))); } }
+        }
+        if (cr.ic === 'leaf') for (let k = 0; k < 8; k++) set(3 + r() * 10, cy - R * .7 + r() * R * .8, F);   // tea: fresh light tips
+      }
+      break;
+    }
+    case 'leafy': {                             // cabbage, cauliflower: a rosette with a head in the middle
+      const R = [1.8, 3.4, 4.8, 5.6][st];
+      blob(7.5, 15 - R * .55, R * 1.3, R * .75, () => leafy());
+      if (st >= 2) blob(7.5, 15 - R * .75, R * .6, R * .5, (x, y) => ripe ? ((x + y) % 3 ? F : shadeC(F, .9)) : Lh);
+      break;
+    }
+    case 'tall': {                              // corn: a thick stalk, long leaves, cobs and a tassel when ripe
+      stem(7, 15, 16 - H, L); stem(8, 15, 17 - H, Ld);
+      for (let y = 14; y > 17 - H; y -= 3) { leafLine(7, y, -1, -.5, 4 + st); leafLine(8, y - 1, 1, -.5, 4 + st); }
+      if (ripe) { for (let q = 0; q < 4; q++) { set(9, 7 + q, F); set(10, 8 + q, shadeC(F, .85)); set(5, 9 + q, F); } set(10, 7, L); set(4, 9, L); for (let q = 0; q < 3; q++) set(6 + q, 1 + (q % 2), [210, 190, 120]); }
+      break;
+    }
+    case 'cane': {                              // sugarcane: segmented stalks with leaves on top
+      for (const sx of [4, 8, 12]) {
+        const h = H - (r() * 2 | 0);
+        for (let y = 15; y > 15 - h; y--) set(sx, y, (15 - y) % 4 === 3 ? shadeC(F, .7) : F);
+        if (st >= 1) { leafLine(sx, 16 - h, -1, -.4, 3); leafLine(sx, 16 - h, 1, -.4, 3); }
+      }
+      break;
+    }
+    case 'gourd': {                             // pumpkin, watermelon: low vines, a big fruit when ripe
+      for (let k = 0; k < 3 + st; k++) leafLine(7.5, 15, (r() - .5) * 2.2, -.35 - r() * .3, 3 + st);
+      blob(4, 13, 1.6 + st * .4, 1.2 + st * .3, () => leafy()); blob(11, 13, 1.6 + st * .4, 1.2 + st * .3, () => leafy());
+      if (st >= 2) {
+        const R = ripe ? 3.6 : 1.8;
+        blob(7.5, 15.4 - R * .85, R * 1.15, R * .85, (x, y, dx) => {
+          const band = cr.ic === 'melon' ? (Math.abs(Math.round(x * .9) % 3) === 0) : (Math.abs(dx) > .35 && Math.abs(dx) < .55);
+          return glow(band ? X : dx < -.4 ? shadeC(F, 1.12) : F);
+        });
+        if (ripe && cr.ic !== 'melon') set(7.5, 15.4 - R * 1.75, Ld);
+      }
+      break;
+    }
+    case 'flower': {                            // a stem, two leaves, then a bud and a blossom
+      const h = cr.tall ? H : Math.min(H, [3, 6, 9, 11][st]);
+      stem(7, 15, 16 - h, L);
+      if (st >= 1) { leafLine(7, 14, -1, -.6, 3); leafLine(8, 13, 1, -.6, 3); }
+      const ty = 16 - h;
+      if (st === 2) blob(7, ty, 1, 1.3, () => cr.ic === 'lavender' ? shadeC(F, .7) : Lh);
+      if (ripe) {
+        if (cr.ic === 'sunflower') blob(7.5, ty + 1, 3.4, 3, (x, y, dx, dy) => dx * dx + dy * dy < .3 ? X : F);
+        else if (cr.ic === 'lavender') for (let q = 0; q < 5; q++) { set(7, ty + q, F); if (q % 2) { set(6, ty + q, shadeC(F, .85)); set(8, ty + q, shadeC(F, .85)); } }
+        else if (cr.ic === 'tulip') blob(7, ty + 1, 2, 2.2, (x, y) => y === Math.round(ty - 1) && x === 7 ? shadeC(F, .8) : F);
+        else if (cr.ic === 'moon') { for (let a = 0; a < 5; a++) for (let q = 1; q < 4; q++) set(7 + Math.cos(a * 1.257) * q, ty + 1 + Math.sin(a * 1.257) * q, glow(q === 3 ? shadeC(F, 1.1) : F)); set(7, ty + 1, glow([255, 255, 220])); }
+        else blob(7, ty + 1, 2.3, 2, (x, y) => glow((x + y) % 2 ? F : shadeC(F, .8)));                // rose
+      }
+      break;
+    }
+    case 'pine': {                              // pineapple: a spiky rosette, fruit and crown when ripe
+      for (let k = 0; k < 6 + st; k++) { const a = -Math.PI / 2 + (k - (5 + st) / 2) * .38; leafLine(7.5, 15, Math.cos(a), Math.sin(a) * .8, 2 + st * 1.6); }
+      if (ripe) { blob(7.5, 10.5, 2.5, 3, (x, y) => (x + y) % 2 ? F : shadeC(F, .7)); for (let q = 0; q < 4; q++) { set(6.5 + q * .7, 6 - (q % 2), L); } }
+      break;
+    }
+  }
+  if (st === 0) { set(7, 15, L); set(8, 14, Lh); set(6, 14, L); }
+  putSprite(PLANT0 + c * 4 + st, px);
+}
+function makeFarmTextures() {
+  let r;
+  const dirtPix = rr => speckled(rr, [134, 96, 67], .14, [[.03, [118, 110, 102]], [.2, [106, 75, 52]], [.3, [156, 114, 82]]]);
+  for (const [id, wet, fert] of [[FARM, 0, 0], [FARM_W, 1, 0], [FARM_F, 0, 1], [FARM_FW, 1, 1]]) {
+    r = seeded(200 + id);
+    const k = wet ? .62 : 1, d = dirtPix(r);
+    paintLayer(id * 3, (x, y) => {                                   // tilled rows, darker when wet, speckled when fertilised
+      if (fert && r() < .1) return r() < .5 ? [226, 222, 196] : [120, 170, 80];
+      const furrow = y % 4 === 3 ? .72 : y % 4 === 0 ? 1.12 : 1;
+      return shadeC([112, 78, 50], k * furrow * (1 + (r() - .5) * .16));
+    });
+    paintLayer(id * 3 + 1, () => shadeC(d(), wet ? .75 : 1)); paintLayer(id * 3 + 2, () => shadeC(d(), wet ? .75 : 1));
+  }
+  r = seeded(216); { const f = (x, y) => shadeC([58, 110, 200], 1 + Math.sin((x + y * .5) * .9) * .08 + (r() - .5) * .06); for (let q = 0; q < 3; q++) paintLayer(WATER * 3 + q, f); }
+  r = seeded(221); {                                                // planks: four boards with seams and grain
+    const shade = [1, .94, 1.04, .97], off = [0, 6, 2, 9];
+    for (let q = 0; q < 3; q++) paintLayer(PLANK * 3 + q, (x, y) => {
+      const b = y >> 2, seam = (x + off[b]) % 16 === 0 || y % 4 === 3;
+      return shadeC([176, 136, 80], (seam ? .72 : shade[b]) * (1 + (r() - .5) * .08) * ((x * 7 + y * 3) % 11 === 0 ? .9 : 1));
+    });
+  }
+  for (const [id, base] of [[SPRINK, [150, 156, 164]], [SPRINK2, [222, 188, 80]]]) {   // sprinkler metal with rivets
+    for (let q = 0; q < 3; q++) paintLayer(id * 3 + q, (x, y) => (x % 5 === 2 && y % 5 === 2) ? shadeC(base, .6) : shadeC(base, (x + y) % 7 === 0 ? 1.15 : 1));
+  }
+  paintLayer(BED * 3, (x, y) => (x === 0 || x === 15 || y === 0 || y === 15) ? [150, 110, 64]            // bed: pillow and blanket
+    : y < 5 ? [244, 242, 236] : ((x + y) % 6 === 0 ? [176, 44, 40] : [200, 58, 48]));
+  paintLayer(BED * 3 + 1, (x, y) => y < 6 ? [200, 58, 48] : y < 7 ? [244, 242, 236] : shadeC([150, 110, 64], y > 13 ? .75 : 1));
+  paintLayer(BED * 3 + 2, () => [120, 88, 52]);
+  r = seeded(231); { const px = px16();                             // weeds: a tuft of blades
+    for (let k = 0; k < 9; k++) {
+      let x = 1 + r() * 14, lean = (r() - .5) * .5;
+      const h = 5 + r() * 9;
+      for (let q = 0; q < h; q++) { const X = Math.round(x + lean * q), Y = 15 - q; if (X >= 0 && X < 16) px[Y * 16 + X] = q > h - 3 ? [118, 176, 70] : r() < .3 ? [60, 110, 40] : [84, 146, 54]; }
+    }
+    putSprite(TALL_L, px); }
+  for (let c = 0; c < CROPS.length; c++) for (let s = 0; s < 4; s++) cropSprite(c, s);
+}
+
+// ---- farm icons: seeds, produce, dishes, tools ----
+function produceIcon(cr) {
+  const F = cr.f, X = cr.x || shadeC(F, .7), L = cr.l, Fh = shadeC(F, 1.2), Fd = shadeC(F, .75);
+  return sprite(set => {
+    const disk = (cx, cy, rx, ry, colf) => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy <= 1) set(x, y, colf(dx, dy, x, y)); } };
+    const shade3 = (dx, dy) => dx + dy < -.6 ? Fh : dx + dy > .7 ? Fd : F;
+    const leafTop = (x, y) => { set(x, y, L); set(x - 1, y - 1, L); set(x + 1, y - 1, shadeC(L, 1.2)); set(x, y - 2, L); };
+    switch (cr.ic) {
+      case 'ear': for (let k = 0; k < 3; k++) { for (let q = 0; q < 11; q++) set(5 + k * 2 + q * .15, 14 - q, q > 5 ? (q % 2 ? F : Fd) : shadeC(F, .6)); } break;
+      case 'rice': for (let k = 0; k < 3; k++) for (let q = 0; q < 10; q++) set(4 + k * 3 + (q > 6 ? q - 6 : 0) * .6, 14 - q, q > 5 ? F : shadeC(L, .8)); break;
+      case 'carrot': for (let q = 0; q < 9; q++) for (let w = 0; w <= (8 - q) * .35; w++) { set(7 + w, 5 + q, w ? Fd : F); set(7 - w, 5 + q, F); } leafTop(7, 4); break;
+      case 'daikon': for (let q = 0; q < 10; q++) for (let w = 0; w <= 2 - q * .15; w++) { set(7 + w, 4 + q, w > 1 ? Fd : F); set(7 - w, 4 + q, F); } leafTop(7, 3); break;
+      case 'potato': case 'taro': disk(7.5, 8.5, 5, 4, (dx, dy, x, y) => (x * 5 + y * 3) % 11 === 0 ? Fd : shade3(dx, dy)); break;
+      case 'yam': disk(7.5, 8.5, 6, 3, shade3); break;
+      case 'onion': disk(7.5, 9.5, 4.5, 4.2, shade3); set(7, 4, L); set(8, 3, L); set(7, 5, shadeC(F, .8)); break;
+      case 'round': case 'bell': disk(7.5, 9, 5, cr.ic === 'bell' ? 5.2 : 4.5, shade3); leafTop(7, 5); break;
+      case 'eggplant': for (let q = 0; q < 10; q++) for (let w = 0; w <= 1.4 + q * .15; w++) { set(8 + q * .3 + w, 5 + q, w > 1 ? Fd : F); set(8 + q * .3 - w, 5 + q, Fh); } leafTop(8, 4); break;
+      case 'chili': for (let q = 0; q < 10; q++) { set(9 - q * .5 + (q > 6 ? q - 6 : 0), 4 + q, F); set(10 - q * .5 + (q > 6 ? q - 6 : 0), 4 + q, q < 8 ? Fd : F); } set(9, 3, L); break;
+      case 'pod': for (let q = 0; q < 11; q++) { set(3 + q, 11 - q * .6, F); set(3 + q, 12 - q * .6, Fd); if (q % 3 === 1) set(3 + q, 10.5 - q * .6, Fh); } break;
+      case 'cob': for (let q = 0; q < 10; q++) for (let w = -1; w <= 1; w++) set(7 + w + q * .2, 4 + q, (q + w) % 2 ? F : Fd); for (let q = 0; q < 6; q++) { set(5 + q * .2, 8 + q, L); set(10 + q * .2, 8 + q, shadeC(L, .8)); } break;
+      case 'head': case 'cauli': disk(7.5, 8.5, 5.5, 5, (dx, dy) => cr.ic === 'cauli' && dx * dx + dy * dy > .55 ? L : (dx * dx + dy * dy > .7 ? shadeC(F, .8) : shade3(dx, dy))); break;
+      case 'cane': for (let k = 0; k < 2; k++) for (let q = 0; q < 12; q++) set(6 + k * 3 + q * .1, 14 - q, q % 4 === 3 ? Fd : F); set(7, 2, L); set(10, 2, L); break;
+      case 'berry': for (let q = 0; q < 8; q++) for (let w = 0; w <= 3.5 - q * .45; w++) { set(7.5 + w, 5 + q, (q + w) % 3 === 1 ? [250, 230, 120] : F); set(7.5 - w, 5 + q, (q + w) % 3 === 1 ? [250, 230, 120] : Fh); } leafTop(8, 4); break;
+      case 'berries': for (const [x, y] of [[6, 7], [9, 6], [8, 10], [5, 11], [11, 10]]) disk(x, y, 1.8, 1.8, shade3); break;
+      case 'grape': for (let q = 0; q < 5; q++) for (let w = 0; w <= 4 - q; w++) disk(4.5 + w * 2 + q, 5 + q * 2, 1.2, 1.2, shade3); set(8, 3, L); break;
+      case 'pumpkin': disk(7.5, 9, 6, 4.8, (dx, dy) => Math.abs(dx) > .3 && Math.abs(dx) < .45 ? Fd : shade3(dx, dy)); set(7, 4, shadeC(L, .7)); set(8, 3, shadeC(L, .7)); break;
+      case 'melon': disk(7.5, 8.5, 6, 5, (dx, dy, x) => (x % 3 === 0 ? X : F)); break;
+      case 'sunflower': disk(7.5, 7.5, 6, 6, (dx, dy) => dx * dx + dy * dy < .35 ? X : F); break;
+      case 'tulip': disk(7.5, 6, 3.4, 3.4, (dx, dy, x, y) => y < 4 && x % 2 ? shadeC(F, .8) : F); for (let q = 0; q < 6; q++) set(7.5, 9 + q, L); set(6, 12, L); set(9, 11, L); break;
+      case 'rose': disk(7.5, 6.5, 4, 3.6, (dx, dy, x, y) => (x + y) % 3 === 0 ? Fd : F); for (let q = 0; q < 5; q++) set(7.5, 10 + q, L); set(9, 12, L); break;
+      case 'lavender': for (let q = 0; q < 7; q++) { set(7.5, 3 + q, F); if (q % 2) { set(6.5, 3 + q, Fd); set(8.5, 3 + q, Fd); } } for (let q = 0; q < 5; q++) set(7.5, 10 + q, L); break;
+      case 'moon': for (let a = 0; a < 5; a++) for (let q = 1; q < 6; q++) set(7.5 + Math.cos(a * 1.257 - 1.57) * q, 7.5 + Math.sin(a * 1.257 - 1.57) * q, q > 4 ? Fh : F); set(7.5, 7.5, [255, 255, 220]); break;
+      case 'leaf': for (let q = 0; q < 11; q++) for (let w = 0; w <= Math.sin(q / 10 * Math.PI) * 3.4; w++) { set(4 + q * .7 + w * .6, 12 - q * .7 + w * .6, w ? F : shadeC(F, .7)); set(4 + q * .7 - w * .6, 12 - q * .7 - w * .6, Fh); } break;
+      case 'beans': for (const [x, y] of [[6, 6], [10, 8], [6, 11]]) disk(x, y, 2.4, 1.8, (dx, dy, xx) => Math.abs(dx) < .18 ? shadeC(X, .6) : X); break;
+      case 'pineapple': disk(7.5, 10, 4, 4.8, (dx, dy, x, y) => (x + y) % 2 ? F : Fd); for (let q = 0; q < 5; q++) { set(5.5 + q, 4 - (q % 2), L); set(6.5 + q * .5, 5, shadeC(L, .8)); } break;
+      case 'star': for (let a = 0; a < 5; a++) for (let q = 0; q < 6; q++) { set(7.5 + Math.cos(a * 1.257 - 1.57) * q, 7.8 + Math.sin(a * 1.257 - 1.57) * q, q < 2 ? Fh : F); } disk(7.5, 7.8, 2, 2, () => Fh); break;
+      default: disk(7.5, 8.5, 5, 5, shade3);
+    }
+  });
+}
+function seedIcon(cr) {                       // a little cloth pouch marked with the crop's colour
+  return sprite(set => {
+    for (let y = 5; y < 15; y++) for (let x = 3; x < 13; x++) {
+      const dx = (x - 7.5) / 5, dy = (y - 10) / 5;
+      if (dx * dx + dy * dy * .7 <= 1) set(x, y, dx < -.4 ? [222, 196, 150] : dx > .5 ? [168, 136, 90] : [200, 170, 120]);
+    }
+    for (let x = 6; x < 10; x++) { set(x, 4, [150, 118, 76]); set(x, 3, [200, 170, 120]); }
+    for (let y = 8; y < 13; y++) for (let x = 6; x < 10; x++) if ((x - 7.5) ** 2 + (y - 10.2) ** 2 < 5) set(x, y, cr.f);
+  });
+}
+function dishIcon(d) {
+  const C = d.col, Ch = shadeC(C, 1.18), Cd = shadeC(C, .78), W = [240, 238, 232], Wd = [196, 194, 188];
+  return sprite(set => {
+    const ell = (cx, cy, rx, ry, colf) => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const dx = (x - cx) / rx, dy = (y - cy) / ry; if (dx * dx + dy * dy <= 1) set(x, y, colf(dx, dy, x, y)); } };
+    switch (d.ic) {
+      case 'bread': ell(7.5, 9, 6.5, 4, (dx, dy, x) => dy < -.2 && x % 3 === 0 ? Cd : dy < 0 ? Ch : C); break;
+      case 'bowl': case 'salad':
+        ell(7.5, 8, 6, 2, (dx, dy, x, y) => d.ic === 'salad' ? ((x + y) % 3 ? [110, 180, 70] : (x % 4 ? [220, 60, 50] : [240, 140, 40])) : (dx < -.3 ? Ch : C));
+        for (let y = 9; y < 14; y++) for (let x = 2; x < 14; x++) { const w = 6 - (y - 9) * 1.1; if (Math.abs(x - 7.5) <= w) set(x, y, x < 7 ? [214, 176, 120] : [182, 142, 92]); }
+        break;
+      case 'plate': case 'pasta':
+        ell(7.5, 10, 7, 3.2, (dx, dy) => dx * dx + dy * dy > .6 ? Wd : W);
+        ell(7.5, 9, 4.2, 2.2, (dx, dy, x, y) => d.ic === 'pasta' ? ((x + y) % 2 ? [236, 206, 120] : C) : (dx < -.3 ? Ch : C));
+        break;
+      case 'onigiri': for (let y = 3; y < 14; y++) for (let x = 2; x < 14; x++) if (Math.abs(x - 7.5) <= (y - 2) * .6) set(x, y, y > 10 && Math.abs(x - 7.5) < 3 ? [30, 44, 34] : W); break;
+      case 'cake': case 'starcake':
+        for (let y = 5; y < 14; y++) for (let x = 2; x < 14; x++) if (x - 2 >= (13 - y) * .0) set(x, y, y < 7 ? Ch : y % 3 === 0 ? C : [246, 230, 196]);
+        if (d.ic === 'starcake') { set(7, 2, [255, 236, 120]); set(6, 3, [255, 236, 120]); set(8, 3, [255, 236, 120]); set(7, 3, [255, 250, 200]); set(7, 4, [255, 236, 120]); }
+        else { set(7, 4, [230, 30, 50]); set(8, 4, [230, 30, 50]); set(7, 3, [90, 150, 60]); }
+        break;
+      case 'balls': for (const [x, y] of [[5, 10], [10, 10], [7.5, 6]]) ell(x, y, 2.8, 2.8, (dx, dy) => dx + dy < -.5 ? Ch : dx + dy > .6 ? Cd : C); break;
+      case 'pie': ell(7.5, 9, 6.5, 4, (dx, dy, x, y) => dx * dx + dy * dy > .7 ? [214, 170, 110] : ((x + y) % 4 === 0 || (x - y + 16) % 4 === 0) ? [230, 196, 130] : C); break;
+      case 'cup': for (let y = 3; y < 14; y++) for (let x = 4; x < 12; x++) { const edge = x === 4 || x === 11 || y === 13; set(x, y, edge ? [220, 236, 244] : y < 5 ? [230, 244, 250] : (x < 6 ? Ch : C)); } for (let y = 6; y < 10; y++) set(12, y, [220, 236, 244]); break;
+      case 'jar': for (let y = 4; y < 14; y++) for (let x = 3; x < 13; x++) set(x, y, y < 6 ? [200, 160, 110] : (x === 3 || x === 12) ? [220, 236, 244] : (x < 6 ? Ch : C)); break;
+      default: ell(7.5, 8.5, 5, 5, () => C);
+    }
+  });
+}
+function farmToolIcons() {
+  ICON_CANVAS[160] = sprite(set => {                                                         // 澆水壺
+    for (let y = 6; y < 14; y++) for (let x = 3; x < 11; x++) set(x, y, x < 5 ? [150, 200, 214] : [110, 168, 186]);
+    for (let q = 0; q < 5; q++) set(11 + q, 8 - q * .8, [110, 168, 186]);
+    for (let x = 4; x < 10; x++) set(x, 4, [90, 140, 160]); set(4, 5, [90, 140, 160]); set(9, 5, [90, 140, 160]);
+    set(15, 3, [120, 190, 250]); set(14, 2, [120, 190, 250]);
+  });
+  const pail = water => sprite(set => {                                                      // 水桶 / 裝水的水桶
+    for (let y = 6; y < 14; y++) for (let x = 3; x < 13; x++) { const w = 5 - (y - 6) * .25; if (Math.abs(x - 7.5) <= w) set(x, y, x < 6 ? [200, 204, 210] : [150, 154, 162]); }
+    for (let x = 3; x < 13; x++) set(x, 6, water ? (x % 3 ? [60, 120, 220] : [120, 180, 250]) : [90, 94, 100]);
+    for (let q = 0; q < 9; q++) set(3.5 + q, 5 - Math.sin(q / 8 * Math.PI) * 3, [120, 124, 130]);
+  });
+  ICON_CANVAS[161] = pail(false); ICON_CANVAS[162] = pail(true);
+  ICON_CANVAS[163] = sprite(set => {                                                         // 肥料
+    for (let y = 5; y < 15; y++) for (let x = 3; x < 13; x++) if (!(y < 7 && (x < 5 || x > 10))) set(x, y, x < 6 ? [176, 140, 90] : [140, 106, 64]);
+    for (let x = 5; x < 11; x++) set(x, 4, [110, 84, 50]);
+    set(7, 9, [90, 170, 70]); set(8, 8, [110, 190, 80]); set(8, 10, [90, 170, 70]); set(7, 11, [70, 140, 60]);
+  });
+  const sprinkler = (col) => sprite(set => {
+    for (let x = 4; x < 12; x++) set(x, 14, shadeC(col, .7));
+    for (let y = 7; y < 14; y++) { set(7, y, col); set(8, y, shadeC(col, .8)); }
+    for (let x = 5; x < 11; x++) set(x, 6, shadeC(col, 1.15)); for (let x = 6; x < 10; x++) set(x, 5, col);
+    for (const [x, y] of [[3, 3], [12, 3], [2, 6], [13, 6], [5, 1], [10, 1]]) set(x, y, [120, 190, 250]);
+  });
+  ICON_CANVAS[SPRINK] = sprinkler([160, 166, 174]); ICON_CANVAS[SPRINK2] = sprinkler([226, 190, 80]);
+  ICON_CANVAS[BED] = sprite(set => {                                                         // 床
+    for (let y = 7; y < 12; y++) for (let x = 1; x < 15; x++) set(x, y, x < 5 ? [244, 242, 236] : (y === 7 ? [226, 80, 64] : [200, 58, 48]));
+    for (let y = 12; y < 15; y++) { set(1, y, [140, 100, 60]); set(14, y, [140, 100, 60]); }
+    for (let x = 1; x < 15; x++) set(x, 12, [150, 110, 64]);
+  });
+  ICON_CANVAS[PLANK] = cubeIcon(PLANK);
+  for (const [i, c] of CROPS.entries()) { ICON_CANVAS[SEED0 + i] = seedIcon(c); ICON_CANVAS[CROP_ITEM0 + i] = produceIcon(c); }
+  for (const [j, d] of DISHES.entries()) ICON_CANVAS[DISH0 + j] = dishIcon(d);
+}
+
+// ---- icons for the hotbar, bag and hand ----
+const ICON_CANVAS = {};                       // id → canvas (block icons 32×32, item sprites 16×16)
+function layerCanvas(layer) {
+  const c = document.createElement('canvas'); c.width = c.height = TEX;
+  const img = new ImageData(new Uint8ClampedArray(texData.buffer, layer * 1024, 1024).slice(), TEX, TEX);
+  c.getContext('2d').putImageData(img, 0, 0);
+  return c;
+}
+function cubeIcon(id) {                       // isometric cube from the block's top and side textures
+  const c = document.createElement('canvas'); c.width = c.height = 32;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+  const top = layerCanvas(id * 3), side = layerCanvas(id * 3 + 1);
+  const face = (img, m, dark) => {
+    g.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]); g.drawImage(img, 0, 0);
+    if (dark) { g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(0,0,0,' + dark + ')'; g.fillRect(0, 0, 16, 16); g.globalCompositeOperation = 'source-over'; }
+  };
+  face(top, [15 / 16, 7.5 / 16, -15 / 16, 7.5 / 16, 16, 1], 0);
+  face(side, [15 / 16, 7.5 / 16, 0, 15 / 16, 1, 8.5], .22);
+  face(side, [15 / 16, -7.5 / 16, 0, 15 / 16, 16, 16], .4);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  return c;
+}
+function sprite(draw) {                       // 16×16 item sprite with an automatic dark outline
+  const px = new Array(256).fill(null);
+  const set = (x, y, col) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < 16 && y < 16) px[y * 16 + x] = col; };
+  draw(set);
+  const c = document.createElement('canvas'); c.width = c.height = 16;
+  const g = c.getContext('2d'), img = g.createImageData(16, 16);
+  for (let i = 0; i < 256; i++) {
+    let col = px[i];
+    if (!col) {                               // outline: transparent pixel next to a filled one
+      const x = i & 15, y = i >> 4;
+      if ((x > 0 && px[i - 1]) || (x < 15 && px[i + 1]) || (y > 0 && px[i - 16]) || (y < 15 && px[i + 16])) col = [36, 26, 20, 200];
+      else continue;
+    }
+    img.data.set([col[0], col[1], col[2], col.length > 3 ? col[3] : 255], i * 4);
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+const STICK_D = [98, 70, 38], STICK_L = [150, 112, 64];
+function handle(set, len) { for (let i = 0; i <= len; i++) { set(2 + i, 13 - i, STICK_D); set(3 + i, 13 - i, STICK_L); } }
+function toolSprite(kind, col) {
+  const hi = shadeC(col, 1.25), lo = shadeC(col, .7);
+  return sprite(set => {
+    if (kind === 'w') {                        // sword: long blade on the diagonal, crossguard, grip
+      for (let i = 0; i < 10; i++) { set(5 + i, 10 - i, i > 7 ? hi : col); set(6 + i, 10 - i, hi); set(5 + i, 9 - i, lo); }
+      for (let i = -2; i <= 2; i++) set(4 + i, 11 + i, [90, 70, 50]);
+      set(3, 12, STICK_L); set(2, 13, STICK_D); set(1, 14, [90, 70, 50]);
+      return;
+    }
+    handle(set, kind === 'p' ? 9 : 8);
+    if (kind === 'p') {                        // pickaxe: a head across the handle end, tips bent back
+      for (let t = -1; t <= 1.001; t += .02) {
+        const bx = 11.6 + t * 6 * .707 - t * t * 2.2 * .707, by = 3.6 + t * 6 * .707 + t * t * 2.2 * .707;
+        set(bx, by, col); set(bx + .7, by - .7, hi); set(bx - .7, by + .7, lo);
+      }
+    } else if (kind === 'a') {                 // axe: a flat blade sticking out to one side of the handle top
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+        const rx = x - 10.5, ry = y - 4.5, a = (rx - ry) * .707, b = (-rx - ry) * .707;   // a: along handle, b: sideways
+        if (a > -3.6 && a < 1.8 && b > -.8 && b < 5.2 - Math.max(0, Math.abs(a + .9) - 1.6) * .9)
+          set(x, y, b > 4 ? hi : b < .6 ? lo : col);
+      }
+    } else if (kind === 'h') {                 // hoe: a short flat blade turned to one side
+      for (let x = 8; x <= 12; x++) { set(x, 2, hi); set(x, 3, x === 8 ? lo : col); }
+      set(12, 4, col); set(11, 4, lo);
+    } else {                                   // shovel: rounded blade at the end
+      for (let y = 0; y <= 7; y++) for (let x = 8; x <= 15; x++) {
+        const dx = x - 12, dy = y - 3.5;
+        if (dx * dx + dy * dy < 7.5) set(x, y, dx + dy < -1.5 ? hi : dx + dy > 1.5 ? lo : col);
+      }
+    }
+  });
+}
+function makeIcons() {
+  for (const id of [SAND, DIRT, WOOD, LEAF, GLASS, STONE, COAL, IRON, DIAMOND, GRASS]) ICON_CANVAS[id] = cubeIcon(id);
+  ICON_CANVAS[TORCH] = sprite(set => {
+    for (let y = 6; y < 15; y++) { set(7, y, [138, 104, 60]); set(8, y, [104, 76, 42]); }
+    set(7, 4, [255, 250, 205]); set(8, 4, [255, 214, 92]); set(7, 5, [255, 206, 80]); set(8, 5, [245, 160, 40]); set(7, 3, [255, 190, 70]);
+  });
+  ICON_CANVAS[103] = sprite(set => { for (let i = 0; i < 10; i++) { set(3 + i, 12 - i, STICK_D); set(4 + i, 12 - i, STICK_L); } });   // 木棒
+  ICON_CANVAS[101] = sprite(set => {                                                             // 箭
+    for (let i = 0; i < 10; i++) set(3 + i, 12 - i, STICK_L);
+    set(13, 1, [200, 200, 205]); set(12, 1, [150, 150, 155]); set(13, 2, [150, 150, 155]); set(12, 2, [220, 220, 225]); set(11, 3, [170, 170, 175]);
+    set(2, 12, [240, 240, 240]); set(3, 13, [240, 240, 240]); set(1, 12, [210, 210, 210]); set(3, 14, [210, 210, 210]); set(2, 14, [230, 230, 230]); set(1, 13, [230, 230, 230]);
+  });
+  ICON_CANVAS[100] = sprite(set => {                                                             // 弓
+    for (let a = Math.PI; a <= 1.5 * Math.PI + .01; a += .03) { set(14 + Math.cos(a) * 11.5, 14 + Math.sin(a) * 11.5, [140, 100, 55]); set(14 + Math.cos(a) * 12.4, 14 + Math.sin(a) * 12.4, [104, 72, 38]); }
+    for (let x = 3; x <= 13; x++) set(x, 16.4 - x, [230, 230, 222]);
+  });
+  ICON_CANVAS[104] = sprite(set => { const r = seeded(91);                                        // 煤炭
+    for (let y = 3; y < 14; y++) for (let x = 2; x < 14; x++) { const dx = (x - 7.5) / 5.5, dy = (y - 8.5) / 4.8; if (dx * dx + dy * dy < 1 - r() * .25) set(x, y, r() < .2 ? [72, 72, 76] : [34, 34, 36]); } });
+  ICON_CANVAS[105] = sprite(set => {                                                             // 鐵錠: a small bar seen from above
+    for (let y = 5; y < 12; y++) for (let x = 1; x < 15; x++) {
+      const top = y < 8 && x >= 4 - (y - 5) && x <= 13 - (y - 5) + 1 && x >= 1 + (7 - y);
+      const front = y >= 8 && x >= 2 && x <= 12, side = y >= 8 && x > 12 && x <= 14 - (y - 8) * .6;
+      if (top) set(x, y, [240, 236, 228]); else if (front) set(x, y, y === 8 ? [214, 206, 196] : [196, 188, 178]); else if (side) set(x, y, [150, 142, 134]);
+    } });
+  ICON_CANVAS[106] = sprite(set => {                                                             // 鑽石
+    for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) { const d = Math.abs(x - 7.5) + Math.abs(y - (y < 6 ? 6 : 6)) * (y < 6 ? 2.2 : 1.1); if (d < 6) set(x, y, y < 6 ? [200, 255, 250] : x < 7 ? [110, 236, 228] : [60, 190, 190]); } });
+  ICON_CANVAS[102] = sprite(set => {                                                             // 暗核
+    for (let y = 2; y < 15; y++) for (let x = 2; x < 15; x++) { const dx = x - 8, dy = y - 8.5, d = Math.sqrt(dx * dx + dy * dy); if (d < 5.6) set(x, y, d < 1.8 ? [236, 190, 255] : dx + dy < -3 ? [170, 110, 220] : d > 4.4 ? [70, 36, 100] : [123, 79, 168]); } });
+  const TIER_C = [0, [168, 128, 76], [140, 140, 140], [226, 226, 226], [96, 226, 216]];
+  for (const tk of TKIND) for (let t = 1; t <= tk.tiers; t++) ICON_CANVAS[tk.b + t - 1] = toolSprite(tk.k, TIER_C[t]);
+  farmToolIcons();
+}
+
+function makeIconCSS() {                      // one class per item (.i<id>) holding its icon, for slots and the drag ghost
+  let css = '';
+  for (const id in ICON_CANVAS) { ICON_URL[id] = ICON_CANVAS[id].toDataURL(); css += '.i' + id + '{background-image:url(' + ICON_URL[id] + ')}'; }
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+}
 
 // ---- inventory: 24 slots, the first 6 are the hotbar ----
 let INV = [];
@@ -322,6 +1152,8 @@ function newKit() {
   INV = [];
   for (let i = 0; i < 24; i++) INV.push({ id: 0, n: 0 });
   INV[0] = { id: DIRT, n: 16 }; INV[1] = { id: TORCH, n: 8 };
+  INV[2] = { id: 150, n: 1 }; INV[3] = { id: 160, n: 1 }; INV[4] = { id: SEED0, n: 8 }; INV[5] = { id: SEED0 + 1, n: 4 };
+  INV[6] = { id: SEED0 + 2, n: 4 }; INV[7] = { id: DISH0, n: 2 };
 }
 function give(id, n) {                        // leftovers when the bag is full are lost
   if (!id) return;
@@ -347,7 +1179,9 @@ let tod = .35;                                // time of day 0..1 (.25 sunrise �
 let weather = 0;                              // 0 clear · 1 rain · 2 snow
 let paused = true, started = false, invOpen = false, creative = false;
 let selI = 0, palPage = 0, dragI = -1;
-const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1 };  // quality -1 = auto
+const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1, peace: 0 };  // quality -1 = auto
+let needStarter = false, bootMsg = '';       // bootMsg: shown when the game first starts
+let sprinting = false, sprintLatch = false, lastWDown = -1e9, fovK = 1;   // sprint state; fovK widens the view while running
 const K = {};                                 // keys held, by name ('w', ' ', 'tab'…)
 const tapped = {};                            // keys pressed since the last frame, so a quick tap is never lost
 
@@ -363,6 +1197,8 @@ function saveGame() {
     localStorage.voxelP = JSON.stringify({ x: P.x, y: P.y, z: P.z, a: P.a, b: P.b, g: 0 });
     localStorage.voxelT = tod;
     localStorage.voxelI = JSON.stringify(INV);
+    localStorage.voxelV = 2;                  // save format 2: worlds have grass
+    saveFarm();
   } catch (e) {}                              // storage may be blocked (private mode, sandboxed preview)
 }
 function loadGame() {
@@ -376,7 +1212,14 @@ function loadGame() {
     if (p && [p.x, p.y, p.z, p.a, p.b].every(Number.isFinite)) P = { x: p.x, y: p.y, z: p.z, a: p.a, b: p.b, g: 0 };
     const t = +localStorage.voxelT;
     if (t >= 0 && t < 1) tod = t;
-    worldVer++; worldDirty = false;
+    worldVer++; worldDirty = false; waterVer++;
+    let farm = false;
+    try { farm = loadFarm(); } catch (e) {}   // a broken farm save must not cost the world
+    if (!farm) needStarter = true;            // a save from before farming: hand out the starter tools at boot
+    if (localStorage.voxelV !== '2') {          // saved before grass existed: green up the open dirt once
+      for (let i = 0; i < VOL; i++) if (world[i] === DIRT && (i >> 10 === WM || world[i + 1024] === AIR)) world[i] = GRASS;
+      worldDirty = true;
+    }
     return true;
   } catch (e) { return false; }
 }
@@ -389,15 +1232,16 @@ function collide(axis, v) {                   // push the player out of any bloc
     for (let z = z0 | 0; z <= (z1 | 0); z++)
       for (let x = x0 | 0; x <= (x1 | 0); x++) {
         const b = blockAt(x, y, z);
-        if (b === AIR || b === TORCH || !(x1 > x && x0 < x + 1 && y1 > y && y0 < y + 1 && z1 > z && z0 < z + 1)) continue;
+        if (!SOLID[b] || !(x1 > x && x0 < x + 1 && y1 > y && y0 < y + 1 && z1 > z && z0 < z + 1)) continue;
         if (axis === 0) P.x = v > 0 ? x - PW : x + 1 + PW;
         else if (axis === 2) P.z = v > 0 ? z - PW : z + 1 + PW;
         else { P.y = v > 0 ? y - PH : y + 1; P.g = 0; }
       }
 }
-function movePlayer(h, mu, mv) {              // one physics sub-step of h seconds
-  const s = 5 * h, cx = Math.cos(P.a), sx = Math.sin(P.a);
-  P.g = Math.max(P.g - 18 * h, -40);
+const inWater = () => blockAt(P.x | 0, P.y + .4 | 0, P.z | 0) === WATER || blockAt(P.x | 0, P.y + 1.2 | 0, P.z | 0) === WATER;
+function movePlayer(h, mu, mv, speed) {       // one physics sub-step of h seconds
+  const wet = inWater(), s = speed * h * (wet ? .55 : 1), cx = Math.cos(P.a), sx = Math.sin(P.a);
+  P.g = wet ? Math.max(P.g - 6 * h, -2.5) : Math.max(P.g - 18 * h, -40);   // water: slow sink, jump swims up
   const vx = (mu * cx + mv * sx) * s, vz = (-mu * sx + mv * cx) * s;
   P.x += vx; collide(0, vx);
   P.z += vz; collide(2, vz);
@@ -406,7 +1250,7 @@ function movePlayer(h, mu, mv) {              // one physics sub-step of h secon
 
 // ---- targeting: ray from the eye through the crosshair, reach 7 cells ----
 // returns [hit x,y,z, previous (empty) x,y,z] or null
-function target() {
+function target(wantWater) {                  // water is looked through unless you hold an empty bucket
   const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
   const px = P.x, py = P.y + EYE, pz = P.z, dx = sx * cp, dy = sp, dz = cx * cp;
   let gx = px | 0, gy = py | 0, gz = pz | 0;
@@ -418,7 +1262,7 @@ function target() {
   let ax = gx, ay = gy, az = gz;
   for (let n = 7; n--;) {
     const b = blockAt(gx, gy, gz);
-    if (b && (b !== GLASS || gx && gz && gx !== WM && gz !== WM)) return [gx, gy, gz, ax, ay, az];  // the cage can't be dug
+    if (b && (b !== WATER || wantWater) && (b !== GLASS || gx && gz && gx !== WM && gz !== WM)) return [gx, gy, gz, ax, ay, az];  // the cage can't be dug
     ax = gx; ay = gy; az = gz;
     if (tmx < tmy) { if (tmx < tmz) { tmx += tdx; gx += stx; } else { tmz += tdz; gz += stz; } }
     else if (tmy < tmz) { tmy += tdy; gy += sty; } else { tmz += tdz; gz += stz; }
@@ -443,12 +1287,13 @@ function mine(dt) {
     if (creativeCD <= 0) { setBlock(i, AIR); creativeCD = .2; }
     mineIdx = -1; return;
   }
+  if (b >= CROP0 || b === TALL) { breakFarmBlock(i, b); mineIdx = -1; mineProg = 0; return; }   // plants come off at once
   const bi = info(b);
   if ((bi.tr || 0) > heldTier()) {
     mineProg = 0; showHint('需要' + TMAT[bi.tr].n + '質以上的' + (bi.tl === 'p' ? '鎬' : '工具'), 1.2); return;
   }
-  mineProg += dt * breakSpeed(b) / (bi.hd || .5);
-  if (mineProg >= 1) { setBlock(i, AIR); give(bi.dp || b, 1); mineProg = 0; mineIdx = -1; }
+  mineProg += dt * breakSpeed(b) / (bi.hd || .5) * (buffs.dig > 0 ? 1.6 : 1);
+  if (mineProg >= 1) { breakFarmBlock(i, b); setBlock(i, AIR); give(bi.dp || b, 1); mineProg = 0; mineIdx = -1; }
 }
 function place() {
   const o = target();
@@ -456,17 +1301,35 @@ function place() {
   const sel = creative ? PAL[(palPage * 6 + selI) % PAL.length] : INV[selI].id;
   if (!placeable(sel)) return;                                       // empty hand, or holding a tool
   const ax = o[3], ay = o[4], az = o[5];
-  if ((ax | ay | az) & ~WM || blockAt(ax, ay, az)) return;           // outside the world, or occupied
-  if (sel !== TORCH && ax + 1 > P.x - PW && ax < P.x + PW && az + 1 > P.z - PW && az < P.z + PW &&
+  const cur = blockAt(ax, ay, az);
+  if ((ax | ay | az) & ~WM || (cur && cur !== WATER && cur !== TALL)) return;   // outside the world, or occupied
+  if (SOLID[sel] && ax + 1 > P.x - PW && ax < P.x + PW && az + 1 > P.z - PW && az < P.z + PW &&
       ay + 1 > P.y && ay < P.y + PH) return;                         // inside the player
   setBlock(idx(ax, ay, az), sel);
   if (!creative) { if (!--INV[selI].n) INV[selI].id = 0; drawBar(); if (invOpen) drawInv(); }
 }
 function use1() { if (dead || paused) return; if (!melee()) holdMine = true; }   // hit a mob, else start mining
 function use1Up() { holdMine = false; mineProg = 0; mineIdx = -1; }
-function use2() {                                                    // shoot when holding a bow, else place
+function use2() {                             // right click / E: sleep, harvest, eat, shoot, farm tools, else place
   if (dead || paused) return;
-  if (info(heldItem()).bow) shoot(); else place();
+  const held = heldItem(), it = info(held), o = target(held === 161);
+  const i = o ? idx(o[0], o[1], o[2]) : -1, b = o ? world[i] : AIR;
+  if (b === BED) return sleep();
+  if (b >= CROP0 && stageOf(b) === 3) return harvest(i, true);
+  if (it.dish !== undefined) return eat(held);
+  if (it.bow) return shoot();
+  if (!o) return;
+  if (held === 161) { if (b === WATER) { setBlock(i, AIR); swapHeld(162); } return; }
+  if (held === 162) {
+    const cur = blockAt(o[3], o[4], o[5]);
+    if (!((o[3] | o[4] | o[5]) & ~WM) && (cur === AIR || cur === TALL)) { setBlock(idx(o[3], o[4], o[5]), WATER); swapHeld(161); }
+    return;
+  }
+  if (it.kind === 'h') { if (!till(o, it.tier)) showHint('草地或泥土才能翻土', 1.2); return; }
+  if (it.seed !== undefined) { if (!plant(o, it.seed)) showHint('種在耕地上(先用鋤頭翻土)', 1.5); return; }
+  if (it.can) { if (!waterAt(o)) showHint('對著耕地或作物澆水', 1.2); return; }
+  if (it.fert) { if (!fertilize(o)) showHint('對著還沒施肥的耕地', 1.2); return; }
+  place();
 }
 
 // ---- entities: mobs and arrows ----
@@ -538,6 +1401,7 @@ function shoot() {
 }
 function tickEntities(h) {                    // one sub-step of h seconds (needs sky.dayf / sky.sunEl)
   const { dayf, sunEl } = sky;
+  if (settings.peace && mobs.length) mobs.length = 0;               // peaceful mode: no monsters
   for (let i = mobs.length; i--;) {
     const m = mobs[i];
     m.ht = Math.max(0, m.ht - h); m.ck = Math.max(0, m.ck - h); m.jc = Math.max(0, m.jc - h);
@@ -575,18 +1439,321 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
     a.x = nx; a.y = ny; a.z = nz;
   }
   hurtT = Math.max(0, hurtT - h); swingT = Math.max(0, swingT - h); shakeT = Math.max(0, shakeT - h);
-  if (!dead && hp < HP_MAX) { regenT += h; if (regenT > 4) { regenT = 0; hp = Math.min(HP_MAX, hp + 1); } }
-  if (creative) hp = HP_MAX;
+  if (!dead && hp < maxHp()) { regenT += h; if (regenT > 4) { regenT = 0; hp = Math.min(maxHp(), hp + 1); } }
+  if (creative) hp = maxHp();
   spawnT -= h;
-  if (spawnT <= 0) { spawnT = 2.5; if (dayf < .25 && !creative) spawnMob(); }
+  if (spawnT <= 0) { spawnT = 2.5; if (dayf < .25 && !creative && !settings.peace) spawnMob(); }
   if (dayf > .6 && mobs.length && Math.random() < h * .15) mobs.pop();
+}
+
+// ---- farming: growth, water, hybrids, seasons, and what the player can do with it ----
+const grow = new Float32Array(VOL);           // crop cells: progress 0..1 (1 = ripe)
+const wetT = new Float32Array(VOL);           // farmland: game hours it stays wet
+const nearWater = new Uint8Array(VOL);        // farmland kept wet by water within 4 or a sprinkler
+let coins = 100, day = 1, farmHours = 0, farmAcc = 0, waterVer = 0, maskVer = -1;
+const discovered = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
+const harvested = new Array(CROPS.length).fill(0);
+const buffs = {};                             // effect → seconds left
+const season = () => Math.floor((day - 1) / DAYS_PER_SEASON) % 4;
+const inSeason = c => CROPS[c].s >> season() & 1;
+const maxHp = () => HP_MAX + (buffs.hp > 0 ? 4 : 0);
+
+function resetFarm() {
+  grow.fill(0); wetT.fill(0); coins = 100; day = 1; farmHours = 0;
+  discovered.clear(); for (let i = 0; i < 8; i++) discovered.add(i);
+  harvested.fill(0); for (const k in buffs) delete buffs[k];
+  waterVer++;
+}
+const sprinklers = [];                        // [x, y, z, reach], for the spray drawn over the view
+function buildWetMask() {                     // farmland within 4 of water (same level or one below), or in a sprinkler's reach
+  nearWater.fill(0); sprinklers.length = 0;
+  for (let i = 0; i < VOL; i++) {
+    const b = world[i];
+    if (b !== WATER && b !== SPRINK && b !== SPRINK2) continue;
+    const x = i & WM, z = i >> 5 & WM, y = i >> 10, r = b === WATER ? 4 : b === SPRINK ? 1 : 2;
+    if (b !== WATER) sprinklers.push([x, y, z, r]);
+    for (let dy = -1; dy <= 0; dy++) for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) {
+      const X = x + dx, Y = y + dy, Z = z + dz;
+      if ((X | Y | Z) & ~WM) continue;
+      nearWater[Y << 10 | Z << 5 | X] = 1;
+    }
+  }
+  maskVer = waterVer;
+}
+function skyOpen(i) {                         // nothing opaque between this cell and the sky (glass counts as open)
+  for (i += 1024; i < VOL; i += 1024) if (SOLID[world[i]] && world[i] !== GLASS && world[i] !== LEAF) return false;
+  return true;
+}
+function underGlass(i) {                      // greenhouse: the first solid thing above is glass
+  for (i += 1024; i < VOL; i += 1024) { const b = world[i]; if (b === GLASS) return true; if (SOLID[b]) return false; }
+  return false;
+}
+function waterBeside(i) {                     // a water block right next to this farmland (paddy crops)
+  const x = i & WM, z = i >> 5 & WM;
+  return x > 0 && world[i - 1] === WATER || x < WM && world[i + 1] === WATER ||
+         z > 0 && world[i - 32] === WATER || z < WM && world[i + 32] === WATER;
+}
+function cropLit(i) { return (sky.sunEl > 0 && skyOpen(i)) || torch[i] >= 8; }
+
+// growth rate multipliers for one crop cell, with the reason text shown by the crosshair tip and the farm map
+function growInfo(i) {
+  const c = cropOf(world[i]), cr = CROPS[c], soil = i >= 1024 ? world[i - 1024] : AIR;
+  const out = { rate: 1, notes: [] };
+  if (!isWetFarm(soil)) { out.rate *= .25; out.notes.push('缺水'); }
+  if (cr.w && !waterBeside(i - 1024)) { out.rate *= .1; out.notes.push('旁邊要有水'); }
+  if (!inSeason(c)) { if (underGlass(i)) out.notes.push('溫室'); else { out.rate *= .25; out.notes.push('非當季'); } }
+  if (!cropLit(i)) { out.rate *= .4; out.notes.push('太暗'); }
+  if (soil === FARM_F || soil === FARM_FW) { out.rate *= 1.5; out.notes.push('施肥'); }
+  return out;
+}
+
+// advance every farm cell by dH game hours
+function tickFarm(dH) {
+  if (dH <= 0) return;
+  if (maskVer !== waterVer) buildWetMask();
+  const rain = weather === 1;
+  let changed = false, relit = false;
+  for (let i = 0; i < VOL; i++) {
+    const b = world[i];
+    if (b < FARM) continue;
+    if (b <= FARM_FW) {                         // farmland: wetness, then maybe a hybrid on the empty cell above
+      if (nearWater[i] || (rain && skyOpen(i))) wetT[i] = 24;
+      else if (wetT[i] > 0) wetT[i] = Math.max(0, wetT[i] - dH);
+      const fert = b >= FARM_F, want = wetT[i] > 0 ? (fert ? FARM_FW : FARM_W) : (fert ? FARM_F : FARM);
+      if (want !== b) { world[i] = want; changed = true; }
+      if (i >> 10 < WM && world[i + 1024] === AIR && tryBreed(i + 1024, dH, wetT[i] > 0)) changed = true;
+    } else if (b >= CROP0) {                    // crop: needs farmland underneath, grows toward ripe
+      if (i < 1024 || !isFarm(world[i - 1024])) { relit = relit || glows(b); world[i] = AIR; grow[i] = 0; changed = true; continue; }
+      if (stageOf(b) === 3) continue;
+      const c = cropOf(b);
+      grow[i] = Math.min(1, grow[i] + dH / CROPS[c].g * growInfo(i).rate);
+      const st = grow[i] >= 1 ? 3 : Math.min(2, grow[i] * 3 | 0);
+      if (st !== stageOf(b)) { world[i] = cropId(c, st); changed = true; relit = relit || glows(world[i]); }
+    }
+  }
+  if (changed) { worldVer++; worldDirty = true; }
+  if (relit) relight();
+}
+// an empty farm cell next to two ripe crops may sprout their hybrid (or more of the same crop)
+function tryBreed(slot, dH, wet) {
+  const x = slot & WM, z = slot >> 5 & WM, ripe = [];
+  const look = j => { const b = world[j]; if (b >= CROP0 && stageOf(b) === 3) ripe.push(cropOf(b)); };
+  if (x > 0) look(slot - 1); if (x < WM) look(slot + 1); if (z > 0) look(slot - 32); if (z < WM) look(slot + 32);
+  if (ripe.length < 2) return false;
+  const i = Math.random() * ripe.length | 0, j = (i + 1 + (Math.random() * (ripe.length - 1) | 0)) % ripe.length;
+  const a = ripe[i], b = ripe[j];
+  const child = a === b ? a : HYBRID[Math.min(a, b) + ',' + Math.max(a, b)];
+  if (child === undefined) return false;
+  const lambda = (a === b ? .6 : 1.5 / CROPS[child].tier) * (wet ? 1 : .3) * (buffs.breed > 0 ? 2.5 : 1);
+  if (Math.random() >= 1 - Math.exp(-lambda * dH)) return false;
+  world[slot] = cropId(child, 0); grow[slot] = 0;
+  if (!discovered.has(child)) {
+    discovered.add(child);
+    toast('🧬 發現新品種:' + CROPS[child].n + '!', 'big');
+    if (invOpen && panelTab === 'tree') drawTree();
+  }
+  return true;
+}
+function newDay() {                           // midnight: next day, maybe a new season, roll the weather
+  const was = season();
+  day++;
+  if (season() !== was) toast(SEASON_ICON[season()] + ' ' + SEASONS[season()] + '天到了', 'big');
+  const [p, kind] = [[.3, 1], [.2, 1], [.25, 1], [.45, 2]][season()];
+  weather = Math.random() < p ? kind : 0;
+}
+
+// ---- things the player does ----
+function farmAt(o) {                          // the farmland a target points at: the block itself or the soil under a crop
+  let i = idx(o[0], o[1], o[2]);
+  if (!isFarm(world[i]) && (world[i] >= CROP0 || world[i] === TALL) && i >= 1024) i -= 1024;
+  return isFarm(world[i]) ? i : -1;
+}
+function till(o, tier) {                      // hoe: grass or dirt with room above → farmland (iron and up: 3×3)
+  const r = tier >= 3 ? 1 : 0, x0 = o[0], z0 = o[2], y = o[1] - (blockAt(o[0], o[1], o[2]) === TALL ? 1 : 0);
+  let n = 0;
+  for (let dz = -r; dz <= r; dz++) for (let dx = -r; dx <= r; dx++) {
+    const x = x0 + dx, z = z0 + dz;
+    if ((x | z) & ~WM) continue;
+    const i = idx(x, y, z), b = world[i], up = y < WM ? world[i + 1024] : AIR;
+    if ((b === GRASS || b === DIRT) && (up === AIR || up === TALL)) {
+      if (up === TALL) world[i + 1024] = AIR;
+      world[i] = FARM; wetT[i] = 0; n++;
+      puff(x + .5, y + 1.02, z + .5, '#7a5636', 5);
+    }
+  }
+  if (n) { worldVer++; worldDirty = true; swingT = .18; }
+  return n > 0;
+}
+function plant(o, c) {
+  const f = farmAt(o);
+  if (f < 0 || f >> 10 >= WM || (world[f + 1024] !== AIR && world[f + 1024] !== TALL)) return false;
+  world[f + 1024] = cropId(c, 0); grow[f + 1024] = 0;
+  worldVer++; worldDirty = true;
+  takeHeld();
+  puff((f & WM) + .5, (f >> 10) + 1.05, (f >> 5 & WM) + .5, '#6fbf4a', 5, .4, 1.4);
+  if (!inSeason(c) && !underGlass(f + 1024)) toast('⚠ ' + CROPS[c].n + '不是' + SEASONS[season()] + '天的作物,會長得很慢(溫室裡不受季節影響)');
+  else if (CROPS[c].w && !waterBeside(f)) toast('💧 ' + CROPS[c].n + '要種在水旁邊(耕地緊鄰水方塊)');
+  return true;
+}
+function waterAt(o) {                         // watering can: the 3×3 farmland around the target stays wet for a day
+  const f = farmAt(o);
+  if (f < 0) return false;
+  const x0 = f & WM, z0 = f >> 5 & WM, y = f >> 10;
+  for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
+    const x = x0 + dx, z = z0 + dz;
+    if ((x | z) & ~WM) continue;
+    const i = idx(x, y, z);
+    if (isFarm(world[i])) { wetT[i] = 24; world[i] = world[i] >= FARM_F ? FARM_FW : FARM_W; }
+  }
+  worldVer++; worldDirty = true; swingT = .18;
+  puff(x0 + .5, y + 1.4, z0 + .5, 'rgba(150,205,255,.95)', 18, 2.2, .6);
+  return true;
+}
+function fertilize(o) {
+  const f = farmAt(o);
+  if (f < 0 || world[f] >= FARM_F) return false;
+  world[f] += 2; worldVer++; worldDirty = true;           // FARM → FARM_F, FARM_W → FARM_FW
+  takeHeld();
+  puff((f & WM) + .5, (f >> 10) + 1.05, (f >> 5 & WM) + .5, '#e8dfb8', 8);
+  return true;
+}
+function harvest(i, replant) {                // ripe crop: produce + seeds; right-click replants it on the spot
+  const c = cropOf(world[i]), cr = CROPS[c], soil = world[i - 1024];
+  const n = 1 + (Math.random() < .5) + (buffs.yield > 0 ? 1 : 0) + (soil >= FARM_F && Math.random() < .5);
+  give(CROP_ITEM0 + c, n);
+  const seeds = replant ? (Math.random() < .3 ? 1 : 0) : 1 + (Math.random() < .5);
+  if (seeds) give(SEED0 + c, seeds);
+  harvested[c]++;
+  if (replant) { grow[i] = cr.r || 0; world[i] = cropId(c, cr.r ? Math.min(2, cr.r * 3 | 0) : 0); }
+  else { world[i] = AIR; grow[i] = 0; }
+  if (cr.glow) relight();
+  worldVer++; worldDirty = true; swingT = .18;
+  toast('+' + n + ' ' + cr.n + (seeds ? '  +' + seeds + ' 種子' : ''));
+  puff((i & WM) + .5, (i >> 10) + .4, (i >> 5 & WM) + .5, 'rgb(' + cr.f.join(',') + ')', 10, .6, 2.6);
+}
+function breakFarmBlock(i, b) {               // drops for crops, weeds and farmland; true when handled here
+  if (b >= CROP0) {
+    if (stageOf(b) === 3) harvest(i, false);
+    else { give(SEED0 + cropOf(b), 1); world[i] = AIR; grow[i] = 0; worldVer++; worldDirty = true; }
+    return true;
+  }
+  if (b === TALL) {                           // weeds sometimes hide a seed, usually one that likes this season
+    setBlock(i, AIR);
+    puff((i & WM) + .5, (i >> 10) + .3, (i >> 5 & WM) + .5, '#5f9f3c', 6);
+    if (Math.random() < .35) {
+      let c = Math.random() * 8 | 0;
+      if (!inSeason(c)) c = Math.random() * 8 | 0;
+      give(SEED0 + c, 1); toast('🌱 撿到 ' + CROPS[c].n + '種子');
+    }
+    return true;
+  }
+  if (isFarm(b) && i >> 10 < WM && world[i + 1024] >= CROP0) breakFarmBlock(i + 1024, world[i + 1024]);
+  return false;
+}
+function sleep() {
+  if (tod > .25 && tod < .75) { toast('🛏 只有晚上才能睡覺'); return; }
+  const hours = (tod >= .75 ? 1.25 - tod : .25 - tod) * 24;
+  if (tod >= .75) newDay();
+  tod = .25;
+  tickFarm(hours);                            // crops keep growing while you sleep
+  mobs.length = 0; arrows.length = 0; hp = maxHp();
+  fadeSleep();
+  toast('☀ 早安!第 ' + day + ' 天 · ' + SEASONS[season()] + '天', 'big');
+  saveGame();
+}
+function eat(id) {
+  const d = DISHES[info(id).dish];
+  if (!take(id, 1)) return;
+  const fx = d.fx || [];
+  for (let k = 0; k < fx.length; k += 2) buffs[fx[k]] = Math.max(buffs[fx[k]] || 0, fx[k + 1]);
+  hp = Math.min(maxHp(), hp + d.heal);
+  swingT = .18; drawBar(); if (invOpen) drawInv(); drawBuffs();
+  toast('😋 ' + d.n + (fx.length ? ' · ' + fx.filter((_, k) => k % 2 === 0).map(f => FX_NAME[f]).join('、') : ''));
+}
+function takeHeld() {                         // use up one of the held item
+  if (creative) return;
+  if (!--INV[selI].n) INV[selI].id = 0;
+  drawBar(); if (invOpen) drawInv();
+}
+function swapHeld(id) { if (!creative) { INV[selI] = { id, n: 1 }; drawBar(); if (invOpen) drawInv(); } }
+
+// ---- market ----
+function sellPrice(id) {
+  const it = info(id);
+  if (it.crop !== undefined) return Math.round(CROPS[it.crop].p * (inSeason(it.crop) ? 1 : 1.3));   // out of season sells dearer
+  if (it.seed !== undefined) return Math.max(1, CROPS[it.seed].sd >> 1);
+  if (it.dish !== undefined) return DISHES[it.dish].p;
+  return it.sell || 0;
+}
+function shopList() {                         // [id, price] — tools and blocks, then seeds of every discovered crop
+  const list = SHOP.slice();
+  for (let c = 0; c < CROPS.length; c++) if (discovered.has(c)) list.push([SEED0 + c, CROPS[c].sd * BUY_SEED_MUL]);
+  return list;
+}
+function roomFor(id, n) {                     // how many of this item still fit in the bag
+  const m = maxStack(id);
+  let room = 0;
+  for (const s of INV) if (!s.id) room += m; else if (s.id === id) room += m - s.n;
+  return Math.min(n, room);
+}
+function sellSlot(i, all) {
+  const s = INV[i], price = sellPrice(s.id);
+  if (!s.id || !price) return;
+  const n = all ? s.n : 1;
+  coins += price * n; s.n -= n; if (!s.n) INV[i] = { id: 0, n: 0 };
+  toast('💰 +' + price * n + '(' + nameOf(s.id || 0) + ')');
+  drawBar(); drawCoins(); drawShop();
+}
+function buyItem(id, price, n) {
+  n = Math.min(n, Math.floor(coins / price), roomFor(id, n));
+  if (n <= 0) { toast(coins < price ? '金幣不夠' : '背包滿了'); return; }
+  coins -= price * n; give(id, n);
+  toast('🛒 ' + nameOf(id) + ' ×' + n);
+  drawCoins(); drawShop();
+}
+function cookDish(j) {
+  const d = DISHES[j];
+  if (!d.i.every(([c, k]) => has(CROP_ITEM0 + c, k)) || !roomFor(DISH0 + j, 1)) return;
+  for (const [c, k] of d.i) take(CROP_ITEM0 + c, k);
+  give(DISH0 + j, 1);
+  toast('🍳 做好了 ' + d.n);
+  drawCook();
+}
+
+// ---- save / load of the farm (localStorage voxelF) ----
+function saveFarm() {
+  const g = [], w = [];
+  for (let i = 0; i < VOL; i++) {
+    if (world[i] >= CROP0 && grow[i] > 0) g.push(i, Math.round(grow[i] * 1000));
+    else if (isFarm(world[i]) && wetT[i] > 0) w.push(i, Math.round(wetT[i] * 10));
+  }
+  localStorage.voxelF = JSON.stringify({ c: coins, d: day, g, w, disc: [...discovered], h: harvested, b: buffs, wx: weather });
+}
+function loadFarm() {                         // false: this save predates farming
+  const f = JSON.parse(localStorage.voxelF || 'null');
+  if (!f) return false;
+  if (Number.isFinite(f.c)) coins = f.c;
+  if (Number.isInteger(f.d) && f.d > 0) day = f.d;
+  for (let k = 0; k + 1 < (f.g || []).length; k += 2) grow[f.g[k]] = f.g[k + 1] / 1000;
+  for (let k = 0; k + 1 < (f.w || []).length; k += 2) wetT[f.w[k]] = f.w[k + 1] / 10;
+  for (const c of f.disc || []) if (CROPS[c]) discovered.add(c);
+  (f.h || []).forEach((n, c) => { if (c < harvested.length && Number.isFinite(n)) harvested[c] = n; });
+  for (const k in f.b || {}) if (FX_NAME[k] && f.b[k] > 0) buffs[k] = f.b[k];
+  if (f.wx >= 0 && f.wx <= 2) weather = f.wx;
+  return true;
+}
+function starterPack() {                      // farming tools for a save that predates farming
+  for (const [id, n] of [[150, 1], [160, 1], [SEED0, 8], [SEED0 + 1, 4], [SEED0 + 2, 4]]) give(id, n);
 }
 
 // ---- sky: sun, colours, clouds (updated once per frame) ----
 const sky = { sunA: 0, sunEl: 0, sdx: 0, sdy: 1, sdz: 0, light: 1, dayf: 1, flk: 1, wt: 0, ct: 0, cbr: 0,
               zR: 0, zG: 0, zB: 0, hR: 0, hG: 0, hB: 0 };
 function updateSky(dt, tm) {
-  tod = (tod + dt / 1440 * (K.t ? 100 : 1)) % 1;                    // full day = 24 min (hold T = 100×)
+  const dTod = dt / 1440 * (K.t ? 100 : 1);                         // full day = 24 min (hold T = 100×)
+  if (tod + dTod >= 1) newDay();
+  tod = (tod + dTod) % 1;
+  farmHours += dTod * 24;
   const s = sky;
   s.sunA = (tod - .25) * 6.2832; s.sunEl = Math.sin(s.sunA);        // sun elevation -1..1
   let dx = Math.cos(s.sunA), dy = s.sunEl, dz = .15;
@@ -604,38 +1771,87 @@ function updateSky(dt, tm) {
   s.light *= oc; s.zR *= oc; s.zG *= oc; s.zB *= oc; s.hR *= oc; s.hG *= oc; s.hB *= oc;
   s.ct = weather ? -.1 : .42;                                        // cloud threshold (lower = more cloud)
   s.cbr = (weather ? 140 : 70) + (weather ? 70 : 180) * s.dayf;     // cloud brightness
+  if (buffs.night > 0) s.light = Math.max(s.light, .62);           // night vision
+}
+
+// ---- season look: grass and leaf tints, blended over a season's first morning, and snow in winter ----
+const TINT = {
+  g: [[1, 1, 1], [.92, 1.03, .78], [1.45, 1, .58], [1.2, .95, .74]],               // grass
+  l: [[1, 1, 1], [.84, .96, .8], [3.3, 1.02, .5], [.8, .94, 1]],                 // leaves
+  l2: [[3.9, 1.38, 4.6], [.84, .96, .8], [3.5, .56, .5], [.8, .94, 1]],          // some trees: blossom in spring, red in autumn
+  m: [.16, 0, .5, 0]                                                             // …this share of them
+};
+function seasonLook() {
+  const s = season(), prev = (s + 3) % 4;
+  const k = day <= DAYS_PER_SEASON ? 1 : Math.min(1, (((day - 1) % DAYS_PER_SEASON) + tod) * 2);   // midnight → noon
+  const mix3 = (a, b) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+  return { g: mix3(TINT.g[prev], TINT.g[s]), l: mix3(TINT.l[prev], TINT.l[s]), l2: mix3(TINT.l2[prev], TINT.l2[s]),
+           m: TINT.m[prev] + (TINT.m[s] - TINT.m[prev]) * k, snow: s === 3 ? k : prev === 3 ? 1 - k : 0 };
+}
+function eyeUnderWater() {
+  const ey = P.y + EYE, x = P.x | 0, y = ey | 0, z = P.z | 0;
+  return blockAt(x, y, z) === WATER && (blockAt(x, y + 1, z) === WATER || ey - y < .875);
+}
+const COL_BASE = COL.slice();
+let colLook = '';
+function tintCPU() {                          // the CPU renderer's flat colours follow the season too
+  const L = seasonLook(), key = L.g.join() + '|' + L.l.join() + '|' + L.snow;
+  if (key === colLook) return;
+  colLook = key;
+  const tint = (id, m, snow) => {
+    const c = COL_BASE[id];
+    let r = (c >> 16 & 255) * m[0], g = (c >> 8 & 255) * m[1], b = (c & 255) * m[2];
+    r += (236 - r) * snow; g += (240 - g) * snow; b += (246 - b) * snow;
+    COL[id] = Math.min(255, Math.round(r)) << 16 | Math.min(255, Math.round(g)) << 8 | Math.min(255, Math.round(b));
+  };
+  tint(GRASS, L.g, L.snow * .8); tint(LEAF, L.l, L.snow * .35);
 }
 
 // ---- renderer ----------------------------------------------------------------------
 // GFX holds the look. v1 equivalents: steps 24, shadowSteps 16, fog false, shade [1,1,1].
 const GFX = { steps: 100, shadowSteps: 48, fog: true, shade: [.86, 1, .74] };  // shade = x / y / z face ambient
-const QUALITY = [{ n: '低', px: 28224 }, { n: '中', px: 47040 }, { n: '高', px: 84672 }];  // 中 = v1's 280×168
+// px: pixel budget for the CPU renderer (中 = v1's 280×168) · s: GPU resolution scale (0 = the screen's full pixel density)
+const QUALITY = [{ n: '低', px: 28224, s: .5 }, { n: '中', px: 47040, s: .75 }, { n: '高', px: 84672, s: 1 }, { n: '超高', px: 150528, s: 0 }];
 const view = { w: 0, h: 0, f: 1, cxo: 0, cyo: 0, ui: 1, img: null, buf: null, colX: null, colZ: null };
 const shadowCache = new Uint8Array(VOL * 6);  // per block face: 0 unknown · 1 lit · 2 shadowed
 let shadowKey = NaN, shadowVer = -1, needRender = true, viewDirty = true, autoLevel = 1;
 const invalidateShadows = () => { shadowKey = NaN; };
 const qualityLevel = () => settings.quality < 0 ? autoLevel : settings.quality;
 
-function setResolution(w, h) {
+function setResolution(w, h, cpu) {            // the 2D canvas: whole frame on CPU, overlay layer on GPU
   view.w = w; view.h = h;
   view.f = Math.min(w / 2, h * 5 / 6);        // focal length (px): 90° wide or 62° tall, whichever is tighter
   view.cxo = w / 2 / view.f; view.cyo = h / 2 / view.f;
   view.ui = h / 168;                          // overlays are authored for a 168 px tall frame
   canvas.width = w; canvas.height = h;
-  view.img = new ImageData(w, h);
-  view.buf = new Uint32Array(view.img.data.buffer);
-  view.colX = new Float64Array(w); view.colZ = new Float64Array(w);
+  if (cpu) {
+    view.img = new ImageData(w, h);
+    view.buf = new Uint32Array(view.img.data.buffer);
+    view.colX = new Float64Array(w); view.colZ = new Float64Array(w);
+  } else view.img = view.buf = view.colX = view.colZ = null;
   makeParticles();
   needRender = true;
 }
 function fitView() {                          // match the screen's shape; letterbox only past 1.25–2.4
   const vw = innerWidth || 1, vh = innerHeight || 1;
   const aspect = Math.min(2.4, Math.max(1.25, vw / vh));
-  const h = Math.max(60, Math.round(Math.sqrt(QUALITY[qualityLevel()].px / aspect))), w = Math.round(h * aspect);
   let cw = vw, ch = vw / aspect;
   if (ch > vh) { ch = vh; cw = vh * aspect; }
-  canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
-  if (w !== view.w || h !== view.h) setResolution(w, h);
+  viewEl.style.width = cw + 'px'; viewEl.style.height = ch + 'px';
+  const q = QUALITY[qualityLevel()];
+  if (GPU.gl) {                               // GPU: render near screen resolution; the 2D canvas is a CSS-size overlay
+    const dpr = window.devicePixelRatio || 1, sc = q.s || Math.min(2, Math.max(1.5, dpr));
+    const gw = Math.max(1, Math.round(cw * sc)), gh = Math.max(1, Math.round(ch * sc));
+    if (glCanvas.width !== gw || glCanvas.height !== gh) { glCanvas.width = gw; glCanvas.height = gh; }
+    glCanvas.style.imageRendering = sc > dpr ? 'auto' : 'pixelated';   // supersampled: smooth downscale
+    const ow = Math.round(cw), oh = Math.round(ch);
+    if (ow !== view.w || oh !== view.h || view.buf) setResolution(ow, oh, false);
+    GPU.f = view.f * gw / view.w;
+  } else {
+    const h = Math.max(60, Math.round(Math.sqrt(q.px / aspect))), w = Math.round(h * aspect);
+    if (w !== view.w || h !== view.h || !view.buf) setResolution(w, h, true);
+  }
+  needRender = true;
 }
 
 // shadow ray: from a point toward the sun, is the sky blocked by an opaque block?
@@ -655,16 +1871,37 @@ function shadowRay(px, py, pz) {
     else { tz += dz; gz += sz; if (gz & ~WM && (gz < 0) === (sz < 0)) return false; }
     if ((gx | gy | gz) & ~WM) continue;
     const b = world[gy << 10 | gz << 5 | gx];
-    if (b !== AIR && b !== GLASS) return true;
+    if (b !== AIR && b !== GLASS && b !== WATER && b !== TALL && b < CROP0) return true;
   }
   return false;
+}
+
+function plantTexel(b, X, Y, Z, ox, oy, oz, dx, dy, dz, t0, t1) {   // CPU: nearest opaque texel of a crop / weed sprite
+  const layer = (b === TALL ? TALL_L : PLANT0 + b - CROP0) * 1024;
+  let best = 1e9, col = -1;
+  const test = (t, u, v) => {
+    if (t < t0 || t > t1 || t >= best || u < 0 || u >= 1 || v < 0 || v >= 1) return;
+    const k = layer + ((15 - (v * 16 | 0)) * 16 + (u * 16 | 0)) * 4;
+    if (texData[k + 3] < 128) return;
+    best = t; col = texData[k] << 16 | texData[k + 1] << 8 | texData[k + 2];
+  };
+  if (b === TALL) {                           // weeds: two diagonal planes
+    const lx = ox - X, lz = oz - Z, ly = oy - Y;
+    if (dx !== dz) { const t = (lz - lx) / (dx - dz); test(t, lx + dx * t, ly + dy * t); }
+    if (dx !== -dz) { const t = (1 - lx - lz) / (dx + dz); test(t, lx + dx * t, ly + dy * t); }
+  } else for (const q of [.25, .75]) {        // crops: a # of four planes
+    if (dx) { const t = (X + q - ox) / dx; test(t, oz + dz * t - Z, oy + dy * t - Y); }
+    if (dz) { const t = (Z + q - oz) / dz; test(t, ox + dx * t - X, oy + dy * t - Y); }
+  }
+  return col;
 }
 
 // The hot path. Everything lives in locals and nothing is allocated per pixel.
 // The ray-direction and lighting arithmetic keeps v1's exact operation order,
 // so with v1's GFX values the output is pixel-identical to v1.
 function renderWorld() {
-  const W = view.w, H = view.h, f = view.f, cxo = view.cxo, cyo = view.cyo;
+  tintCPU();
+  const W = view.w, H = view.h, f = view.f / fovK, cxo = W / 2 / f, cyo = H / 2 / f;
   const buf = view.buf, colX = view.colX, colZ = view.colZ;
   const ox = P.x, oy = P.y + EYE, oz = P.z;
   const sx = Math.sin(P.a), cx = Math.cos(P.a), sp = Math.sin(P.b), cp = Math.cos(P.b);
@@ -680,6 +1917,7 @@ function renderWorld() {
   }
   const fog = GFX.fog, fogStart = weather ? 5 : 14, fogK = 1 / ((weather ? 30 : 46) - fogStart), fogMax = weather ? .85 : .72;
   const starOn = sunEl < .06, nf = Math.max(0, Math.min(1, -sunEl * 4)), sunOn = sunEl > -.06, moonOn = sunEl < .12;
+  const water0 = eyeUnderWater() ? 2 : 0;     // under water, everything looks blue
   let k = 0;
   for (let y = 0; y < H; y++) {
     const dy = cyo - y / f;
@@ -692,7 +1930,7 @@ function renderWorld() {
       const ddx = Math.abs(1 / dirX), ddz = Math.abs(1 / dirZ);
       let tx = dirX !== 0 ? (X0 + (dirX > 0) - ox) / dirX : Infinity, ty = ty0,
           tz = dirZ !== 0 ? (Z0 + (dirZ > 0) - oz) / dirZ : Infinity;
-      let X = X0, Y = Y0, Z = Z0, face = 1, t = 0, glass = 0, id = 0;
+      let X = X0, Y = Y0, Z = Z0, face = 1, t = 0, glass = 0, id = 0, water = water0, plantC = -1;
       // DDA. The camera's own cell is skipped, so a torch at eye level can't fill the screen.
       // A ray that leaves the world while moving away from it can never hit anything: stop.
       for (let n = nSteps; n > 0; n--) {
@@ -703,13 +1941,24 @@ function renderWorld() {
         else { t = tz; tz += ddz; Z += stZ; face = 2; if (Z & ~WM && (Z < 0) === (stZ < 0)) break; }
         if ((X | Y | Z) & ~WM) continue;
         const b = world[Y << 10 | Z << 5 | X];
-        if (b !== AIR) { if (b !== GLASS) { id = b; break; } glass++; }   // glass tints and lets the ray through
+        if (b === AIR) continue;
+        if (b === GLASS) { glass++; continue; }                     // glass tints and lets the ray through
+        if (b === WATER) { water++; continue; }
+        if (b === TALL || b >= CROP0) {                             // plants: see-through sprites
+          plantC = plantTexel(b, X, Y, Z, ox, oy, oz, dirX, dirY, dirZ, t, Math.min(tx, ty, tz));
+          if (plantC >= 0) { id = b; break; }
+          continue;
+        }
+        id = b; break;
       }
       let cr, cg, cb;
       if (id !== 0) {
-        const Q = COL[id], qr = Q >> 16, qg = Q >> 8 & 255, qb = Q & 255;
+        const Q = plantC >= 0 ? plantC : COL[id], qr = Q >> 16, qg = Q >> 8 & 255, qb = Q & 255;
         const nx = face === 0 ? -stX : 0, ny = face === 1 ? -stY : 0, nz = face === 2 ? -stZ : 0;
-        if (id === TORCH) {                                          // torch: emissive, never dark
+        if (plantC >= 0) {                                           // plant: soft light from sky, sun and torches
+          const tl = torch[Y << 10 | Z << 5 | X] / 14, m = light * .85 + dayf * .35 + tl * tl * flk;
+          cr = qr * m; cg = qg * m; cb = qb * m;
+        } else if (id === TORCH) {                                   // torch: emissive, never dark
           const m = 1.18 * flk; cr = qr * m; cg = qg * m; cb = qb * m;
         } else {
           let diff = nx * sdx + ny * sdy + nz * sdz;                 // how squarely the face meets the sun
@@ -760,6 +2009,10 @@ function renderWorld() {
           cr += (cbr - cr) * cov; cg += (cbr - cg) * cov; cb += (cbr + 6 - cb) * cov;
         }
       }
+      if (water) {                                                   // water tints blue-green
+        const aW = water * .3 < .75 ? water * .3 : .75;
+        cr += (30 * light - cr) * aW; cg += (80 * light - cg) * aW; cb += (120 * light - cb) * aW;
+      }
       if (glass) {                                                   // glass tints toward the horizon colour
         const aG = glass * .24 < .6 ? glass * .24 : .6;
         cr += (hR - cr) * aG; cg += (hG - cg) * aG; cb += (hB - cb) * aG;
@@ -771,26 +2024,541 @@ function renderWorld() {
   g2d.putImageData(view.img, 0, 0);
 }
 
+// ---- GPU renderer (WebGL2): the same voxel ray march, run per pixel on the graphics card ----
+// Blocks carry 16×16 textures; lighting adds per-pixel sun shadows, corner ambient occlusion,
+// smooth torch light, see-through leaves and glass, and 3D mobs. Falls back to renderWorld().
+const GL_VS = `#version 300 es
+void main() {                                   // one triangle that covers the screen
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+const GL_FS = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp sampler3D;
+precision highp sampler2DArray;
+precision highp sampler2D;
+uniform sampler3D uWorld;                       // block id / 255, texel (x, z, y)
+uniform sampler3D uLight;                       // torch light level / 255, linear filtered
+uniform sampler2DArray uTex;                    // block textures (id*3 + face), crack stages, plant sprites
+uniform sampler2D uHeight;                      // per column: y of the highest solid block (snow settles there), tree id
+uniform vec2 uRes;
+uniform vec3 uEye, uFwd, uRight, uUp;
+uniform float uFocal;
+uniform vec3 uSun, uZen, uHor, uFog, uShade;
+uniform float uSunEl, uAmb, uDayf, uFlk, uWt, uCt, uCbr, uTod, uMine, uTime, uSnow, uLeafMix;
+uniform vec3 uGrass, uLeaf, uLeaf2;             // season tints: grass, leaves, and a share of trees (blossom / red)
+uniform int uShadows, uMobN, uUnder;
+uniform ivec4 uTarget;
+uniform vec4 uMob[14];                          // feet position, yaw
+uniform float uMobHurt[14];
+out vec4 outColor;
+
+const int AIR = 0, LEAF = 4, GLASS = 5, TORCH = 6, GRASS = 11, FARM = 12, FARM_FW = 15, WATER = 16, TALL = 17,
+          SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21, CROP0 = 128;
+const float CRACK0 = 96.0, PLANT0 = 112.0, TALL_L = 240.0, WATER_Y = .875;
+const vec3 PMIN[6] = vec3[6](vec3(-.24, 0., -.12), vec3(.01, 0., -.12), vec3(-.24, .72, -.13),
+                             vec3(-.46, 1.12, -.12), vec3(.24, 1.12, -.12), vec3(-.23, 1.36, -.23));
+const vec3 PMAX[6] = vec3[6](vec3(-.01, .72, .12), vec3(.24, .72, .12), vec3(.24, 1.36, .13),
+                             vec3(-.24, 1.34, .62), vec3(.46, 1.34, .62), vec3(.23, 1.82, .23));
+const vec3 PCOL[6] = vec3[6](vec3(.2, .15, .3), vec3(.2, .15, .3), vec3(.26, .19, .38),
+                             vec3(.3, .22, .44), vec3(.3, .22, .44), vec3(.33, .25, .47));
+
+int cellId(ivec3 c) {
+  if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, ivec3(31)))) return AIR;
+  return int(texelFetch(uWorld, c.xzy, 0).r * 255.0 + 0.5);
+}
+bool solidB(int b) { return (b > AIR && b < WATER && b != GLASS && b != TORCH) || b == PLANK; }   // full, opaque cubes
+bool occludes(ivec3 c) { return solidB(cellId(c)); }
+bool isPlant(int b) { return b == TALL || b >= CROP0; }
+bool isModel(int b) { return b == SPRINK || b == SPRINK2 || b == BED; }
+float hash3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+float torchAt(vec3 p) { return texture(uLight, p.xzy / 32.0).r * (255.0 / 14.0); }
+vec2 faceUV(vec3 f, int axis, vec3 n) {         // f = point inside the cell; v = 0 at the top of side faces
+  if (axis == 1) return vec2(f.x, n.y > 0.0 ? f.z : 1.0 - f.z);
+  if (axis == 0) return vec2(n.x > 0.0 ? f.z : 1.0 - f.z, 1.0 - f.y);
+  return vec2(n.z > 0.0 ? 1.0 - f.x : f.x, 1.0 - f.y);
+}
+float layerOf(int id, vec3 n) { return float(id * 3 + (n.y > 0.5 ? 0 : n.y < -0.5 ? 2 : 1)); }
+float texLod(float dist, vec3 n, vec3 rd) {     // mip level from distance and viewing angle
+  return max(0.0, log2(16.0 * dist / (uFocal * sqrt(max(abs(dot(n, rd)), 0.06)))));
+}
+vec3 axisN(int axis, ivec3 st) {
+  return axis == 0 ? vec3(-float(st.x), 0., 0.) : axis == 1 ? vec3(0., -float(st.y), 0.) : vec3(0., 0., -float(st.z));
+}
+bool leaving(ivec3 c, ivec3 st) {               // outside the world and moving away from it
+  return (c.x < 0 && st.x < 0) || (c.x > 31 && st.x > 0) || (c.y < 0 && st.y < 0) ||
+         (c.y > 31 && st.y > 0) || (c.z < 0 && st.z < 0) || (c.z > 31 && st.z > 0);
+}
+vec2 boxT(vec3 o, vec3 inv, vec3 mn, vec3 mx, out vec3 n) {   // slab test: (t near, t far) and entry normal
+  vec3 a = (mn - o) * inv, b = (mx - o) * inv, tn = min(a, b), tf = max(a, b);
+  float t0 = max(max(tn.x, tn.y), tn.z);
+  n = t0 == tn.x ? vec3(-sign(inv.x), 0., 0.) : t0 == tn.y ? vec3(0., -sign(inv.y), 0.) : vec3(0., 0., -sign(inv.z));
+  return vec2(t0, min(min(tf.x, tf.y), tf.z));
+}
+
+// plant sprites: a crop is a # of four planes, a weed an X of two; their tops sway in the wind.
+// returns the nearest opaque texel's t in [t0, t1] (or -1), its colour and its height in the cell
+float plantHit(int b, ivec3 c, vec3 o, vec3 d, float t0, float t1, out vec4 tx, out float pv) {
+  float layer = b == TALL ? TALL_L : PLANT0 + float(b - CROP0), best = -1.;
+  vec3 l = o - vec3(c);
+  float sw = .06 * sin(uTime * 1.7 + float(c.x) * 1.3 + float(c.z) * .9);
+  tx = vec4(0.); pv = 0.;
+  for (int k = 0; k < 4; k++) {
+    float t, u; vec3 p;
+    if (b == TALL) {
+      if (k > 1) break;
+      float den = k == 0 ? d.x - d.z : d.x + d.z;
+      if (abs(den) < 1e-5) continue;
+      t = k == 0 ? (l.z - l.x) / den : (1. - l.x - l.z) / den;
+      p = l + d * t; u = p.x;
+    } else {
+      float q = (k & 1) == 0 ? .25 : .75;
+      if (k < 2) { if (abs(d.x) < 1e-5) continue; t = (q - l.x) / d.x; p = l + d * t; u = p.z; }
+      else { if (abs(d.z) < 1e-5) continue; t = (q - l.z) / d.z; p = l + d * t; u = p.x; }
+    }
+    if (t < t0 || t > t1 || (best >= 0. && t >= best)) continue;
+    u -= sw * p.y;
+    if (u < 0. || u >= 1. || p.y < 0. || p.y >= 1.) continue;
+    vec4 sm = textureLod(uTex, vec3(u, 1. - p.y, layer), 0.);
+    if (sm.a < .5) continue;
+    best = t; tx = sm; pv = p.y;
+  }
+  return best;
+}
+bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed and sprinklers are a few boxes, in 1/16ths
+  mn = vec3(0.); mx = vec3(16., 9., 16.);
+  if (b == BED) return k == 0;
+  float h = b == SPRINK2 ? 5. : 4.;
+  if (k == 0) { mn = vec3(6., 0., 6.); mx = vec3(10., 9., 10.); }             // post
+  else if (k == 1) { mn = vec3(8. - h, 9., 8. - h); mx = vec3(8. + h, 12., 8. + h); }   // head
+  else { mn = vec3(7., 12., 7.); mx = vec3(9., b == SPRINK2 ? 15. : 14., 9.); }        // nozzle
+  return true;
+}
+
+bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves and plants let light through their gaps
+  vec3 r = d + vec3(equal(d, vec3(0.))) * 1e-6;
+  ivec3 c = ivec3(floor(p)), st = ivec3(sign(r));
+  vec3 tD = abs(1.0 / r), tM = (vec3(c) + max(vec3(st), 0.) - p) / r;
+  for (int i = 0; i < 64; i++) {
+    int axis; float t;
+    if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; c.x += st.x; axis = 0; }
+    else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; c.y += st.y; axis = 1; }
+    else { t = tM.z; tM.z += tD.z; c.z += st.z; axis = 2; }
+    if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, ivec3(31)))) { if (leaving(c, st)) return false; continue; }
+    int b = cellId(c);
+    if (b == AIR || b == GLASS || b == TORCH || b == WATER || b == SPRINK || b == SPRINK2) continue;
+    if (b == LEAF) {
+      vec3 n = axisN(axis, st);
+      if (textureLod(uTex, vec3(faceUV(p + d * t - vec3(c), axis, n), layerOf(LEAF, n)), 0.).a < .5) continue;
+    } else if (isPlant(b)) {
+      vec4 tx; float pv;
+      if (plantHit(b, c, p, d, t, min(min(tM.x, tM.y), tM.z), tx, pv) < 0.) continue;
+    } else if (b == BED) {
+      vec3 bn; vec2 tt = boxT(p, 1. / r, vec3(c), vec3(c) + vec3(1., .5625, 1.), bn);
+      if (tt.x >= tt.y || tt.y < 0.) continue;
+    }
+    return true;
+  }
+  return false;
+}
+
+vec3 light(vec3 base, vec3 n, vec3 hp, float ao, float shade, bool plant) {   // sky + sun (+ shadow) + torches
+  float diff = plant ? (uSunEl > 0. ? .35 + .65 * max(uSun.y, 0.) : 0.) : max(dot(n, uSun), 0.);   // sprites: lit from any side
+  if (uShadows == 1 && uDayf > .02 && diff > 0. && shadowed(hp + n * .003, uSun)) diff = 0.;
+  vec3 c = plant ? base * (uAmb * .8 * ao + diff * uDayf * .5 * (.6 + .4 * ao))
+                 : base * (uAmb * (.64 + .1 * max(n.y, 0.)) * shade * ao + diff * uDayf * .46 * (.55 + .45 * ao));
+  float tl = torchAt(hp + n * .5); tl = tl * tl * uFlk;
+  return c + base * tl * vec3(1.3, .82, .42) * (plant ? .85 : .5 + .5 * ao);
+}
+
+vec3 skyColor(vec3 rd) {
+  vec3 c = mix(uHor, uZen, clamp(rd.y * 1.6 + .25, 0., 1.));
+  float dts = dot(rd, uSun);
+  vec3 sr = normalize(cross(uSun, vec3(0., 0., 1.))), su = cross(sr, uSun);
+  if (uSunEl > -.06 && dts > 0.) {              // square sun with a soft glow
+    vec2 q = vec2(dot(rd, sr), dot(rd, su)) / dts;
+    if (max(abs(q.x), abs(q.y)) < .075) c = vec3(1., .98, .86);
+    else if (dts > .9) { float gl = (dts - .9) / .1; gl *= gl; c += (vec3(1., .933, .706) - c) * gl * vec3(.5, .5, .4); }
+  }
+  if (uSunEl < .12 && dts < 0.) {               // square moon with a few darker patches
+    vec2 q = vec2(dot(rd, sr), dot(rd, su)) / -dts;
+    if (max(abs(q.x), abs(q.y)) < .06) {
+      vec2 mq = floor((q / .12 + .5) * 8.);
+      c = vec3(.92, .94, .98) * (fract(sin(dot(mq, vec2(12.9898, 78.233))) * 43758.5453) < .2 ? .78 : 1.);
+    }
+  }
+  if (uSunEl < .06 && rd.y > .03) {             // stars
+    ivec3 q = ivec3(rd * 300.);
+    int h = (q.x * 1836311903 ^ q.y * 2109839 ^ q.z * 971) & 65535;
+    if (h < 9) c += .82 * clamp(-uSunEl * 4., 0., 1.) * (.6 + .4 * sin(float(h) * 3. + uTod * 60.));
+  }
+  if (rd.y > .05) {                             // clouds on a plane above the world
+    vec2 cf = uEye.xz + rd.xz / rd.y * 20.;
+    float nv = sin(cf.x * .15 + uWt) * cos(cf.y * .13 - uWt * .5);
+    c = mix(c, vec3(uCbr, uCbr, uCbr + .024), clamp((nv - uCt) * 2., 0., 1.) * clamp((rd.y - .05) * 5., 0., 1.));
+  }
+  return c;
+}
+
+void main() {
+  vec2 pc = gl_FragCoord.xy - uRes * .5;
+  vec3 rd = normalize(uFwd + pc.x / uFocal * uRight + pc.y / uFocal * uUp), ro = uEye;
+  vec3 r = rd + vec3(equal(rd, vec3(0.))) * 1e-6, inv = 1.0 / r;
+
+  // ---- mobs first, so the voxel march can stop at the nearest one (only which part and how far: details later) ----
+  float tMob = 1e9; int mob = -1, part = 0;
+  for (int i = 0; i < 14; i++) {
+    if (i >= uMobN) break;
+    float cy = cos(uMob[i].w), sy = sin(uMob[i].w);
+    vec3 o = ro - uMob[i].xyz;
+    vec3 lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);        // into the mob's frame (it faces +z)
+    vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), li = 1.0 / ld, n;
+    vec2 bb = boxT(lo, li, vec3(-.5, 0., -.26), vec3(.5, 1.84, .66), n);
+    if (bb.x > bb.y || bb.y < 0. || bb.x > tMob) continue;
+    for (int p = 0; p < 6; p++) {
+      vec2 tt = boxT(lo, li, PMIN[p], PMAX[p], n);
+      if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { tMob = tt.x; mob = i; part = p; }
+    }
+  }
+
+  // ---- voxel march: glass and torch glow add light in front, water absorbs, leaves and plants are cut out.
+  //      The loop only finds what is hit and where (few live values keep it fast); shading comes after. ----
+  ivec3 cell = ivec3(floor(ro)), st = ivec3(sign(r));
+  vec3 tD = abs(inv), tM = (vec3(cell) + max(vec3(st), 0.) - ro) * inv;
+  float t = 0., tHit = 1e9, wD = 0., wT = -1.; int axis = 1, id = AIR, hit = 0;   // hit: 1 cube · 2 torch · 3 model · 4 plant
+  vec3 acc = vec3(0.); float tr = 1.; bool border = false;
+  if (uUnder == 1) {                            // eye under water: the stretch to the first cell wall is water too
+    float te = min(min(tM.x, tM.y), tM.z);
+    if (rd.y > 0. && cellId(cell + ivec3(0, 1, 0)) != WATER) te = min(te, (float(cell.y) + WATER_Y - ro.y) / rd.y);
+    wD = max(te, 0.);
+  }
+  for (int i = 0; i < 128; i++) {
+    if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; cell.x += st.x; axis = 0; }
+    else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; cell.y += st.y; axis = 1; }
+    else { t = tM.z; tM.z += tD.z; cell.z += st.z; axis = 2; }
+    if (t > tMob) break;
+    if (any(lessThan(cell, ivec3(0))) || any(greaterThan(cell, ivec3(31)))) { if (leaving(cell, st)) break; continue; }
+    int b = cellId(cell);
+    if (b == AIR) continue;
+    if (b == WATER) {                           // the top water cell is filled to WATER_Y; add up the distance through water
+      float tN = min(min(tM.x, tM.y), tM.z), ts = t, te = tN;
+      if (cellId(cell + ivec3(0, 1, 0)) != WATER) {
+        float sy = float(cell.y) + WATER_Y;
+        if (ro.y + rd.y * t > sy + 1e-4) {      // came in above the surface
+          if (rd.y >= 0.) continue;
+          float tS = (sy - ro.y) / rd.y;
+          if (tS > tN) continue;
+          ts = tS;
+          if (wT < 0.) wT = tS;
+        } else if (rd.y > 0.) te = min(te, (sy - ro.y) / rd.y);   // under it, looking up through it
+      }
+      wD += max(te - ts, 0.);
+      continue;
+    }
+    vec3 n = axisN(axis, st);
+    if (b == GLASS) {
+      if (cell.x == 0 || cell.x == 31 || cell.z == 0 || cell.z == 31) {   // world border: one faint haze, no grid
+        if (!border) { acc += tr * .14 * uHor; tr *= .86; border = true; }
+        continue;
+      }
+      vec4 g = textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(GLASS, n)), texLod(t, n, rd));
+      acc += tr * g.a * g.rgb * (uAmb * .85 + .15 + torchAt(vec3(cell) + .5) * .5);
+      tr *= 1. - g.a;
+      continue;
+    }
+    if (b == LEAF && textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(LEAF, n)), texLod(t, n, rd)).a < .5) continue;
+    if (b == TORCH) {                           // a 2×10 px stick in the middle of the cell, with a glow
+      vec3 c0 = vec3(cell), fc = c0 + vec3(.5, .62, .5), tn;
+      vec3 dv = ro + rd * max(dot(fc - ro, rd), 0.) - fc;
+      acc += tr * vec3(1., .62, .28) * (.5 - .32 * uDayf) * uFlk * exp(-dot(dv, dv) * 22.);
+      vec2 tt = boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
+      if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { hit = 2; tHit = tt.x; id = b; break; }
+      continue;
+    }
+    if (isPlant(b)) {
+      vec4 tx; float pv;
+      float th = plantHit(b, cell, ro, rd, t, min(min(tM.x, tM.y), tM.z), tx, pv);
+      if (th >= 0. && th < tMob) { hit = 4; tHit = th; id = b; break; }
+      continue;
+    }
+    if (isModel(b)) {
+      float best = 1e9;
+      for (int k = 0; k < 3; k++) {
+        vec3 mn, mx, bn;
+        if (!modelBox(b, k, mn, mx)) continue;
+        vec2 tt = boxT(ro, inv, vec3(cell) + mn / 16., vec3(cell) + mx / 16., bn);
+        if (tt.x < tt.y && tt.x > 0.) best = min(best, tt.x);
+      }
+      if (best < tMob) { hit = 3; tHit = best; id = b; break; }
+      continue;
+    }
+    hit = 1; tHit = t; id = b; break;
+  }
+
+  // ---- shade what was hit ----
+  vec3 col = vec3(0.), base = vec3(0.), N = vec3(0.), HP = ro + rd * tHit, c0 = vec3(cell);
+  float AO = 1., SH = 1., dist = tHit, mark = 1.;
+  bool lit = true, plant = false, aimed = uTarget.w == 1 && cell == uTarget.xyz;
+  if (mob >= 0 && tMob < tHit) {                // ---- mob ----
+    float cy = cos(uMob[mob].w), sy = sin(uMob[mob].w);
+    vec3 o = ro - uMob[mob].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
+    vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
+    boxT(lo, 1.0 / ld, PMIN[part], PMAX[part], ln);
+    vec3 lp = lo + ld * tMob;
+    N = vec3(ln.x * cy + ln.z * sy, ln.y, -ln.x * sy + ln.z * cy);
+    base = PCOL[part] * (.92 + .16 * hash3(floor(lp * 16.)));
+    if (uMobHurt[mob] > 0.) base = mix(base, vec3(1., .5, .5), .6);
+    HP = ro + rd * tMob; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tMob; aimed = false;
+    vec2 e = vec2((lp.x + .23) / .46, (1.82 - lp.y) / .46);             // eyes on the front of the head glow
+    if (part == 5 && ln.z > .5 && e.y > .36 && e.y < .5 && ((e.x > .18 && e.x < .4) || (e.x > .6 && e.x < .82))) {
+      col = vec3(1., .38, .2) * (1.1 + .2 * uFlk); lit = false;
+    }
+  } else if (hit == 2) {                        // ---- torch stick and flame ----
+    vec3 tn; boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
+    vec3 tp = HP - c0;
+    vec2 uv = abs(tn.y) > .5 ? vec2(7.5 + (tp.x - .4375) * 8., 6.5) / 16.
+            : vec2(7. + (abs(tn.x) > .5 ? tp.z : tp.x) * 16. - 7., 16. - tp.y * 16.) / 16.;
+    base = textureLod(uTex, vec3(uv, float(TORCH * 3 + 1)), 0.).rgb; N = tn; aimed = false;
+    if (uv.y < .5) { col = base * (1.15 + .25 * uFlk); lit = false; }
+  } else if (hit == 3) {                        // ---- bed or sprinkler model ----
+    float best = 1e9;
+    for (int k = 0; k < 3; k++) {
+      vec3 mn, mx, bn;
+      if (!modelBox(id, k, mn, mx)) continue;
+      vec2 tt = boxT(ro, inv, c0 + mn / 16., c0 + mx / 16., bn);
+      if (tt.x < tt.y && tt.x > 0. && tt.x < best) { best = tt.x; N = bn; }
+    }
+    vec3 f = HP - c0;
+    int ax = abs(N.x) > .5 ? 0 : abs(N.y) > .5 ? 1 : 2;
+    vec2 uv = faceUV(f, ax, N);
+    if (id == BED && ax != 1) uv.y = .5625 - f.y;   // a bed's sides: blanket, sheet, then the frame
+    base = textureLod(uTex, vec3(uv, layerOf(id, N)), texLod(tHit, N, rd)).rgb;
+    SH = ax == 0 ? uShade.x : ax == 1 ? uShade.y : uShade.z;
+  } else if (hit == 4) {                        // ---- crop or weed sprite: soft light, darker toward the ground ----
+    vec3 bn; vec2 span = boxT(ro, inv, c0, c0 + 1., bn);
+    vec4 tx; float pv;
+    plantHit(id, cell, ro, rd, span.x, span.y, tx, pv);
+    base = id == TALL ? tx.rgb * uGrass : tx.rgb; AO = .45 + .55 * pv; plant = true;
+    if (tx.a < .97) mark = -1.;                  // glowing fruit: shines at night
+  } else if (hit == 1) {                        // ---- textured block ----
+    vec3 n = axisN(axis, st), f = HP - c0;
+    vec2 uv = faceUV(f, axis, n);
+    vec3 tex = textureLod(uTex, vec3(uv, layerOf(id, n)), texLod(t, n, rd)).rgb;
+    bool grassy = id == GRASS && (n.y > .5 || tex.g > tex.r * 1.15);   // grass top, or the green fringe on its sides
+    if (grassy) tex *= uGrass;
+    else if (id == LEAF) tex *= texelFetch(uHeight, cell.xz, 0).g < uLeafMix ? uLeaf2 : uLeaf;
+    if (uSnow > 0. && id != GLASS && (id < FARM || id > FARM_FW) &&
+        texelFetch(uHeight, cell.xz, 0).r * 255. < float(cell.y) + .5) {   // snow on the top block of each column
+      vec3 snow = vec3(.9, .93, .97) * (.95 + .08 * hash3(vec3(floor(uv * 16.), float(id))));
+      if (n.y > .5 || grassy) tex = mix(tex, snow, uSnow);
+      else if (id == LEAF) tex = mix(tex, snow, uSnow * .3);
+    }
+    ivec3 a = cell + ivec3(n);                  // ambient occlusion: the 8 cells around the air in front
+    ivec3 U = axis == 0 ? ivec3(0, 0, 1) : ivec3(1, 0, 0), V = axis == 1 ? ivec3(0, 0, 1) : ivec3(0, 1, 0);
+    float fu = axis == 0 ? f.z : f.x, fv = axis == 1 ? f.z : f.y;
+    float s0 = float(occludes(a - U)), s1 = float(occludes(a + U)), s2 = float(occludes(a - V)), s3 = float(occludes(a + V));
+    float v00 = s0 * s2 > .5 ? 0. : 3. - s0 - s2 - float(occludes(a - U - V));
+    float v10 = s1 * s2 > .5 ? 0. : 3. - s1 - s2 - float(occludes(a + U - V));
+    float v01 = s0 * s3 > .5 ? 0. : 3. - s0 - s3 - float(occludes(a - U + V));
+    float v11 = s1 * s3 > .5 ? 0. : 3. - s1 - s3 - float(occludes(a + U + V));
+    AO = .42 + .58 * mix(mix(v00, v10, fu), mix(v01, v11, fu), fv) / 3.;
+    base = tex; N = n; SH = axis == 0 ? uShade.x : axis == 1 ? uShade.y : uShade.z;
+    if (aimed) {                                // outline the block under the crosshair, show cracks
+      if (min(min(fu, 1. - fu), min(fv, 1. - fv)) < max(.012, 1.4 * t / uFocal)) mark = .3;
+      if (uMine > 0.) mark *= 1. - .7 * textureLod(uTex, vec3(uv, CRACK0 + floor(min(uMine, .999) * 10.)), 0.).a;
+      aimed = false;
+    }
+  } else { col = skyColor(rd); lit = false; dist = -1.; }                  // ---- sky ----
+  if (lit) col = light(base, N, HP, AO, SH, plant);
+  if (mark < 0.) col = max(col, base * (1.05 + .15 * uFlk)); else col *= mark;
+  if (aimed) col = col * 1.22 + .03;            // the plant or model under the crosshair lights up a little
+  if (dist > 0.) col = mix(col, uHor, clamp((dist - uFog.x) * uFog.y, 0., 1.) * uFog.z);
+  if (wD > 0.) col = mix(vec3(.06, .2, .32) * (uAmb * .9 + .1), col, exp(-wD * 1.15));   // water swallows what lies behind
+  if (wT >= 0.) {                               // the water surface: rippled sky reflection (Fresnel) and a sun glint
+    vec3 hp = ro + rd * wT;
+    vec3 n = normalize(vec3(.045 * sin(hp.x * 5.1 + uTime * 1.6) + .03 * sin(hp.z * 7.3 - uTime * 2.2), 1.,
+                            .045 * cos(hp.z * 5.7 + uTime * 1.3) + .03 * cos(hp.x * 6.7 + uTime * 1.9)));
+    vec3 rr = reflect(rd, n);
+    float F = .04 + .96 * pow(1. - max(dot(-rd, n), 0.), 5.);
+    vec3 refl = mix(skyColor(rr) * .92, uHor, clamp((wT - uFog.x) * uFog.y, 0., 1.) * uFog.z);
+    col = mix(col, refl, F) + (uSunEl > 0. ? pow(max(dot(rr, uSun), 0.), 150.) * uDayf * 2. : 0.);
+  }
+  outColor = vec4(acc + tr * col, 1.);
+}`;
+
+const glCanvas = $('gl');
+const GPU = { gl: null, u: {}, tWorld: null, tLight: null, ver: -1, f: 1 };
+const heightBuf = new Uint8Array(WS * WS * 2), woodCol = new Uint8Array(WS * WS);   // per column: top solid block, tree id
+const mobBuf = new Float32Array(14 * 4), mobHurtBuf = new Float32Array(14);
+function initGL() {
+  if (FORCE_CPU) return false;
+  let gl;
+  try {
+    gl = glCanvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false,
+                                         preserveDrawingBuffer: false, powerPreference: 'high-performance' });
+    if (!gl) return false;
+    const shader = (type, src) => {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
+    };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, shader(gl.VERTEX_SHADER, GL_VS)); gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, GL_FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+    gl.useProgram(prog);
+    for (const n of ['uWorld', 'uLight', 'uTex', 'uRes', 'uEye', 'uFwd', 'uRight', 'uUp', 'uFocal', 'uSun', 'uZen', 'uHor',
+                     'uFog', 'uShade', 'uSunEl', 'uAmb', 'uDayf', 'uFlk', 'uWt', 'uCt', 'uCbr', 'uTod', 'uMine', 'uShadows',
+                     'uMobN', 'uTarget', 'uMob', 'uMobHurt', 'uHeight', 'uTime', 'uSnow', 'uLeafMix', 'uGrass', 'uLeaf',
+                     'uLeaf2', 'uUnder']) GPU.u[n] = gl.getUniformLocation(prog, n);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    const tex3 = (unit, filter) => {
+      const t = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_3D, t);
+      gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, filter); gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, filter);
+      for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R]) gl.texParameteri(gl.TEXTURE_3D, p, gl.CLAMP_TO_EDGE);
+      gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, WS, WS, WS, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+      return t;
+    };
+    GPU.tWorld = tex3(0, gl.NEAREST); GPU.tLight = tex3(1, gl.LINEAR);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D_ARRAY, gl.createTexture());
+    gl.texImage3D(gl.TEXTURE_2D_ARRAY, 0, gl.RGBA8, TEX, TEX, TEX_LAYERS, 0, gl.RGBA, gl.UNSIGNED_BYTE, texData);
+    gl.generateMipmap(gl.TEXTURE_2D_ARRAY);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D_ARRAY, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST],
+                          [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, p, v);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG8, WS, WS, 0, gl.RG, gl.UNSIGNED_BYTE, null);
+    gl.uniform1i(GPU.u.uWorld, 0); gl.uniform1i(GPU.u.uLight, 1); gl.uniform1i(GPU.u.uTex, 2); gl.uniform1i(GPU.u.uHeight, 3);
+    gl.bindVertexArray(gl.createVertexArray());
+  } catch (e) {
+    console.warn('WebGL2 unavailable, using the CPU renderer:', e.message);
+    return false;
+  }
+  GPU.gl = gl; GPU.ver = -1;
+  return true;
+}
+function renderGL(tg) {
+  const gl = GPU.gl, u = GPU.u, s = sky;
+  if (GPU.ver !== worldVer) {                   // world or torch light changed: re-upload both (2 × 32 KB)
+    gl.activeTexture(gl.TEXTURE0); gl.texSubImage3D(gl.TEXTURE_3D, 0, 0, 0, 0, WS, WS, WS, gl.RED, gl.UNSIGNED_BYTE, world);
+    gl.activeTexture(gl.TEXTURE1); gl.texSubImage3D(gl.TEXTURE_3D, 0, 0, 0, 0, WS, WS, WS, gl.RED, gl.UNSIGNED_BYTE, torch);
+    woodCol.fill(0);
+    for (let i = 0; i < VOL; i++) if (world[i] === WOOD) woodCol[i & 1023] = 1;
+    for (let z = 0; z < WS; z++) for (let x = 0; x < WS; x++) {
+      let y = WM;
+      while (y > 0 && !SOLID[world[y << 10 | z << 5 | x]]) y--;
+      let tx = x, tz = z;                     // leaves take their colour from the nearest trunk, so a tree turns as one
+      if (!woodCol[z * WS + x]) for (let k = 0; k < 9; k++) {
+        const X = x - 1 + k % 3, Z = z - 1 + (k / 3 | 0);
+        if (X >= 0 && Z >= 0 && X < WS && Z < WS && woodCol[Z * WS + X]) { tx = X; tz = Z; break; }
+      }
+      heightBuf[(z * WS + x) * 2] = y;
+      heightBuf[(z * WS + x) * 2 + 1] = (Math.imul(tx, 73856093) ^ Math.imul(tz, 19349663)) >>> 3 & 255;
+    }
+    gl.activeTexture(gl.TEXTURE3); gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, WS, WS, gl.RG, gl.UNSIGNED_BYTE, heightBuf);
+    GPU.ver = worldVer;
+  }
+  const w = glCanvas.width, h = glCanvas.height;
+  gl.viewport(0, 0, w, h);
+  const sx = Math.sin(P.a), cx = Math.cos(P.a), sp = Math.sin(P.b), cp = Math.cos(P.b);
+  gl.uniform2f(u.uRes, w, h);
+  gl.uniform3f(u.uEye, P.x, P.y + EYE, P.z);
+  gl.uniform3f(u.uFwd, sx * cp, sp, cx * cp); gl.uniform3f(u.uRight, cx, 0, -sx); gl.uniform3f(u.uUp, -sx * sp, cp, -cx * sp);
+  gl.uniform1f(u.uFocal, GPU.f / fovK);
+  gl.uniform3f(u.uSun, s.sdx, s.sdy, s.sdz);
+  gl.uniform3f(u.uZen, s.zR / 255, s.zG / 255, s.zB / 255); gl.uniform3f(u.uHor, s.hR / 255, s.hG / 255, s.hB / 255);
+  const fs = weather ? 5 : 16;
+  gl.uniform3f(u.uFog, fs, 1 / ((weather ? 30 : 48) - fs), GFX.fog ? (weather ? .85 : .7) : 0);
+  gl.uniform3f(u.uShade, GFX.shade[0], GFX.shade[1], GFX.shade[2]);
+  gl.uniform1f(u.uSunEl, s.sunEl); gl.uniform1f(u.uAmb, s.light); gl.uniform1f(u.uDayf, s.dayf); gl.uniform1f(u.uFlk, s.flk);
+  gl.uniform1f(u.uWt, s.wt); gl.uniform1f(u.uCt, s.ct); gl.uniform1f(u.uCbr, s.cbr / 255); gl.uniform1f(u.uTod, tod);
+  gl.uniform1i(u.uShadows, settings.shadows ? 1 : 0);
+  gl.uniform1f(u.uMine, mineProg);
+  const look = seasonLook();
+  gl.uniform3fv(u.uGrass, look.g); gl.uniform3fv(u.uLeaf, look.l); gl.uniform3fv(u.uLeaf2, look.l2);
+  gl.uniform1f(u.uLeafMix, look.m); gl.uniform1f(u.uSnow, look.snow);
+  gl.uniform1f(u.uTime, performance.now() / 1000 % 3600);
+  gl.uniform1i(u.uUnder, eyeUnderWater() ? 1 : 0);
+  if (tg) gl.uniform4i(u.uTarget, tg[0], tg[1], tg[2], 1); else gl.uniform4i(u.uTarget, 0, 0, 0, 0);
+  const n = Math.min(14, mobs.length);
+  for (let i = 0; i < n; i++) {
+    const m = mobs[i];
+    mobBuf[i * 4] = m.x; mobBuf[i * 4 + 1] = m.y; mobBuf[i * 4 + 2] = m.z;
+    mobBuf[i * 4 + 3] = Math.atan2(P.x - m.x, P.z - m.z);          // they always face the player
+    mobHurtBuf[i] = m.ht > 0 ? 1 : 0;
+  }
+  gl.uniform1i(u.uMobN, n);
+  gl.uniform4fv(u.uMob, mobBuf); gl.uniform1fv(u.uMobHurt, mobHurtBuf);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+glCanvas.addEventListener('webglcontextlost', e => { e.preventDefault(); GPU.gl = null; glCanvas.style.display = 'none'; viewDirty = true; });
+glCanvas.addEventListener('webglcontextrestored', () => { if (initGL()) { glCanvas.style.display = 'block'; viewDirty = true; } });
+
 // ---- overlays drawn with the 2D API on top of the voxel pass ----
 const cam = { sx: 0, cx: 1, sp: 0, cp: 1 };   // camera basis for project(), set once per frame
 // camera basis: F = (sx*cp, sp, cx*cp) · right = (cx, 0, -sx) · up = (-sx*sp, cp, -cx*sp)
 function project(wx, wy, wz) {                // world point → canvas pixel, or null when behind the camera
-  const { sx, cx, sp, cp } = cam, f = view.f;
+  const { sx, cx, sp, cp } = cam, f = view.f / fovK;
   const vx = wx - P.x, vy = wy - (P.y + EYE), vz = wz - P.z;
   const fF = vx * sx * cp + vy * sp + vz * cx * cp;
   if (fF <= .05) return null;
   const fR = vx * cx - vz * sx, fU = -vx * sx * sp + vy * cp - vz * cx * sp;
-  return [(fR / fF + view.cxo) * f, (view.cyo - fU / fF) * f];
+  return [(fR / fF + view.w / 2 / f) * f, (view.h / 2 / f - fU / fF) * f];
+}
+// sprinkler spray and the little bursts from farm work (their own random numbers, so the game's stay put)
+const fxRand = seeded(777), puffs = [];
+function puff(x, y, z, col, n, spread = .5, up = 2.2) {
+  for (let k = 0; k < n; k++) puffs.push({ x: x + (fxRand() - .5) * spread, y: y + fxRand() * .2, z: z + (fxRand() - .5) * spread,
+    vx: (fxRand() - .5) * 1.8, vy: up * (.5 + fxRand() * .7), vz: (fxRand() - .5) * 1.8, life: .45 + fxRand() * .4, col });
+  if (puffs.length > 300) puffs.splice(0, puffs.length - 300);
+}
+function drawPuffs(dt) {
+  const f = view.f / fovK;
+  for (let i = puffs.length; i--;) {
+    const p = puffs[i];
+    if ((p.life -= dt) <= 0) { puffs.splice(i, 1); continue; }
+    p.vy -= 9 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt;
+    const s = project(p.x, p.y, p.z);
+    if (!s) continue;
+    const sz = Math.max(1, f * .055 / Math.hypot(p.x - P.x, p.y - P.y - EYE, p.z - P.z));
+    g2d.globalAlpha = Math.min(1, p.life * 3); g2d.fillStyle = p.col; g2d.fillRect(s[0] - sz / 2, s[1] - sz / 2, sz, sz);
+  }
+  g2d.globalAlpha = 1;
+}
+function drawSpray() {
+  if (!sprinklers.length || dead) return;
+  const f = view.f / fovK, T = performance.now() / 1000;
+  g2d.fillStyle = 'rgb(190,226,255)';
+  for (const [x, y, z, r] of sprinklers) {
+    const d = Math.hypot(x + .5 - P.x, y + .9 - P.y - EYE, z + .5 - P.z);
+    if (d > 16 || lineBlocked(x + .5, y + .9, z + .5, d)) continue;
+    for (let k = 0; k < 8 + r * 6; k++) {    // droplets fly out in a ring and fall onto the reach
+      const ph = (T * .8 + k * .618) % 1, a = k * 2.399 + T * .7, rr = .15 + ph * (r + .35);
+      const s = project(x + .5 + Math.cos(a) * rr, y + .9 + Math.sin(ph * 3.14) * .5 - ph * .75, z + .5 + Math.sin(a) * rr);
+      if (!s) continue;
+      const sz = Math.max(1, f * .04 / d);
+      g2d.globalAlpha = .85 * (1 - ph * .7); g2d.fillRect(s[0] - sz / 2, s[1] - sz / 2, sz, sz);
+    }
+  }
+  g2d.globalAlpha = 1;
 }
 function lineBlocked(px, py, pz, d) {         // is the line from the eye to this point cut by an opaque block?
   const ux = (px - P.x) / d, uy = (py - (P.y + EYE)) / d, uz = (pz - P.z) / d;
   for (let l = .5; l < d - .35; l += .45) {
     const b = blockAt(P.x + ux * l | 0, P.y + EYE + uy * l | 0, P.z + uz * l | 0);
-    if (b !== AIR && b !== GLASS && b !== TORCH) return true;
+    if (SOLID[b] && b !== GLASS) return true; // water, plants and torches don't hide things
   }
   return false;
 }
-function drawEntities() {                     // billboards, far to near, hidden behind blocks
+function drawEntities(gpu) {                  // CPU: billboards, far to near · GPU (mobs are 3D there): arrows and health bars
   const list = [];
   for (const m of mobs) list.push([m, 0, 0]);
   for (const a of arrows) list.push([a, 1, 0]);
@@ -804,13 +2572,22 @@ function drawEntities() {                     // billboards, far to near, hidden
     if (d > 40) continue;
     const s = project(o.x, oy, o.z);
     if (!s || lineBlocked(o.x, oy, o.z, d)) continue;
-    const u = view.f / Math.max(.4, d);                              // pixels per world unit
+    const u = view.f / fovK / Math.max(.4, d);                       // pixels per world unit
     if (isArrow) {
       g2d.fillStyle = '#2b2118';
       g2d.fillRect(s[0] - u * .06, s[1] - u * .06, Math.max(1, u * .12), Math.max(1, u * .12));
       continue;
     }
     const bw = u * .62, bh = u * 1.7;                                // body width / height
+    if (gpu) {
+      const top = o.hp < 12 && u > 3 ? project(o.x, o.y + 2.02, o.z) : null;
+      if (top) {
+        const hb = Math.max(2, u * .06);
+        g2d.fillStyle = '#000'; g2d.fillRect(top[0] - bw / 2, top[1], bw, hb);
+        g2d.fillStyle = '#6ee27a'; g2d.fillRect(top[0] - bw / 2, top[1], bw * (o.hp / 12), hb);
+      }
+      continue;
+    }
     g2d.fillStyle = o.ht ? '#ff9a9a' : '#3a2b50';
     g2d.fillRect(s[0] - bw / 2, s[1] - bh * .55, bw, bh * .72);      // torso
     g2d.fillStyle = o.ht ? '#ffbdbd' : '#4a3768';
@@ -833,10 +2610,11 @@ function makeParticles() {
   particles = [];
   for (let i = Math.round(200 * vw / 280); i--;) particles.push({ x: Math.random() * vw, y: Math.random() * vh, ph: Math.random() * 6.28 });
 }
-function drawOverlays(dt) {
-  drawEntities();
-  const tg = target();                        // outline the face under the crosshair
-  if (tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {
+function drawOverlays(dt, tg) {
+  const gpu = !!GPU.gl;                       // the GPU draws mobs and the block outline itself
+  drawEntities(gpu);
+  drawSpray(); drawPuffs(dt);
+  if (!gpu && tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {   // outline the face under the crosshair
     const [gx, gy, gz] = tg, fx = gx - tg[3], fy = gy - tg[4], fz = gz - tg[5];
     const q = fx ? [[gx + (fx < 0), gy, gz], [gx + (fx < 0), gy + 1, gz], [gx + (fx < 0), gy + 1, gz + 1], [gx + (fx < 0), gy, gz + 1]]
             : fy ? [[gx, gy + (fy < 0), gz], [gx + 1, gy + (fy < 0), gz], [gx + 1, gy + (fy < 0), gz + 1], [gx, gy + (fy < 0), gz + 1]]
@@ -868,22 +2646,18 @@ function drawOverlays(dt) {
     g2d.fillStyle = 'rgba(0,0,0,.5)'; g2d.fillRect(VW / 2 - tw / 2, VH * .68, tw, 11);
     g2d.fillStyle = '#ffd9a0'; g2d.textAlign = 'center'; g2d.fillText(hint, VW / 2, VH * .68 + 8); g2d.textAlign = 'left';
   }
-  const held = heldItem() || (creative ? PAL[(palPage * 6 + selI) % PAL.length] : 0);
-  if (held && !dead) {                        // held item in the corner
+  const held = heldItem() || (creative ? PAL[(palPage * 6 + selI) % PAL.length] : 0), ic = ICON_CANVAS[held];
+  if (ic && !dead) {                          // held item in the corner, swinging on use
     const sw = swingT > 0 ? 1 - swingT / .18 : 1;                    // 0 at swing start, 1 at rest
     const arc = swingT > 0 ? Math.sin(sw * 3.14) * 14 : 0;
-    const it = info(held);
-    g2d.fillStyle = it.c || '#888';
-    if (it.dmg) {                                                    // tools and swords: a diagonal blade
-      g2d.save(); g2d.translate(VW - 38 + arc * .6, VH - 6 + arc * .5); g2d.rotate(-.6 - arc * .055);
-      g2d.fillRect(-3, -30, 6, 32); g2d.fillStyle = '#5c4326'; g2d.fillRect(-5, -2, 10, 8); g2d.restore();
-    } else if (it.bow) {
-      g2d.save(); g2d.translate(VW - 34 + arc * .4, VH - 8); g2d.fillRect(-2, -26, 4, 28);
-      g2d.fillStyle = '#e8e0cc'; g2d.fillRect(-1, -22, 2, 18); g2d.restore();
-    } else {                                                         // a block in hand
-      g2d.save(); g2d.translate(VW - 34, VH - 4 + arc * .7); g2d.fillRect(-11, -22, 22, 22);
-      g2d.strokeStyle = 'rgba(0,0,0,.45)'; g2d.lineWidth = 1; g2d.strokeRect(-11, -22, 22, 22); g2d.restore();
+    g2d.imageSmoothingEnabled = false;
+    g2d.save();
+    if (ic.width === 32) { g2d.translate(VW - 40 - arc * .3, VH - 20 + arc * .8); g2d.drawImage(ic, -27, -27, 54, 54); }   // a block
+    else {                                                           // a tool or item, head toward the middle
+      g2d.translate(VW - 42 + arc * .6, VH - 24 + arc * .5); g2d.rotate(-.12 - arc * .06); g2d.scale(-1, 1);
+      g2d.drawImage(ic, -27, -27, 54, 54);
     }
+    g2d.restore();
   }
   if (weather) {                              // precipitation
     if (weather === 1) { g2d.strokeStyle = 'rgba(190,215,255,.5)'; g2d.lineWidth = 1; g2d.beginPath(); }
@@ -901,8 +2675,8 @@ function drawOverlays(dt) {
 
 // ---- HUD: hotbar, bag, crafting, health ----
 function slotHTML(it, i, hb, on) {
-  return '<div class="slot' + (it.id ? '' : ' e') + (hb ? ' hb' : '') + (on ? ' on' : '') + (i === dragI ? ' src' : '') +
-    '" data-i="' + i + '" title="' + nameOf(it.id) + '" style="background:' + colorOf(it.id) + '">' +
+  return '<div class="slot' + (it.id ? ' i' + it.id : ' e') + (hb ? ' hb' : '') + (on ? ' on' : '') + (i === dragI ? ' src' : '') +
+    '" data-i="' + i + '" title="' + nameOf(it.id) + '">' +
     (hb ? '<span>' + (i + 1) + '</span>' : '') + (it.id ? '<i>' + (it.n < 0 ? '∞' : it.n > 1 ? it.n : '') + '</i>' : '') + '</div>';
 }
 function drawBar() {
@@ -916,6 +2690,7 @@ function drawInv() {
   invGrid.innerHTML = s;
   RCP.forEach((rc, ri) => { craftBtns[ri].disabled = !rc[0].every(g => has(g[0], g[1])); });
   invTitle.textContent = creative ? '背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動' : '背包 — 拖曳搬移方塊,第一排就是快捷欄';
+  if (panelTab === 'shop') drawShop(); else if (panelTab === 'cook') drawCook();   // their lists depend on the bag
 }
 function selectSlot(i) { selI = i; drawBar(); if (invOpen) drawInv(); }
 function setCreative(on) {                    // survival ↔ creative (C key, or 模式 in settings)
@@ -924,7 +2699,10 @@ function setCreative(on) {                    // survival ↔ creative (C key, o
 }
 function drawHP() {
   let s = '';
-  for (let i = 0; i < 10; i++) { const v = hp - i * 2; s += '<b class="' + (v >= 2 ? 'f' : v > 0 ? 'h' : '') + '"></b>'; }
+  for (let i = 0; i < maxHp() / 2; i++) {    // hearts past the tenth are the golden bonus ones
+    const v = hp - i * 2, gold = i >= 10;
+    s += '<b class="' + (v >= 2 ? (gold ? 'g' : 'f') : v > 0 ? (gold ? 'gh' : 'h') : '') + '"></b>';
+  }
   hpEl.innerHTML = s;
 }
 const craftBtns = RCP.map(rc => {
@@ -940,22 +2718,267 @@ const craftBtns = RCP.map(rc => {
   return b;
 });
 function toggleInv(open) {
-  invOpen = !!open; invEl.classList.toggle('on', invOpen);
+  invOpen = !!open; invEl.classList.toggle('on', invOpen); document.body.classList.toggle('inv', invOpen);
   dragI = -1; ghostEl.style.display = 'none';
   barEl.style.display = invOpen ? 'none' : 'flex';                  // the grid's first row already is the hotbar
-  if (invOpen) { resetTouch(); unlockPointer(); drawInv(); }
+  if (invOpen) { resetTouch(); unlockPointer(); drawCoins(); showTab(panelTab); }
   else if (!paused && !dead && !isTouch()) lockPointer();
   drawBar();
 }
 function respawn() {
-  hp = HP_MAX; dead = false; hurtT = 0; regenT = 0;
+  hp = maxHp(); dead = false; hurtT = 0; regenT = 0;
   P.x = 16; P.y = 30; P.z = 16; P.g = 0;
   mobs.length = 0; arrows.length = 0;
   deadEl.classList.remove('on'); drawHP();
 }
 function resetWorld() {
-  generateWorld(); relight(); newKit(); drawBar(); if (invOpen) drawInv(); respawn(); saveGame();
+  generateWorld(); relight(); newKit(); mapSel = treeSel = -1;
+  drawBar(); if (invOpen) showTab(panelTab); respawn(); drawCoins(); drawBuffs(); saveGame();
 }
+
+// ---- farm HUD: coins, effects, notices, crosshair tip ----
+const coinEl = $('coin'), buffsEl = $('buffs'), toastsEl = $('toasts'), tipEl = $('tip'), sleepEl = $('sleep');
+const ICON_URL = {};                          // id → data URL, filled by makeIconCSS
+function toast(msg, kind) {
+  const d = document.createElement('div');
+  d.className = 'toast' + (kind ? ' ' + kind : ''); d.textContent = msg;
+  toastsEl.appendChild(d);
+  while (toastsEl.children.length > 4) toastsEl.firstChild.remove();
+  setTimeout(() => d.classList.add('out'), kind === 'big' ? 3200 : 2200);
+  setTimeout(() => d.remove(), kind === 'big' ? 3800 : 2800);
+}
+function drawCoins() {                        // season · day, and coins, under the clock (and in the panel)
+  coinEl.innerHTML = SEASON_ICON[season()] + ' ' + SEASONS[season()] + '天 · 第 ' + day + ' 天<br><b>💰 ' + coins + '</b>';
+  $('pcoin').textContent = '💰 ' + coins;
+}
+function fadeSleep() {                        // the screen goes black, then fades back in: a night has passed
+  sleepEl.style.transition = 'none'; sleepEl.style.opacity = '1';
+  void sleepEl.offsetWidth;
+  sleepEl.style.transition = 'opacity 1.8s ease-in'; sleepEl.style.opacity = '0';
+}
+let lastBuffs = '';
+function drawBuffs() {
+  const s = Object.keys(buffs).map(k => '<span title="' + FX_NAME[k] + '">' + FX_ICON[k] + ' ' + Math.ceil(buffs[k]) + 's</span>').join('');
+  if (s !== lastBuffs) { buffsEl.innerHTML = s; lastBuffs = s; }
+}
+let lastTip = '';
+function updateTip(tg) {                      // what the crosshair is on, for farm things
+  let s = '';
+  if (tg) {
+    const i = idx(tg[0], tg[1], tg[2]), b = world[i];
+    if (b >= CROP0) {
+      const c = cropOf(b), g = growInfo(i);
+      s = CROPS[c].n + ' · ' + (stageOf(b) === 3 ? '成熟了,右鍵收成' : Math.floor(grow[i] * 100) + '%') +
+          (stageOf(b) < 3 && g.notes.length ? ' · ' + g.notes.join('、') : '');
+    } else if (isFarm(b)) s = '耕地 · ' + (isWetFarm(b) ? '濕潤' : '乾') + (b >= FARM_F ? ' · 已施肥' : '');
+    else if (b === TALL) s = '雜草 · 拔掉有機會掉種子';
+    else if (b === BED) s = '床 · 晚上右鍵睡到天亮';
+    else if (b === SPRINK || b === SPRINK2) s = (b === SPRINK ? '灑水器 · 周圍 3×3' : '高級灑水器 · 周圍 5×5') + '的耕地保持濕潤';
+  }
+  if (s !== lastTip) { tipEl.textContent = s; tipEl.style.display = s ? 'block' : 'none'; lastTip = s; }
+}
+
+// ---- the panel: bag · market · cooking · breeding graph · farm map ----
+let panelTab = 'bag';
+function showTab(t) {
+  panelTab = t;
+  for (const b of document.querySelectorAll('#ptabs .tab')) b.classList.toggle('on', b.dataset.p === t);
+  for (const p of document.querySelectorAll('#pbody .pg')) p.classList.toggle('on', p.id === 'pg-' + t);
+  if (t === 'bag') drawInv(); else if (t === 'shop') drawShop(); else if (t === 'cook') drawCook();
+  else if (t === 'tree') drawTree(); else if (t === 'map') drawMap();
+}
+for (const b of document.querySelectorAll('#ptabs .tab')) b.onclick = () => showTab(b.dataset.p);
+$('pclose').onclick = () => toggleInv(false);
+const iconImg = (id, cls) => '<i class="ic i' + id + (cls ? ' ' + cls : '') + '"></i>';
+
+function drawShop() {
+  if (!invOpen || panelTab !== 'shop') return;
+  let sell = '', any = false;
+  INV.forEach((s, i) => {
+    const pr = s.id ? sellPrice(s.id) : 0;
+    if (!pr) return;
+    any = true;
+    const off = info(s.id).crop !== undefined && !inSeason(info(s.id).crop);
+    sell += '<div class="row">' + iconImg(s.id) + '<span class="nm">' + nameOf(s.id) + ' ×' + s.n + '</span>' +
+            '<span class="pr">💰' + pr + (off ? '<em>非當季</em>' : '') + '</span>' +
+            '<button data-sell="' + i + '">賣 1</button><button data-sellall="' + i + '">全部</button></div>';
+  });
+  let buy = '';
+  for (const [id, price] of shopList())
+    buy += '<div class="row">' + iconImg(id) + '<span class="nm">' + nameOf(id) + '</span><span class="pr">💰' + price + '</span>' +
+           '<button data-buy="' + id + '" data-price="' + price + '"' + (coins < price ? ' disabled' : '') + '>買</button>' +
+           '<button data-buy5="' + id + '" data-price="' + price + '"' + (coins < price * 5 ? ' disabled' : '') + '>×5</button></div>';
+  $('sell').innerHTML = '<h3>賣出</h3>' + (any ? sell : '<p class="dim">背包裡沒有能賣的東西</p>') + '<p class="dim">不合季節的作物賣價多 30%</p>';
+  $('buy').innerHTML = '<h3>購買</h3>' + buy + '<p class="dim">發現新品種後,這裡就能買到它的種子</p>';
+}
+$('pg-shop').onclick = e => {
+  const d = e.target.dataset;
+  if (d.sell !== undefined) sellSlot(+d.sell, false);
+  else if (d.sellall !== undefined) sellSlot(+d.sellall, true);
+  else if (d.buy !== undefined) buyItem(+d.buy, +d.price, 1);
+  else if (d.buy5 !== undefined) buyItem(+d.buy5, +d.price, 5);
+};
+
+function fxText(d) {
+  const fx = d.fx || [], parts = ['回血 ' + d.heal / 2 + ' 心'];
+  for (let k = 0; k < fx.length; k += 2) parts.push(FX_ICON[fx[k]] + FX_NAME[fx[k]] + ' ' + (fx[k + 1] >= 60 ? fx[k + 1] / 60 + ' 分' : fx[k + 1] + ' 秒'));
+  return parts.join(' · ');
+}
+function drawCook() {
+  if (!invOpen || panelTab !== 'cook') return;
+  let h = '';
+  for (const [j, d] of DISHES.entries()) {
+    const ok = d.i.every(([c, k]) => has(CROP_ITEM0 + c, k));
+    const ing = d.i.map(([c, k]) => {
+      const n = INV.reduce((a, s) => a + (s.id === CROP_ITEM0 + c ? s.n : 0), 0);
+      return discovered.has(c) ? '<span class="ing' + (n >= k ? '' : ' miss') + '">' + iconImg(CROP_ITEM0 + c) + CROPS[c].n + ' ' + n + '/' + k + '</span>'
+                               : '<span class="ing miss">❔ 未發現 ×' + k + '</span>';
+    }).join('');
+    h += '<div class="dish' + (ok ? ' ok' : '') + '">' + iconImg(DISH0 + j, 'big') + '<div class="dx"><b>' + d.n + '</b> <span class="pr">💰' + d.p + '</span>' +
+         '<div class="fx">' + fxText(d) + '</div><div>' + ing + '</div></div><button data-cook="' + j + '"' + (ok ? '' : ' disabled') + '>煮</button></div>';
+  }
+  $('cooklist').innerHTML = h;
+}
+$('cooklist').onclick = e => { if (e.target.dataset.cook !== undefined) cookDish(+e.target.dataset.cook); };
+
+// breeding graph: crops in columns by tier, lines from both parents to each hybrid
+let treeSel = -1;
+function treeLayout() {
+  const cols = [[], [], [], [], []];
+  for (const [i, c] of CROPS.entries()) cols[c.tier - 1].push(i);
+  const pos = {};
+  cols.forEach((col, t) => {
+    if (t) col.sort((a, b) => (pos[CROPS[a].a].y + pos[CROPS[a].b].y) - (pos[CROPS[b].a].y + pos[CROPS[b].b].y));   // near their parents
+    const top = (9 - col.length) * 25;
+    col.forEach((c, k) => { pos[c] = { x: 16 + t * 160, y: 26 + top + k * 50 }; });
+  });
+  return pos;
+}
+const TREE_POS = treeLayout();
+function drawTree() {
+  if (!invOpen || panelTab !== 'tree') return;
+  const NW = 128, NH = 38, W = 16 + 4 * 160 + NW + 12, H = 26 + 9 * 50 + 10;
+  let edges = '', nodes = '';
+  for (const [i, c] of CROPS.entries()) {
+    if (c.a === undefined) continue;
+    const q = TREE_POS[i], known = discovered.has(i), hot = treeSel === i || treeSel === c.a || treeSel === c.b;
+    for (const p of [c.a, c.b]) {
+      const s = TREE_POS[p], x1 = s.x + NW, y1 = s.y + NH / 2, x2 = q.x, y2 = q.y + NH / 2, mx = (x1 + x2) / 2;
+      edges += '<path d="M' + x1 + ' ' + y1 + ' C' + mx + ' ' + y1 + ' ' + mx + ' ' + y2 + ' ' + x2 + ' ' + y2 + '" class="e' +
+               (known ? ' k' : '') + (hot ? ' hot' : '') + '"/>';
+    }
+  }
+  for (const [i, c] of CROPS.entries()) {
+    const q = TREE_POS[i], known = discovered.has(i);
+    const hint = c.a === undefined ? '' : discovered.has(c.a) && discovered.has(c.b) ? CROPS[c.a].n + ' × ' + CROPS[c.b].n
+               : discovered.has(c.a) || discovered.has(c.b) ? CROPS[discovered.has(c.a) ? c.a : c.b].n + ' × ?' : '? × ?';
+    nodes += '<g class="n' + (known ? ' k' : '') + (treeSel === i ? ' sel' : '') + '" data-c="' + i + '" transform="translate(' + q.x + ' ' + q.y + ')">' +
+             '<rect width="' + NW + '" height="' + NH + '" rx="7"/>' +
+             (known ? '<image href="' + ICON_URL[CROP_ITEM0 + i] + '" x="5" y="5" width="28" height="28"/>' +
+                      '<text x="39" y="17">' + c.n + '</text><text x="39" y="31" class="s">' + seasonText(c.s) + ' · 💰' + c.p + '</text>'
+                    : '<text x="12" y="25" class="q">?</text><text x="30" y="17" class="s">未發現</text><text x="30" y="31" class="s">' + hint + '</text>') + '</g>';
+  }
+  const heads = ['第 1 階', '第 2 階', '第 3 階', '第 4 階', '第 5 階'].map((t, k) => '<text x="' + (16 + k * 160) + '" y="14" class="h">' + t + '</text>').join('');
+  $('treesvg').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  $('treesvg').setAttribute('width', W); $('treesvg').setAttribute('height', H);
+  $('treesvg').innerHTML = heads + edges + nodes;
+  $('treecount').textContent = '已發現 ' + discovered.size + ' / ' + CROPS.length + ' 種';
+  drawTreeInfo();
+}
+function drawTreeInfo() {
+  const el = $('treeinfo');
+  if (treeSel < 0) { el.innerHTML = '<p class="dim">點一個作物看詳細資料。兩株成熟的不同作物中間留一格空耕地,就有機會長出新品種。</p>'; return; }
+  const c = CROPS[treeSel], known = discovered.has(treeSel);
+  const kids = CROPS.map((k, i) => [k, i]).filter(([k]) => k.a === treeSel || k.b === treeSel)
+                    .map(([k, i]) => (discovered.has(i) ? k.n : '?') + '(和 ' + CROPS[k.a === treeSel ? k.b : k.a].n + ')');
+  if (!known) {
+    el.innerHTML = '<b>? 未發現的第 ' + c.tier + ' 階作物</b><p>' + (discovered.has(c.a) && discovered.has(c.b)
+      ? '試試把 <b>' + CROPS[c.a].n + '</b> 和 <b>' + CROPS[c.b].n + '</b> 種成熟,中間留一格空耕地。'
+      : '先發現它的親代作物。') + '</p>';
+    return;
+  }
+  el.innerHTML = '<div class="ti">' + iconImg(CROP_ITEM0 + treeSel, 'big') + '<b>' + c.n + '</b> <span class="dim">第 ' + c.tier + ' 階</span></div>' +
+    '<p>季節:' + SEASONS.map((n, k) => '<span class="sz' + (c.s >> k & 1 ? ' on' : '') + '">' + n + '</span>').join('') +
+    ' · 成熟 ' + c.g + ' 小時' + (c.r ? ' · 收成後會再長' : '') + (c.w ? ' · 耕地旁要有水' : '') + (c.glow ? ' · 會發光' : '') + '</p>' +
+    '<p>賣價 💰' + c.p + ' · 種子 💰' + c.sd + ' · 收成過 ' + harvested[treeSel] + ' 次</p>' +
+    (c.a !== undefined ? '<p>來源:' + CROPS[c.a].n + ' × ' + CROPS[c.b].n + '</p>' : '<p>來源:市集、拔雜草</p>') +
+    (kids.length ? '<p>可以培育出:' + kids.join('、') + '</p>' : '');
+}
+$('treesvg').onclick = e => { const g = e.target.closest('g[data-c]'); if (g) { treeSel = +g.dataset.c; drawTree(); } };
+
+// farm map: the world seen from above, one cell per block column
+const mapC = $('mapc'), mapG = mapC.getContext('2d'), MAPS = 12;
+let mapSel = -1;
+function columnTop(x, z) {                    // the cell a top-down view shows: crops and farmland win, glass is seen through
+  let glass = false;
+  for (let y = WM; y >= 0; y--) {
+    const b = world[idx(x, y, z)];
+    if (b === AIR || b === TORCH) continue;
+    if (b === GLASS && x && z && x !== WM && z !== WM) { glass = true; continue; }
+    return { y, b, glass };
+  }
+  return { y: 0, b: AIR, glass };
+}
+function drawMap() {
+  if (!invOpen || panelTab !== 'map') return;
+  const S = MAPS, g = mapG;
+  mapC.width = mapC.height = WS * S;
+  if (maskVer !== waterVer) buildWetMask();
+  const grassC = ['#6dbb4a', '#5aa83c', '#b8a444', '#dfe6ea'][season()];
+  for (let z = 0; z < WS; z++) for (let x = 0; x < WS; x++) {
+    const { y, b, glass } = columnTop(x, z), X = x * S, Y = z * S;
+    let c = '#333';
+    if (b >= CROP0 || isFarm(b)) c = isWetFarm(b >= CROP0 ? world[idx(x, y - 1, z)] : b) ? '#4a3220' : '#7a5636';
+    else if (b === GRASS || b === TALL) c = grassC; else if (b === WATER) c = '#3a78d8'; else if (b === SAND) c = '#e3d4a0';
+    else if (b === LEAF) c = season() === 2 ? '#c8702a' : '#2f6e2a'; else if (b === WOOD || b === PLANK) c = '#6b4a2a';
+    else if (b === GLASS) c = '#9fc4d8'; else if (b === STONE || b === COAL || b === IRON || b === DIAMOND) c = '#8a8a8e';
+    else if (b === DIRT) c = '#86603f'; else if (b === BED) c = '#c0392b'; else if (b === SPRINK || b === SPRINK2) c = '#9aa0a6';
+    g.fillStyle = c; g.fillRect(X, Y, S, S);
+    if (b >= CROP0) {                           // crop: coloured dot that grows with the plant, ring when ripe
+      const cr = CROPS[cropOf(b)], st = stageOf(b);
+      g.fillStyle = 'rgb(' + (st === 3 ? cr.f : cr.l).join(',') + ')';
+      g.beginPath(); g.arc(X + S / 2, Y + S / 2, 1.5 + st * 1.2, 0, 7); g.fill();
+      if (st === 3) { g.strokeStyle = '#fff'; g.lineWidth = 1.2; g.stroke(); }
+    }
+    if (b === TALL) { g.fillStyle = '#3d7a2a'; g.fillRect(X + 4, Y + 4, 4, 4); }
+    if (glass) { g.strokeStyle = 'rgba(200,236,255,.9)'; g.lineWidth = 1; g.strokeRect(X + .5, Y + .5, S - 1, S - 1); }
+  }
+  for (let i = 0; i < VOL; i++) {               // sprinkler reach
+    const b = world[i];
+    if (b !== SPRINK && b !== SPRINK2) continue;
+    const r = b === SPRINK ? 1 : 2, x = i & WM, z = i >> 5 & WM;
+    g.fillStyle = 'rgba(120,190,255,.22)'; g.fillRect((x - r) * S, (z - r) * S, (2 * r + 1) * S, (2 * r + 1) * S);
+    g.fillStyle = b === SPRINK ? '#dfe4ea' : '#f0d070'; g.fillRect(x * S + 3, z * S + 3, S - 6, S - 6);
+  }
+  g.fillStyle = '#ff5a3c';
+  for (const m of mobs) { g.beginPath(); g.arc(m.x * S, m.z * S, 3, 0, 7); g.fill(); }
+  g.save(); g.translate(P.x * S, P.z * S); g.rotate(-P.a);        // you: an arrow pointing where you look
+  g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(0, 7); g.lineTo(-4.5, -4); g.lineTo(0, -1.5); g.lineTo(4.5, -4); g.closePath(); g.stroke(); g.fill();
+  g.restore();
+  if (mapSel >= 0) { g.strokeStyle = '#ffe070'; g.lineWidth = 2; g.strokeRect((mapSel & WM) * S + 1, (mapSel >> 5) * S + 1, S - 2, S - 2); }
+  let crops = 0, ripe = 0;
+  for (let i = 0; i < VOL; i++) if (world[i] >= CROP0) { crops++; if (stageOf(world[i]) === 3) ripe++; }
+  $('mapsum').textContent = SEASONS[season()] + '天 · 第 ' + day + ' 天 · 作物 ' + crops + ' 株,成熟 ' + ripe + ' 株';
+  drawMapInfo();
+}
+function drawMapInfo() {
+  const el = $('mapinfo');
+  if (mapSel < 0) { el.innerHTML = '<p class="dim">點地圖上的一格看詳細資料。</p>'; return; }
+  const x = mapSel & WM, z = mapSel >> 5, { y, b, glass } = columnTop(x, z);
+  let h = '<b>(' + x + ', ' + z + ')</b> ';
+  if (b >= CROP0) {
+    const i = idx(x, y, z), c = cropOf(b), cr = CROPS[c], gi = growInfo(i), left = (1 - grow[i]) * cr.g / Math.max(gi.rate, .001);
+    h += cr.n + (stageOf(b) === 3 ? ' · <b>成熟</b>' : ' · ' + Math.floor(grow[i] * 100) + '% · 約 ' + (left < 1 ? Math.max(1, Math.round(left * 60)) + ' 分鐘' : left.toFixed(1) + ' 小時') + '後成熟') +
+         '<br>' + (gi.notes.length ? gi.notes.join('、') : '生長狀況良好') + (glass ? ' · 在溫室裡' : '');
+  } else if (isFarm(b)) h += '耕地 · ' + (isWetFarm(b) ? '濕潤' : '乾的') + (b >= FARM_F ? ' · 已施肥' : '') + (nearWater[idx(x, y, z)] ? ' · 靠水或灑水器,一直保持濕潤' : '') + '<br>空著:旁邊兩株不同的成熟作物有機會在這裡長出新品種';
+  else h += nameOf(b) || '空地';
+  el.innerHTML = h;
+}
+mapC.onclick = e => {
+  const r = mapC.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * WS | 0, z = (e.clientY - r.top) / r.height * WS | 0;
+  if (x >= 0 && z >= 0 && x < WS && z < WS) { mapSel = z * 32 + x; drawMap(); }
+};
 
 // ---- menu & settings ----
 function applySettings() {                    // settings → live values and labels
@@ -966,6 +2989,7 @@ function applySettings() {                    // settings → live values and la
   $('sQ').textContent = settings.quality < 0 ? '自動(' + QUALITY[autoLevel].n + ')' : QUALITY[settings.quality].n;
   $('sFp').textContent = settings.fps ? '開' : '關';
   $('sHp').textContent = settings.help ? '開' : '關';
+  $('sPc').textContent = settings.peace ? '開' : '關';
   hudEl.classList.toggle('off', !settings.help);
   fpsEl.classList.toggle('on', !!settings.fps);
   viewDirty = true; needRender = true;
@@ -973,7 +2997,7 @@ function applySettings() {                    // settings → live values and la
 function saveSettings() {
   try {
     localStorage.voxelS = JSON.stringify({ m: settings.ms, t: settings.ts, i: settings.invY, s: settings.shadows,
-                                           q: settings.quality, f: settings.fps, h: settings.help });
+                                           q: settings.quality, f: settings.fps, h: settings.help, p: settings.peace });
   } catch (e) {}
 }
 function loadSettings() {
@@ -982,7 +3006,7 @@ function loadSettings() {
     if (!j) return;
     settings.ms = j.m || 6; settings.ts = j.t || 6; settings.invY = j.i < 0 ? -1 : 1; settings.shadows = j.s ? 1 : 0;
     if (Number.isInteger(j.q) && j.q >= -1 && j.q < QUALITY.length) settings.quality = j.q;
-    settings.fps = j.f ? 1 : 0; settings.help = j.h === 0 ? 0 : 1;
+    settings.fps = j.f ? 1 : 0; settings.help = j.h === 0 ? 0 : 1; settings.peace = j.p ? 1 : 0;
   } catch (e) {}
 }
 function setMenu(open) {                      // the menu pauses the world
@@ -995,7 +3019,7 @@ function setMenu(open) {                      // the menu pauses the world
     needRender = true;
   } else {
     showSettings(false);
-    if (!started) { started = true; $('bstart').textContent = '繼續遊戲'; }
+    if (!started) { started = true; $('bstart').textContent = '繼續遊戲'; if (bootMsg) { toast(bootMsg, 'big'); bootMsg = ''; } }
   }
 }
 function showSettings(on) { setpEl.classList.toggle('on', !!on); menuEl.classList.toggle('cfg', !!on); }
@@ -1032,13 +3056,15 @@ $('sQ').onclick = () => { settings.quality = settings.quality + 1 < QUALITY.leng
 $('sFp').onclick = () => { settings.fps ^= 1; applySettings(); saveSettings(); };
 $('sHp').onclick = () => { settings.help ^= 1; applySettings(); saveSettings(); };
 $('sCr').onclick = () => setCreative(!creative);
+$('sPc').onclick = () => { settings.peace ^= 1; if (settings.peace) mobs.length = 0; applySettings(); saveSettings(); };
 $('bm').onclick = () => setMenu(true);
 $('bm').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); setMenu(true); }, { passive: false });
 $('rb').onclick = () => { respawn(); if (!isTouch()) lockPointer(); };
 
 // ---- input -----------------------------------------------------------------------
 // keys go by physical position (e.code), so WASD works with any layout or IME
-const KEYMAP = { Space: ' ', Tab: 'tab', Escape: 'escape', ArrowUp: 'w', ArrowDown: 's', ArrowLeft: 'a', ArrowRight: 'd' };
+const KEYMAP = { Space: ' ', Tab: 'tab', Escape: 'escape', ArrowUp: 'w', ArrowDown: 's', ArrowLeft: 'a', ArrowRight: 'd',
+                 ShiftLeft: 'shift', ShiftRight: 'shift' };   // no Ctrl: Ctrl+W would close the tab
 function keyOf(e) {
   const c = e.code || '';
   if (c.startsWith('Key')) return c.slice(3).toLowerCase();
@@ -1062,18 +3088,25 @@ addEventListener('keydown', e => {
   K[k] = 1;
   if (e.repeat) return;                       // holding a key must not flip toggles over and over
   tapped[k] = 1;
+  if (k === 'w') {                            // double-tap W: run until W is let go
+    const now = performance.now();
+    if (now - lastWDown < 350) sprintLatch = true;
+    lastWDown = now;
+  }
   if (k >= '1' && k <= '6' && k.length === 1) selectSlot(+k - 1);
   else if (k === 'i' || k === 'tab') toggleInv(!invOpen);
+  else if (k === 'm') { if (!invOpen) { panelTab = 'map'; toggleInv(true); } else if (panelTab === 'map') toggleInv(false); else showTab('map'); }
   else if (k === 'c') setCreative(!creative);
   else if (k === 'g') { settings.shadows ^= 1; applySettings(); saveSettings(); }
   else if (k === 'h') { settings.help ^= 1; applySettings(); saveSettings(); }
   else if (k === 'r') weather = (weather + 1) % 3;
   else if (k === 'x') confirmReset();
 });
-addEventListener('keyup', e => { K[keyOf(e)] = 0; });
+addEventListener('keyup', e => { const k = keyOf(e); K[k] = 0; if (k === 'w') sprintLatch = false; });
 function releaseInput() {                     // drop everything held (blur, tab switch, menu)
   for (const k in K) K[k] = 0;
   for (const k in tapped) tapped[k] = 0;
+  sprintLatch = false;
   holdMine = false; dragLook = false; mineProg = 0; mineIdx = -1;
   resetTouch();
 }
@@ -1126,11 +3159,14 @@ addEventListener('wheel', e => {
 
 // touch: left half = floating stick (springs up under the thumb), right half = drag to look
 const RAD = 52;
-const stick = { id: -1, x0: 0, y0: 0, u: 0, v: 0 }, look = { id: -1, x0: 0, y0: 0, dx: 0, dy: 0 };
+const stick = { id: -1, x0: 0, y0: 0, u: 0, v: 0, full: false }, look = { id: -1, x0: 0, y0: 0, dx: 0, dy: 0 };
 let jumpTap = false;
 const isTouch = () => document.body.classList.contains('touch');
 addEventListener('touchstart', () => document.body.classList.add('touch'), { passive: true, capture: true });
-function resetTouch() { stick.id = look.id = -1; stick.u = stick.v = look.dx = look.dy = 0; stickEl.style.display = 'none'; }
+function resetTouch() {
+  stick.id = look.id = -1; stick.u = stick.v = look.dx = look.dy = 0; stick.full = false;
+  stickEl.style.display = 'none'; knobEl.classList.remove('run');
+}
 const wrapEl = $('wrap');
 wrapEl.addEventListener('touchstart', e => {
   e.preventDefault();
@@ -1149,9 +3185,11 @@ wrapEl.addEventListener('touchmove', e => {
   for (const t of e.changedTouches) {
     if (t.identifier === stick.id) {
       let ux = t.clientX - stick.x0, uy = t.clientY - stick.y0, ul = Math.sqrt(ux * ux + uy * uy);
+      stick.full = ul >= RAD * 1.3;                                    // finger pushed past the ring: run
       if (ul > RAD) { ux *= RAD / ul; uy *= RAD / ul; ul = RAD; }  // clamp to the ring
       knobEl.style.left = (RAD - 18 + ux) + 'px'; knobEl.style.top = (RAD - 18 + uy) + 'px';
       stick.u = ul < 9 ? 0 : ux / RAD; stick.v = ul < 9 ? 0 : -uy / RAD;   // small dead zone; up = forward
+      knobEl.classList.toggle('run', stick.full && stick.v > .3);
     } else if (t.identifier === look.id) {
       look.dx += t.clientX - look.x0; look.dy += t.clientY - look.y0;       // accumulate this frame's drag
       look.x0 = t.clientX; look.y0 = t.clientY;
@@ -1161,7 +3199,7 @@ wrapEl.addEventListener('touchmove', e => {
 const touchEnd = e => {
   e.preventDefault();
   for (const t of e.changedTouches) {
-    if (t.identifier === stick.id) { stick.id = -1; stick.u = stick.v = 0; stickEl.style.display = 'none'; }
+    if (t.identifier === stick.id) { stick.id = -1; stick.u = stick.v = 0; stick.full = false; stickEl.style.display = 'none'; knobEl.classList.remove('run'); }
     if (t.identifier === look.id) look.id = -1;
   }
 };
@@ -1189,7 +3227,7 @@ invGrid.onpointerdown = e => {
   const i = slotFrom(e);
   if (i < 0 || !INV[i].id) return;
   e.preventDefault(); dragI = i;
-  ghostEl.style.background = colorOf(INV[i].id); ghostEl.style.display = 'block'; moveGhost(e);
+  ghostEl.className = 'i' + INV[i].id; ghostEl.style.display = 'block'; moveGhost(e);
   if (invGrid.setPointerCapture) invGrid.setPointerCapture(e.pointerId);
   drawInv();
 };
@@ -1214,30 +3252,39 @@ addEventListener('resize', () => { viewDirty = true; needRender = true; });
 
 // ---- main loop ---------------------------------------------------------------------
 let lastT = -1, saveT = 8, lastHP = -1, jumpCD = 0, placeCD = 0, prevF = false;
-let workMs = 0, autoT = 0, autoLocked = false, fpsN = 0, fpsT0 = 0;
-let lastClock = '', lastDmg = '', lastShake = '';
+let workMs = 0, frameMs = 0, autoT = 0, autoLocked = false, fpsN = 0, fpsT0 = 0;
+let lastClock = '', lastDmg = '', lastShake = '', lastDay = -1, mapT = 0;
 const pad2 = n => (n < 10 ? '0' : '') + n;
 
-function autoQuality(dt) {                    // auto 畫質: step down when frames are heavy, up when there is room
-  if (settings.quality >= 0 || (autoT += dt) < 2) return;
+let autoPrevMs = 0, autoDone = false;         // GPU auto quality: frame time before the last step down
+function autoQuality(dt) {                    // auto 畫質: step down when frames are heavy (CPU: up when there is room)
+  if (settings.quality >= 0 || autoDone || (autoT += dt) < 2) return;
   autoT = 0;
-  if (workMs > 12 && autoLevel > 0) { autoLevel--; autoLocked = true; }
-  else if (workMs < 5 && autoLevel < QUALITY.length - 1 && !autoLocked) autoLevel++;
-  else return;
-  workMs = 0; viewDirty = true; applySettings();
+  let next = autoLevel;
+  if (GPU.gl) {                               // GPU time is invisible to JS: judge by the frame rate
+    if (autoPrevMs) {                         // did the last step down help? if not, a frame-rate cap is the limit: undo, stop
+      if (frameMs > autoPrevMs * .85) { next = autoLevel + 1; autoDone = true; }
+      autoPrevMs = 0;
+    } else if (frameMs > 24 && autoLevel > 0) { autoPrevMs = frameMs; next = autoLevel - 1; }
+  } else if (workMs > 12 && autoLevel > 0) { next = autoLevel - 1; autoLocked = true; }
+  else if (workMs < 5 && autoLevel < 2 && !autoLocked) next = autoLevel + 1;
+  if (next === autoLevel) return;
+  autoLevel = next; workMs = frameMs = 0; viewDirty = true; applySettings();
 }
 
 function frame(tm) {
   requestAnimationFrame(frame);               // schedule first: one bad frame won't freeze the game
   const t0 = performance.now();
   let dt = lastT < 0 ? 0 : (tm - lastT) / 1000;
+  if (!paused && dt > 0 && dt < .25) frameMs = frameMs ? frameMs * .95 + dt * 50 : dt * 1000;
   lastT = tm;
   dt = dt > 0 ? Math.min(dt, .1) : 0;
   if (paused) dt = 0;                         // menu open: nothing advances
   fpsN++;
   if (t0 - fpsT0 >= 500) {
-    if (settings.fps) fpsEl.textContent = Math.round(fpsN * 1000 / (t0 - fpsT0)) + ' fps · ' + workMs.toFixed(1) +
-      ' ms · ' + QUALITY[qualityLevel()].n + ' ' + view.w + '×' + view.h;
+    if (settings.fps) fpsEl.textContent = Math.round(fpsN * 1000 / (t0 - fpsT0)) + ' fps · ' +
+      (GPU.gl ? 'GPU ' + QUALITY[qualityLevel()].n + ' ' + glCanvas.width + '×' + glCanvas.height
+              : workMs.toFixed(1) + ' ms · ' + QUALITY[qualityLevel()].n + ' ' + view.w + '×' + view.h);
     fpsN = 0; fpsT0 = t0;
   }
   if (viewDirty) { viewDirty = false; fitView(); }
@@ -1253,6 +3300,10 @@ function frame(tm) {
   mu = Math.max(-1, Math.min(1, mu)); mv = Math.max(-1, Math.min(1, mv));
   const ml = Math.sqrt(mu * mu + mv * mv);
   if (ml > 1) { mu /= ml; mv /= ml; }         // diagonals are no faster than straight lines
+  sprinting = !handsOff && mv > .3 && !!(K.shift || sprintLatch || stick.full);
+  const fovGoal = sprinting ? 1.12 : 1;       // running widens the view a little
+  fovK += (fovGoal - fovK) * Math.min(1, dt * 10);
+  if (Math.abs(fovK - fovGoal) < 1e-3) fovK = fovGoal;
   jumpCD = Math.max(0, jumpCD - dt); placeCD = Math.max(0, placeCD - dt);
   creativeCD -= dt; resetArm = Math.max(0, resetArm - dt);
   if (handsOff) tapped.e = 0;
@@ -1260,17 +3311,27 @@ function frame(tm) {
   prevF = !!K.f;
   if ((K.e || tapped.e) && placeCD === 0 && !invOpen) { use2(); placeCD = .15; tapped.e = 0; }  // a tap waits out the cooldown
   tapped.f = tapped[' '] = 0;
-  if (jump && P.g === 0 && jumpCD === 0) { P.g = 8; jumpCD = .35; }
+  if (jump && P.g === 0 && jumpCD === 0) { P.g = buffs.jump > 0 ? 10 : 8; jumpCD = .35; }
+  else if (jump && inWater()) P.g = Math.max(P.g, 4.5);              // swim up
   const lks = .0007 * settings.ts;
   P.a += look.dx * lks;                       // drag right = turn right
   P.b = Math.max(-1.5, Math.min(1.5, P.b - look.dy * lks * settings.invY));   // drag down = look down
   look.dx = look.dy = 0;
 
   updateSky(dt, tm);
+  if ((farmAcc += dt) >= .25) {               // crops, farmland and food effects: four times a second
+    tickFarm(farmHours); farmHours = 0;
+    for (const k in buffs) if ((buffs[k] -= farmAcc) <= 0) delete buffs[k];
+    if (hp > maxHp()) hp = maxHp();
+    drawBuffs(); farmAcc = 0;
+  }
+  if (day !== lastDay) { lastDay = day; drawCoins(); }
 
   // ---- physics + entities in ≤20 ms sub-steps, so arrows and falls stay accurate on slow frames ----
   const steps = Math.max(1, Math.ceil(dt / .02)), h = dt / steps;
-  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv); tickEntities(h); }
+  const spd = (sprinting ? 7 : 5) * (buffs.run > 0 ? 1.35 : 1);
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd); tickEntities(h); }
+  tickGrass(dt);
   if (P.y < -10) { P.x = 16; P.y = 30; P.z = 16; P.g = 0; hurtPlayer(4); }
   if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
   hintT = Math.max(0, hintT - dt);
@@ -1279,14 +3340,18 @@ function frame(tm) {
   if (dead && !deadEl.classList.contains('on')) { deadEl.classList.add('on'); if (invOpen) toggleInv(false); unlockPointer(); }
   const dmg = (dead ? .55 : hurtT > 0 ? hurtT / .35 * .6 : hp < 7 ? .16 + .05 * Math.sin(tm * .006) : 0).toFixed(2);
   if (dmg !== lastDmg) { dmgEl.style.opacity = dmg; lastDmg = dmg; }
-  if (hp !== lastHP) { lastHP = hp; drawHP(); }
+  const hpKey = hp * 64 + maxHp();
+  if (hpKey !== lastHP) { lastHP = hpKey; drawHP(); }
   const shake = shakeT > 0 ? 'translate(' + ((Math.random() - .5) * shakeT * 9).toFixed(1) + 'px,' + ((Math.random() - .5) * shakeT * 9).toFixed(1) + 'px)' : '';
-  if (shake !== lastShake) { canvas.style.transform = shake; lastShake = shake; }
+  if (shake !== lastShake) { viewEl.style.transform = shake; lastShake = shake; }
 
   // ---- draw ----
   cam.sx = Math.sin(P.a); cam.cx = Math.cos(P.a); cam.sp = Math.sin(P.b); cam.cp = Math.cos(P.b);
-  renderWorld();
-  drawOverlays(dt);
+  const tg = target(heldItem() === 161);      // an empty bucket aims at water
+  updateTip(handsOff ? null : tg);
+  if (invOpen && panelTab === 'map' && (mapT -= dt) <= 0) { mapT = 1; drawMap(); }
+  if (GPU.gl) { renderGL(tg); g2d.clearRect(0, 0, view.w, view.h); } else renderWorld();
+  drawOverlays(dt, tg);
 
   // ---- autosave (silently skipped where storage is blocked) + clock ----
   if (dt > 0 && (saveT -= dt) <= 0) { saveT = 8; saveGame(); }
@@ -1304,11 +3369,14 @@ function frame(tm) {
 
 // ---- boot ----
 loadSettings();
+makeTextures(); makeIcons(); makeIconCSS();
+if (initGL()) { glCanvas.style.display = 'block'; autoLevel = 2; }   // GPU starts at 高, CPU at 中
 newKit();
-if (!loadGame()) generateWorld();
+if (!loadGame()) { generateWorld(); bootMsg = '🌱 出生點附近有池塘和一小塊菜園:鋤頭翻土、右鍵播種、成熟後右鍵收成'; }
+else if (needStarter) { starterPack(); bootMsg = '🌱 新功能:種菜!鋤頭、澆水壺和種子已經放進背包'; }
 relight();
 applySettings();
-drawBar(); drawHP();
+drawBar(); drawHP(); drawCoins(); drawBuffs();
 setMenu(true);
 requestAnimationFrame(frame);
 </script>
