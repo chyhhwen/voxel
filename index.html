@@ -7,160 +7,263 @@
 <title>VOXEL</title>
 <style>
   :root{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);
-        --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px)}
-  html,body{margin:0;height:100%;background:#111;overflow:hidden;overscroll-behavior:none;
+        --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+        --ui:system-ui,-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans CJK TC",sans-serif;
+        --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+        --pan:rgba(10,13,18,.58);--card:rgba(18,22,29,.97);--line:rgba(255,255,255,.14);--line2:rgba(255,255,255,.32);
+        --acc:#7fc4ff;--good:#8fe0a0;--bad:#ff9a8a;--gold:#ffd766}
+  html,body{margin:0;height:100%;background:#111;overflow:hidden;overscroll-behavior:none;font-family:var(--ui);color:#fff;
        -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+  button,input{font-family:inherit}
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none}
   #view{position:relative;flex:none;background:#000}
   #view canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none}
   #view #gl{display:none}
   #c{cursor:crosshair}
-  #hud{position:fixed;top:calc(8px + var(--st));left:calc(8px + var(--sl));right:calc(128px + var(--sr));
-       color:#fff;font:12px/1.4 monospace;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.85}
-  #hud.off{display:none}
-  /* help lines: keyboard lines on desktop, touch lines on phones/tablets, both on touch laptops */
-  #hud .tc{display:none}
-  body.touch #hud .tc{display:inline}
-  @media (any-pointer:coarse){#hud .tc{display:inline}}
-  @media (pointer:coarse){#hud .kb{display:none}}
-  #cross{position:fixed;top:50%;left:50%;width:6px;height:6px;margin:-3px 0 0 -3px;
-         border:1px solid rgba(255,255,255,.7);border-radius:50%;pointer-events:none}
-  .btn{position:fixed;width:56px;height:56px;border-radius:50%;
-       display:flex;align-items:center;justify-content:center;font:22px/1 monospace;
-       color:#fff;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4);
-       user-select:none;touch-action:none;z-index:2;cursor:pointer}
-  #bd{right:calc(88px + var(--sr));bottom:calc(84px + var(--sb))}
-  #bp{right:calc(16px + var(--sr));bottom:calc(84px + var(--sb))}
-  #bj{right:calc(88px + var(--sr));bottom:calc(152px + var(--sb))}
-  #bi{right:calc(16px + var(--sr));bottom:calc(152px + var(--sb));z-index:6}
-  /* touch-only buttons stay hidden on mouse-only devices */
-  #bd,#bp,#bj{display:none}
-  body.touch #bd,body.touch #bp,body.touch #bj{display:flex}
-  @media (any-pointer:coarse){#bd,#bp,#bj{display:flex}}
-  /* creative flight on touch screens: 🕊 flies / lands, ⤓ sinks while flying (⤒ climbs) */
-  #bf{right:calc(160px + var(--sr));bottom:calc(152px + var(--sb))}
-  #bdn{right:calc(160px + var(--sr));bottom:calc(84px + var(--sb))}
-  #bf,#bdn{display:none}
-  #bf.on{background:rgba(110,180,255,.5);border-color:#fff}
-  body.touch.creative #bf,body.touch.flying #bdn{display:flex}
-  @media (any-pointer:coarse){body.creative #bf,body.flying #bdn{display:flex}}
-  #stk{position:fixed;width:104px;height:104px;border-radius:50%;display:none;z-index:3;
-       border:2px solid rgba(255,255,255,.28);background:rgba(0,0,0,.22);pointer-events:none}
-  #knb{position:absolute;width:36px;height:36px;border-radius:50%;
-       background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.65)}
-  #knb.run{background:rgba(255,214,120,.8);border-color:#fff}
-  #bar{position:fixed;bottom:calc(16px + var(--sb));left:50%;transform:translateX(-50%);
-       display:flex;gap:6px;z-index:2}
-  .slot{width:42px;height:42px;border-radius:6px;border:2px solid rgba(255,255,255,.3);
-        position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);cursor:pointer;touch-action:none;
-        background-color:rgba(16,18,22,.55);background-repeat:no-repeat;background-position:center;
-        background-size:78%;image-rendering:pixelated}
-  .slot.on{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.7)}
-  .slot span{position:absolute;top:1px;left:4px;font:10px monospace;color:#fff;text-shadow:0 1px 1px #000}
-  .slot i{position:absolute;right:3px;bottom:0;font:11px/1.4 monospace;font-style:normal;
-          color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
-  .slot.e{background-color:rgba(255,255,255,.07)}
-  #clock{position:fixed;top:calc(8px + var(--st));right:calc(10px + var(--sr));color:#fff;font:14px monospace;
-         text-shadow:0 1px 2px #000;pointer-events:none;opacity:.9}
-  #fps{position:fixed;top:calc(82px + var(--st));right:calc(10px + var(--sr));color:#fff;font:11px monospace;
-       text-shadow:0 1px 2px #000;pointer-events:none;opacity:.8;display:none;white-space:nowrap}
+  /* what shows where: .kb keyboard & mouse · .tc any touch screen · .tap 點畫面 mode · .xh 準心+按鈕 mode */
+  body.touch .kb,body:not(.touch) .tc,body:not(.tapmode) .tap,body:not(.crossmode) .xh{display:none!important}
+  .pill{background:var(--pan);border:1px solid var(--line);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+
+  /* ---- in-game HUD: a one-line hint (or the first-time guide) top left, time · money · ❔ ⚙ top right,
+          the aim info under the crosshair, the held item · hearts · hotbar at the bottom ---- */
+  #hud{position:fixed;top:calc(10px + var(--st));left:calc(10px + var(--sl));z-index:2;pointer-events:none;border-radius:999px;
+       padding:4px 12px;font-size:12px;line-height:1.5;white-space:nowrap;max-width:calc(100vw - 330px);overflow:hidden;text-overflow:ellipsis}
+  #hud b{font-weight:600;color:var(--gold)}
+  #hud.off,body.tut #hud{display:none}
+  #tut{position:fixed;top:calc(10px + var(--st));left:calc(10px + var(--sl));z-index:3;display:none;box-sizing:border-box;
+       width:min(290px,calc(100vw - 20px));padding:9px 12px 10px;border-radius:12px;pointer-events:none;
+       background:rgba(12,28,44,.84);border:1px solid rgba(127,196,255,.5);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+  body.tut #tut{display:block}
+  #tut .th{display:flex;align-items:center;gap:8px;font-size:12px}
+  #tut .th b{color:var(--acc);font-weight:600}
+  #tutn{opacity:.7}
+  #tutx{margin-left:auto;pointer-events:auto;cursor:pointer;font-size:11px;color:#fff;background:rgba(255,255,255,.1);
+        border:1px solid var(--line2);border-radius:6px;padding:2px 9px}
+  #tutt{margin-top:5px;font-size:14px;line-height:1.5}
+  #tut.ok #tutt{color:var(--good)}
+  #tutd{display:flex;gap:4px;margin-top:8px}
+  #tutd i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.18)}
+  #tutd i.d{background:var(--good)}
+  #tutd i.c{background:var(--acc)}
+  #topr{position:fixed;top:calc(8px + var(--st));right:calc(8px + var(--sr));z-index:3;display:flex;align-items:flex-start;gap:6px}
+  #stat{pointer-events:none;padding:4px 12px;border-radius:12px;text-align:right;font-size:12px;line-height:1.5}
+  #clock{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+  #coin{white-space:nowrap}
+  #coin b{font-weight:600;color:var(--gold)}
+  .tb{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;font-size:16px;
+      color:#fff;background:var(--pan);border:1px solid var(--line2);cursor:pointer;user-select:none;touch-action:none;box-sizing:border-box}
+  .tb:hover{background:rgba(40,48,60,.85)}
+  body.touch .tb{width:42px;height:42px;font-size:18px}
+  #fps{position:fixed;top:calc(62px + var(--st));right:calc(10px + var(--sr));font:11px var(--mono);text-shadow:0 1px 2px #000;
+       pointer-events:none;opacity:.8;display:none;white-space:nowrap;z-index:2}
   #fps.on{display:block}
-  #inv{position:fixed;inset:0;z-index:5;display:none;
-       align-items:center;justify-content:center;color:#fff;font:12px/1.6 monospace;
-       background:rgba(8,10,14,.72);backdrop-filter:blur(3px)}
-  #inv.on{display:flex}
-  #invg{display:grid;grid-template-columns:repeat(6,46px);gap:5px;touch-action:none}
-  #invg .slot{width:46px;height:46px}
-  #invg .slot.hb{border-color:rgba(255,215,120,.75)}
-  #invg .slot.src{opacity:.35}
-  #ghost{position:fixed;width:46px;height:46px;border-radius:6px;pointer-events:none;
-         z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6);
-         background-color:rgba(16,18,22,.75);background-repeat:no-repeat;background-position:center;
-         background-size:78%;image-rendering:pixelated}
-  #hp{position:fixed;left:calc(8px + var(--sl));bottom:calc(70px + var(--sb));display:flex;gap:3px;z-index:2;pointer-events:none}
-  #hp b{width:11px;height:11px;border-radius:2px;background:#3a1520;
-        box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+  #cross{position:fixed;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;pointer-events:none;z-index:1;opacity:.8}
+  #cross::before,#cross::after{content:'';position:absolute;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+  #cross::before{left:7px;top:0;width:2px;height:16px}
+  #cross::after{left:0;top:7px;width:16px;height:2px}
+  body.tapmode #cross{display:none}
+  /* under the crosshair (or, in 點畫面 mode, just above the finger): mining progress, what it is, tool hints */
+  #aim{position:fixed;left:50%;top:calc(50% + 18px);transform:translateX(-50%);z-index:2;pointer-events:none;
+       display:flex;flex-direction:column;align-items:center;gap:4px}
+  body.tapmode #aim{transform:translate(-50%,-100%);flex-direction:column-reverse}
+  #tip,#hint{display:none;font-size:12px;line-height:1.4;padding:3px 10px;border-radius:8px;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.5)}
+  #tip{background:rgba(0,0,0,.58)}
+  #hint{background:rgba(48,28,6,.8);color:#ffd9a0}
+  #mbar{display:none;width:72px;height:6px;border-radius:3px;overflow:hidden;background:rgba(0,0,0,.55);box-shadow:0 0 0 1px rgba(255,255,255,.3)}
+  #mbar i{display:block;height:100%;width:0;background:var(--good)}
+  #hb{position:fixed;left:50%;bottom:calc(12px + var(--sb));transform:translateX(-50%);z-index:2;pointer-events:none;
+      display:flex;flex-direction:column;gap:5px}
+  #held{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);margin-bottom:8px;max-width:min(92vw,580px);box-sizing:border-box;
+        padding:3px 12px;border-radius:10px;background:rgba(0,0,0,.58);font-size:13px;line-height:1.5;white-space:nowrap;
+        overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .35s}
+  #held.on{opacity:1}
+  #held b{font-weight:600}
+  #held .hw{opacity:.8;font-size:12px}
+  #stats{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;min-height:10px}
+  #hp{display:flex;gap:2px;flex:none}
+  #hp b{width:10px;height:10px;border-radius:3px;background:#3a1520;box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
   #hp b.f{background:#e2455c}
   #hp b.h{background:linear-gradient(90deg,#e2455c 50%,#3a1520 50%)}
   #hp b.g{background:#f2c94c}
   #hp b.gh{background:linear-gradient(90deg,#f2c94c 50%,#3a1520 50%)}
-  #coin{position:fixed;top:calc(42px + var(--st));right:calc(10px + var(--sr));color:#fff;font:12px/1.5 monospace;
-        text-align:right;text-shadow:0 1px 2px #000;pointer-events:none;opacity:.92}
-  #coin b{font-weight:400;color:#ffd766}
-  #buffs{position:fixed;left:calc(8px + var(--sl));bottom:calc(88px + var(--sb));display:flex;gap:5px;flex-wrap:wrap;
-         max-width:60vw;color:#fff;font:11px monospace;text-shadow:0 1px 2px #000;pointer-events:none;z-index:2}
-  #buffs span{background:rgba(0,0,0,.38);border-radius:9px;padding:1px 7px}
-  #toasts{position:fixed;bottom:calc(98px + var(--sb));left:50%;transform:translateX(-50%);display:flex;flex-direction:column;
-          align-items:center;gap:5px;z-index:6;pointer-events:none;width:max-content;max-width:72vw}
-  .toast{background:rgba(0,0,0,.62);color:#fff;font:12px/1.4 monospace;padding:4px 12px;border-radius:12px;text-align:center;white-space:pre-line;
+  body.creative #hp{visibility:hidden}
+  #buffs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;font-size:11px;text-shadow:0 1px 2px #000}
+  #buffs span{background:rgba(0,0,0,.45);border-radius:9px;padding:1px 7px}
+  #hotbar{display:flex;align-items:center;gap:6px;pointer-events:auto}
+  #bar{display:flex;gap:6px}
+  #bi{width:42px;height:42px;border-radius:8px;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;
+      font-size:21px;background:rgba(12,15,20,.6);cursor:pointer;touch-action:none;margin-left:4px;user-select:none}
+  #bi:hover,#bi.down{border-color:#fff}
+  body.inv #hb,body.dead #hb{display:none}
+  .slot{width:42px;height:42px;border-radius:8px;border:2px solid rgba(255,255,255,.3);
+        position:relative;box-shadow:inset 0 0 0 2px rgba(0,0,0,.2);cursor:pointer;touch-action:none;
+        background-color:rgba(12,15,20,.6);background-repeat:no-repeat;background-position:center;
+        background-size:76%;image-rendering:pixelated}
+  .slot.on{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.3),0 0 12px rgba(255,255,255,.45)}
+  .slot span{position:absolute;top:1px;left:4px;font:10px var(--mono);color:#fff;text-shadow:0 1px 1px #000}
+  body.touch #bar .slot span{display:none}
+  .slot i{position:absolute;right:3px;bottom:0;font:600 11px/1.4 var(--mono);font-style:normal;
+          color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}
+  .slot.e{background-color:rgba(255,255,255,.07)}
+  #toasts{position:fixed;top:calc(12px + var(--st));left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;
+          display:flex;flex-direction:column;align-items:center;gap:5px;width:max-content;
+          max-width:max(240px,min(520px,calc(100vw - 600px)))}
+  body.inv #toasts{top:auto;bottom:calc(14px + var(--sb));max-width:min(560px,92vw)}
+  .toast{background:rgba(10,12,16,.82);font-size:13px;line-height:1.45;padding:6px 14px;border-radius:12px;text-align:center;
+         white-space:pre-line;border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.3);
          transition:opacity .5s,transform .5s;animation:tin .25s ease-out}
-  .toast.big{font-size:15px;padding:6px 16px;background:rgba(52,38,6,.82);border:1px solid rgba(255,215,102,.75);color:#ffe9a8}
+  .toast.big{font-size:14px;background:rgba(52,38,6,.9);border-color:rgba(255,215,102,.7);color:#ffe9a8}
   .toast.out{opacity:0;transform:translateY(-8px)}
-  @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  #tip{position:fixed;top:calc(50% + 12px);left:50%;transform:translateX(-50%);display:none;pointer-events:none;z-index:2;
-       color:#fff;font:11px/1.4 monospace;background:rgba(0,0,0,.45);padding:2px 8px;border-radius:5px;white-space:nowrap}
+  @keyframes tin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
   #sleep{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:4}
-  body.inv #bi{display:none!important}         /* the panel has its own ✕ */
-  /* the panel: bag · market · cooking · breeding graph · farm map */
-  #inv .pw{width:min(840px,96vw);height:min(580px,94vh);display:flex;flex-direction:column;box-sizing:border-box;
-           background:rgba(18,22,28,.95);border:1px solid rgba(255,255,255,.16);border-radius:10px;overflow:hidden;
-           box-shadow:0 10px 40px rgba(0,0,0,.5)}
-  #ptabs{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.1);flex:none}
-  #ptabs .tab{font:12px monospace;color:rgba(255,255,255,.72);background:none;border:1px solid transparent;
-              border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap}
-  #ptabs .tab:hover{background:rgba(255,255,255,.08)}
-  #ptabs .tab.on{color:#fff;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.32)}
-  #pcoin{margin-left:auto;color:#ffd766;padding:0 6px;white-space:nowrap}
-  #pclose{font:14px monospace;color:#fff;background:none;border:1px solid rgba(255,255,255,.3);border-radius:6px;
-          width:30px;height:28px;cursor:pointer;flex:none}
-  #pbody{flex:1;min-height:0;overflow:auto;padding:10px 12px;box-sizing:border-box;-webkit-overflow-scrolling:touch}
+  #dmg{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;
+       background:radial-gradient(ellipse at center,transparent 35%,rgba(190,20,40,.55) 100%)}
+
+  /* ---- touch controls: a stick bottom left; ⤒ (and 🕊 ⤓ when creative) bottom right; ⛏ ＋ only in 準心+按鈕 mode ---- */
+  .btn{position:fixed;display:none;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;
+       width:60px;height:60px;border-radius:50%;color:#fff;background:rgba(10,12,16,.38);border:1.5px solid rgba(255,255,255,.55);
+       user-select:none;touch-action:none;z-index:3;cursor:pointer;transition:transform .08s,background-color .08s}
+  .btn i{font-style:normal;font-size:22px;line-height:1}
+  .btn b{font-size:10px;font-weight:600;line-height:1;margin-top:3px;opacity:.85}
+  .btn.down{transform:scale(.9);background-color:rgba(255,255,255,.32)}
+  body.touch #bj,body.touch.creative #bf,body.touch.flying #bdn,body.crossmode #bd,body.crossmode #bp{display:flex}
+  body.inv .btn,body.dead .btn{display:none!important}
+  #bj{width:72px;height:72px;right:calc(22px + var(--sr));bottom:calc(22px + var(--sb))}
+  #bj i{font-size:28px}
+  #bf{width:54px;height:54px;right:calc(31px + var(--sr));bottom:calc(106px + var(--sb))}
+  #bf.on{background-color:rgba(110,180,255,.55);border-color:#fff}
+  #bdn,#bd{right:calc(106px + var(--sr));bottom:calc(28px + var(--sb))}
+  #bp{right:calc(28px + var(--sr));bottom:calc(106px + var(--sb))}
+  body.crossmode #bf{right:calc(106px + var(--sr));bottom:calc(106px + var(--sb))}
+  body.crossmode #bdn{right:calc(182px + var(--sr));bottom:calc(106px + var(--sb))}
+  #stk{position:fixed;display:none;width:108px;height:108px;border-radius:50%;z-index:2;pointer-events:none;
+       left:calc(26px + var(--sl));bottom:calc(26px + var(--sb));border:2px solid rgba(255,255,255,.42);background:rgba(10,12,16,.25);
+       opacity:.6;transition:opacity .2s}
+  body.touch #stk{display:block}
+  body.inv #stk,body.dead #stk{display:none}
+  #stk.act{opacity:1;transition:none}
+  #knb{position:absolute;left:32px;top:32px;width:44px;height:44px;border-radius:50%;box-sizing:border-box;
+       background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.8)}
+  #knb.run{background:rgba(255,214,120,.9);border-color:#fff}
+  #stkl{position:absolute;left:50%;top:100%;margin-top:2px;transform:translateX(-50%);font-size:11px;white-space:nowrap;
+        text-shadow:0 1px 2px #000;opacity:.9}
+  body.moved #stkl{display:none}
+  @media (max-aspect-ratio:1/1){              /* portrait: everything sits above the hotbar, the top notes below the top bar */
+    #bj{bottom:calc(124px + var(--sb))}
+    #bdn,#bd{bottom:calc(130px + var(--sb))}
+    #bf,#bp,body.crossmode #bf,body.crossmode #bdn{bottom:calc(208px + var(--sb))}
+    #stk{bottom:calc(130px + var(--sb))}
+    #hud{top:calc(60px + var(--st));max-width:calc(100vw - 20px)}
+    #tut{top:calc(60px + var(--st))}
+    #toasts{top:calc(60px + var(--st));max-width:92vw}
+    #hud:not(.off)~#toasts{top:calc(94px + var(--st))}
+    body.tut #hud~#toasts{top:calc(156px + var(--st))}
+    #bar{gap:5px}
+    #bar .slot,#bi{width:40px;height:40px}
+  }
+  @media (min-aspect-ratio:1/1) and (max-width:720px){   /* small landscape phones: a narrower hotbar keeps clear of the buttons */
+    #bar,#hotbar{gap:4px}
+    #bar .slot,#bi{width:38px;height:38px}
+    #bi{margin-left:2px}
+  }
+
+  /* ---- the panel: bag · market · cooking · breeding graph · farm map · pets ---- */
+  #inv{position:fixed;inset:0;z-index:5;display:none;align-items:center;justify-content:center;font-size:13px;line-height:1.55;
+       background:rgba(6,8,12,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+  #inv.on{display:flex}
+  #inv .pw{width:min(980px,96vw);height:min(660px,94vh);display:flex;flex-direction:column;box-sizing:border-box;
+           background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 12px 44px rgba(0,0,0,.5)}
+  #ptabs{display:flex;align-items:center;gap:4px;padding:8px 10px;border-bottom:1px solid var(--line);flex:none;overflow-x:auto;scrollbar-width:none}
+  #ptabs .tab{font-size:13px;color:rgba(255,255,255,.7);background:none;border:1px solid transparent;border-radius:9px;
+              padding:6px 12px;cursor:pointer;white-space:nowrap}
+  #ptabs .tab:hover{background:rgba(255,255,255,.07)}
+  #ptabs .tab.on{color:#fff;background:rgba(255,255,255,.12);border-color:var(--line2)}
+  #pcoin{margin-left:auto;color:var(--gold);padding:0 8px;white-space:nowrap;font-weight:600}
+  #pclose{font-size:16px;color:#fff;background:#262b33;border:1px solid var(--line2);border-radius:9px;
+          width:38px;height:34px;cursor:pointer;flex:none;position:sticky;right:0}
+  body.touch #pclose{width:46px;height:40px;font-size:18px}
+  #pbody{flex:1;min-height:0;overflow:auto;padding:12px 14px;box-sizing:border-box;-webkit-overflow-scrolling:touch}
   .pg{display:none}
   .pg.on{display:block}
-  #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:100%}
+  /* the bag: the grid and what the picked item does on the left, recipes on the right */
+  #pg-bag.on{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:10px 18px;height:100%;box-sizing:border-box}
+  #bagl{display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+  #invt{font-size:12px;opacity:.7}
+  #invg{display:grid;grid-template-columns:repeat(6,50px);gap:6px;touch-action:none}
+  #invg .slot{width:46px;height:46px}
+  #invg .slot.hb{border-color:rgba(255,215,120,.75)}
+  #invg .slot.on{border-color:#fff}
+  #invg .slot.pick{box-shadow:0 0 0 2px var(--acc),0 0 10px rgba(127,196,255,.6)}
+  #invg .slot.src{opacity:.35}
+  #iinfo{display:flex;gap:10px;align-items:flex-start;min-height:64px;padding:10px 12px;border-radius:10px;box-sizing:border-box;
+         width:330px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+  #iinfo .ix{flex:1;min-width:0;line-height:1.5}
+  #iinfo .nm{font-weight:600;font-size:14px}
+  #iinfo .how{font-size:12px;opacity:.85}
+  #iinfo p{margin:0}
+  #iinfo button{margin-top:6px;font-size:12px;color:#fff;background:rgba(127,196,255,.18);border:1px solid rgba(127,196,255,.6);
+                border-radius:8px;padding:5px 12px;cursor:pointer}
+  body.touch #iinfo button{padding:8px 14px;font-size:13px}
+  #craft{display:flex;flex-direction:column;gap:8px;min-height:0;min-width:0}
+  #inv #craft h3{margin:0}
+  #rlist{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;
+         align-content:start;-webkit-overflow-scrolling:touch}
+  .rc{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+  .rc.ok{border-color:rgba(143,224,160,.5);background:rgba(80,140,90,.14)}
+  .rc .rx{flex:1;min-width:0;line-height:1.45}
+  .rc .rx b{font-weight:600}
+  .rc button{font-size:13px;color:#fff;background:rgba(255,255,255,.1);border:1px solid var(--line2);border-radius:8px;padding:5px 12px;cursor:pointer;flex:none}
+  .rc.ok button{background:rgba(72,160,102,.5);border-color:rgba(143,224,160,.85)}
+  .rc button:disabled{opacity:.3;cursor:default}
+  body.touch .rc button{padding:9px 14px}
+  #invx{grid-column:1/-1;font-size:11px;opacity:.55;text-align:center}
   /* creative: the bag becomes a catalog of every item, picked into the creative hotbar */
   #chead,#cat{display:none}
-  body.creative #invg,body.creative #craft{display:none}
-  body.creative #chead{display:flex;flex-direction:column;align-items:center;gap:8px;position:sticky;top:-10px;z-index:1;
-        width:100%;padding:8px 0;background:rgb(18,22,28);border-bottom:1px solid rgba(255,255,255,.08)}
+  body.creative #bagl,body.creative #craft{display:none}
+  body.creative #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px;height:auto;min-height:100%}
+  body.creative #chead{display:flex;flex-direction:column;align-items:center;gap:8px;position:sticky;top:-12px;z-index:1;
+        width:100%;padding:8px 0;background:rgb(18,22,29);border-bottom:1px solid rgba(255,255,255,.08)}
   #chot{display:flex;gap:6px}
   body.creative #cat{display:block}
   #chot .slot{width:46px;height:46px;border-color:rgba(255,215,120,.75)}
   #chot .slot.on{border-color:#fff}
-  #catq{font:12px monospace;width:min(320px,86vw);box-sizing:border-box;padding:6px 10px;border-radius:6px;
-        border:1px solid rgba(255,255,255,.32);background:rgba(0,0,0,.35);color:#fff;outline:none}
+  #catq{font-size:13px;width:min(340px,86vw);box-sizing:border-box;padding:7px 12px;border-radius:8px;
+        border:1px solid var(--line2);background:rgba(0,0,0,.35);color:#fff;outline:none}
   #catq:focus{border-color:rgba(255,255,255,.7)}
-  #cat{width:100%;max-width:790px;align-self:center}
-  .catg h4{margin:8px 0 4px;font:600 12px monospace;opacity:.72}
+  #cat{width:100%;max-width:900px;align-self:center}
+  .catg h4{margin:10px 0 5px;font-size:12px;font-weight:600;opacity:.72}
   .catr{display:flex;flex-wrap:wrap;gap:5px}
-  #cat .slot{width:40px;height:40px;touch-action:pan-y}
+  #cat .slot{width:42px;height:42px;touch-action:pan-y}
   #cat .slot:hover{border-color:rgba(255,255,255,.85)}
   .slot.pop{animation:pop .28s ease-out}
   @keyframes pop{40%{transform:scale(1.18)}}
-  #inv h3{margin:0 0 6px;font:600 13px monospace}
+  #inv h3{margin:0 0 6px;font-size:14px;font-weight:600}
   #inv p{margin:4px 0}
-  #inv .dim{opacity:.55;font-size:11px}
+  #inv .dim{opacity:.55;font-size:12px}
   .ic{display:inline-block;width:24px;height:24px;flex:none;vertical-align:middle;background-size:contain;
       background-repeat:no-repeat;background-position:center;image-rendering:pixelated}
   .ic.big{width:34px;height:34px}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  .row{display:flex;align-items:center;gap:6px;padding:3px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .row{display:flex;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
   .row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pr{color:#ffd766;white-space:nowrap}
-  .pr em{font-style:normal;color:#8fe0a0;font-size:10px;margin-left:4px}
-  .row button,.dish button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
-        border-radius:5px;padding:3px 8px;cursor:pointer;flex:none}
+  .pr{color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pr em{font-style:normal;color:var(--good);font-size:11px;margin-left:4px}
+  .row button,.dish button,.pet button,#petcall,.mapctl button{font-size:12px;color:#fff;background:rgba(255,255,255,.1);
+        border:1px solid var(--line2);border-radius:7px;padding:4px 10px;cursor:pointer;flex:none}
+  body.touch .row button,body.touch .dish button,body.touch .pet button,body.touch #petcall,body.touch .mapctl button{padding:8px 13px;font-size:13px}
   .row button:disabled,.dish button:disabled{opacity:.3;cursor:default}
-  #cooklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:6px}
-  .dish{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.05);
-        border:1px solid rgba(255,255,255,.08)}
+  #cooklist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;margin-top:6px}
+  .dish{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.04);
+        border:1px solid rgba(255,255,255,.07)}
   .dish.ok{border-color:rgba(143,224,160,.55);background:rgba(80,140,90,.14)}
+  .dish.ok button{background:rgba(72,160,102,.5);border-color:rgba(143,224,160,.85)}
   .dish .dx{flex:1;min-width:0;line-height:1.45}
-  .dish .fx{color:#9cc8ff;font-size:11px}
-  .ing{display:inline-flex;align-items:center;gap:2px;margin-right:7px;font-size:11px;white-space:nowrap}
+  .dish .fx{color:#9cc8ff;font-size:12px}
+  .ing{display:inline-flex;align-items:center;gap:2px;margin-right:7px;font-size:12px;white-space:nowrap}
   .ing .ic{width:16px;height:16px}
-  .ing.miss{color:#ff9a8a}
+  .ing.miss{color:var(--bad)}
   #pg-tree.on{display:flex;flex-direction:column;gap:6px;height:100%}
-  #treewrap{flex:1;min-height:150px;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:7px;background:rgba(0,0,0,.25)}
+  #treewrap{flex:1;min-height:150px;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(0,0,0,.25)}
   #treesvg{display:block}
   #treesvg .e{fill:none;stroke:rgba(255,255,255,.13);stroke-width:1.5}
   #treesvg .e.k{stroke:rgba(143,224,160,.5)}
@@ -169,7 +272,7 @@
   #treesvg .n rect{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.24);stroke-dasharray:4 3}
   #treesvg .n.k rect{fill:rgba(56,92,58,.72);stroke:rgba(143,224,160,.75);stroke-dasharray:none}
   #treesvg .n.sel rect{stroke:#ffd766;stroke-width:2.5}
-  #treesvg text{fill:#fff;font:12px monospace}
+  #treesvg text{fill:#fff;font-size:12px;font-family:var(--ui)}
   #treesvg text.s{fill:rgba(255,255,255,.62);font-size:10px}
   #treesvg text.q{fill:rgba(255,255,255,.45);font-size:20px}
   #treesvg text.h{fill:rgba(255,255,255,.5);font-size:11px}
@@ -179,118 +282,158 @@
   .sz{display:inline-block;padding:0 5px;margin-right:2px;border-radius:3px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.35)}
   .sz.on{background:#4c7f3c;color:#fff}
   .mapbox{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:6px}
-  #mapc{width:min(384px,100%);aspect-ratio:1;image-rendering:pixelated;border:1px solid rgba(255,255,255,.2);border-radius:4px;
+  #mapc{width:min(384px,100%);aspect-ratio:1;image-rendering:pixelated;border:1px solid rgba(255,255,255,.2);border-radius:6px;
         cursor:grab;flex:none;touch-action:none}
   .mapctl{display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
-  .mapctl button{font:12px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
-        border-radius:5px;padding:3px 10px;cursor:pointer}
-  #mapzoom{opacity:.6;font-size:11px}
+  #mapzoom{opacity:.6;font-size:12px}
   .mapside{flex:1;min-width:200px}
   #mapinfo{min-height:64px}
-  .legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;opacity:.75;margin-top:8px}
+  .legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;opacity:.75;margin-top:8px}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
   #pg-pets .petbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-  #petlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px}
-  .pet{display:flex;gap:8px;padding:7px 8px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+  #petlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px}
+  .pet{display:flex;gap:8px;padding:7px 8px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
   .pet .dx{flex:1;min-width:0;line-height:1.5}
   .pet .pn{cursor:text;border-bottom:1px dashed rgba(255,255,255,.35)}
   .pet .hearts{color:#ff7b95;letter-spacing:1px}
-  .pet .ab{color:#9cc8ff;font-size:11px}
+  .pet .ab{color:#9cc8ff;font-size:12px}
   .pet .btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-  .pet button,#petcall{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);
-        border-radius:5px;padding:3px 8px;cursor:pointer}
-  .petname{font:12px monospace;width:7em;background:#0c0e12;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:4px;padding:1px 4px}
+  .petname{font-size:13px;width:7em;background:#0c0e12;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:5px;padding:2px 5px}
   #petegg{margin-top:10px}
-  #petdex{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:5px}
-  .dex{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:6px;background:rgba(255,255,255,.04);font-size:11px;line-height:1.45}
+  #petdex{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:5px}
+  .dex{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:7px;background:rgba(255,255,255,.04);font-size:12px;line-height:1.45}
   .dex.t{background:rgba(80,140,90,.16)}
   .dex .q{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font-size:20px;opacity:.35;
         border:1px dashed rgba(255,255,255,.3);border-radius:6px;box-sizing:border-box}
-  .dex .ok{color:#8fe0a0}
+  .dex .ok{color:var(--good)}
   @media (max-width:600px){.cols{grid-template-columns:1fr}}
-  @media (max-width:560px){#ptabs .tab span{display:none} #ptabs .tab{padding:4px 9px;font-size:16px}}
-  @media (max-height:480px){                  /* landscape phones: the panel takes the whole screen */
-    #inv .pw{width:100vw;height:100vh;border-radius:0;border:0}
-    #ptabs{padding:3px 6px}
-    #pbody{padding:6px 10px}
-    #pg-bag.on{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;align-content:center;justify-content:center}
-    #invt,#invx{grid-column:1/-1;text-align:center}
-    #craft{max-height:200px;max-width:none}
-    body.creative #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px}
+  @media (max-width:760px){#ptabs .tab span{display:none} #ptabs .tab{padding:5px 11px;font-size:18px}}
+  @media (max-width:600px){#ptabs{gap:2px} #ptabs .tab{padding:5px 8px;font-size:17px} #pcoin{padding:0 4px}}
+  @media (max-width:600px),(max-height:480px){                  /* phones: the panel takes the whole screen */
+    #inv .pw{width:100vw;height:100%;border-radius:0;border:0}
+    #ptabs{padding:4px calc(8px + var(--sr)) 4px calc(8px + var(--sl))}
+    #pbody{padding:8px calc(12px + var(--sr)) calc(8px + var(--sb)) calc(12px + var(--sl))}
+  }
+  @media (max-width:600px){                   /* portrait phones: one column, the whole page scrolls */
+    #pg-bag.on{grid-template-columns:minmax(0,1fr);grid-template-rows:none;height:auto;justify-items:center}
+    #bagl{overflow:visible}
+    #craft{width:100%}
+    #rlist{overflow:visible}
+    #iinfo{width:100%;max-width:330px}
+  }
+  @media (max-height:480px){
+    #invx{display:none}
+    #pg-bag.on{grid-template-rows:minmax(0,1fr)}
+    #iinfo{min-height:0}
     #mapc{width:min(300px,100%)}
   }
-  #dmg{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;
-       background:radial-gradient(ellipse at center,transparent 35%,rgba(190,20,40,.55) 100%)}
-  #dead{position:fixed;inset:0;z-index:7;display:none;flex-direction:column;
-        align-items:center;justify-content:center;gap:14px;color:#fff;
-        font:15px/1.7 monospace;background:rgba(60,6,14,.72);text-align:center}
+  #dead{position:fixed;inset:0;z-index:7;display:none;align-items:center;justify-content:center;background:rgba(60,6,14,.6)}
   #dead.on{display:flex}
-  #dead button{font:14px monospace;color:#fff;background:rgba(255,255,255,.14);
-        border:1px solid rgba(255,255,255,.5);border-radius:6px;padding:8px 20px;cursor:pointer}
-  #craft{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:340px;
-       max-height:118px;overflow-y:auto;padding:2px}
-  #craft button{font:11px monospace;color:#fff;background:rgba(255,255,255,.12);
-       border:1px solid rgba(255,255,255,.45);border-radius:5px;padding:5px 9px;cursor:pointer}
-  #craft button:disabled{opacity:.3;cursor:default}
-  #mnu{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;
-       align-items:center;justify-content:center;gap:10px;color:#fff;
-       font:13px/1.7 monospace;background:rgba(8,11,16,.82);backdrop-filter:blur(4px)}
-  #mnu h1{font:600 26px/1.2 monospace;letter-spacing:.14em;margin:0 0 2px}
-  #mnu .tag{opacity:.55;font-size:12px;margin:0 0 18px}
-  #mnu button{font:14px monospace;color:#fff;background:rgba(255,255,255,.1);
-       border:1px solid rgba(255,255,255,.42);border-radius:7px;padding:10px 30px;
-       cursor:pointer;min-width:190px}
-  #mnu button:hover{background:rgba(255,255,255,.2)}
-  #setp{display:none;flex-direction:column;gap:13px;width:min(340px,86vw);
-        border:1px solid rgba(255,255,255,.16);border-radius:9px;padding:16px 18px;
-        background:rgba(255,255,255,.04)}
+  #dead .card{padding:24px 34px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+  #dead h2{margin:0;font-size:22px}
+  #dead p{margin:0 0 6px;opacity:.7;font-size:13px}
+  #ghost{position:fixed;width:46px;height:46px;border-radius:8px;pointer-events:none;
+         z-index:9;display:none;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.6);
+         background-color:rgba(16,18,22,.75);background-repeat:no-repeat;background-position:center;
+         background-size:78%;image-rendering:pixelated}
+
+  /* ---- menu · settings · help ---- */
+  #mnu{position:fixed;inset:0;z-index:8;display:flex;padding:12px;box-sizing:border-box;overflow:auto;
+       background:rgba(8,11,16,.78);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 44px rgba(0,0,0,.5);box-sizing:border-box}
+  .card h2{margin:0;font-size:18px;font-weight:700}
+  #home{width:min(360px,94vw);padding:26px 24px 20px;display:flex;flex-direction:column;gap:9px;text-align:center;margin:auto}
+  #home h1{margin:0;font-size:38px;font-weight:800;letter-spacing:.22em;padding-left:.22em;line-height:1.1;
+           background:linear-gradient(180deg,#e2f4ff,#7fb2e5);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #home .tag{margin:2px 0 12px;font-size:12px;opacity:.6}
+  .mb{font-size:15px;color:#fff;background:rgba(255,255,255,.08);border:1px solid var(--line2);border-radius:10px;padding:10px 16px;cursor:pointer}
+  .mb:hover{background:rgba(255,255,255,.15)}
+  .mb.pri{font-size:16px;font-weight:600;padding:12px 16px;background:linear-gradient(180deg,#4aa56a,#327a4c);border-color:rgba(160,240,180,.6)}
+  .mb.pri:hover{filter:brightness(1.1)}
+  .mb.warn{font-size:13px;padding:8px 16px;color:#ffb8ad;background:none;border-color:rgba(255,154,138,.3)}
+  .mb.warn.arm{background:rgba(200,60,50,.4);border-color:var(--bad);color:#fff}
+  #quick{margin-top:8px;font-size:12px;line-height:1.7;opacity:.62}
+  #setp{display:none;flex-direction:column;gap:4px;width:min(440px,94vw);max-height:calc(100vh - 24px);overflow-y:auto;padding:16px 20px;margin:auto}
   #setp.on{display:flex}
-  #setp{max-height:calc(100vh - 24px);overflow-y:auto;box-sizing:border-box}
-  @media (max-height:480px){                  /* landscape phones: two columns so it fits */
-    #setp.on{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;width:min(620px,94vw);padding:12px 16px}
-    #setp #bback{grid-column:1/-1;margin-top:0!important;padding:7px 30px}
-  }
-  #mnu.cfg #home{display:none}
-  .st{display:flex;flex-direction:column;gap:5px}
-  .st .lab{display:flex;justify-content:space-between;font-size:12px;opacity:.85}
-  .st .lab b{font-weight:400;opacity:.7}
+  #mnu.cfg #home,#mnu.hlp #home{display:none}
+  #setp section h3{margin:12px 0 4px;font-size:12px;font-weight:600;letter-spacing:.1em;opacity:.5}
+  .st{display:flex;flex-direction:column;gap:4px;padding:4px 0}
+  .st .lab{display:flex;justify-content:space-between;font-size:13px}
+  .st .lab b{font-weight:600;color:var(--acc)}
   .st input[type=range]{width:100%;accent-color:#7fb2e5}
-  .tog{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:.9}
-  .tog button{min-width:74px!important;padding:5px 10px!important;font-size:12px!important}
-  #bm{position:fixed;top:calc(6px + var(--st));right:calc(78px + var(--sr));width:32px;height:32px;border-radius:6px;z-index:3;
-      display:flex;align-items:center;justify-content:center;font:15px/1 monospace;color:#fff;
-      background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.35);cursor:pointer;user-select:none}
+  .tog{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;padding:4px 0}
+  .tog small{display:block;font-size:11px;opacity:.55;line-height:1.4}
+  .tog button{flex:none;min-width:88px;font-size:13px;color:#fff;background:rgba(255,255,255,.07);border:1px solid var(--line2);
+              border-radius:999px;padding:6px 12px;cursor:pointer}
+  .tog button.on{background:rgba(72,160,102,.45);border-color:rgba(143,224,160,.85)}
+  #bback{margin-top:12px}
+  body:not(.touch) .to,body.coarse .mo{display:none!important}
+  #helpp{display:none;flex-direction:column;width:min(680px,94vw);max-height:calc(100vh - 24px);overflow:hidden;margin:auto}
+  #mnu.hlp #helpp{display:flex}
+  .hh{padding:16px 20px 0;flex:none}
+  #htabs{display:flex;gap:2px;margin-top:10px;border-bottom:1px solid var(--line);overflow-x:auto}
+  #htabs button{font-size:13px;color:rgba(255,255,255,.65);background:none;border:0;border-bottom:2px solid transparent;
+                padding:8px 12px;cursor:pointer;white-space:nowrap}
+  #htabs button.on{color:#fff;border-bottom-color:var(--acc)}
+  #hbody{flex:1;min-height:0;overflow-y:auto;padding:14px 20px 16px;font-size:13px;line-height:1.65;-webkit-overflow-scrolling:touch}
+  .hp{display:none}
+  .hp.on{display:block}
+  .hp h4{margin:16px 0 6px;font-size:13px;color:var(--acc)}
+  .hp>h4:first-child,.hp>div:first-child>h4:first-child{margin-top:0}
+  .hp ol,.hp ul{margin:0;padding-left:20px}
+  .hp li{margin:2px 0}
+  .hp p{margin:8px 0 0}
+  .hp .dim{opacity:.6;font-size:12px}
+  .keys{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:baseline}
+  .keys kbd{justify-self:start;font:600 12px var(--ui);padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.1);
+            border:1px solid var(--line2);white-space:nowrap}
+  body.touch #h-ctl .kbs{margin-top:18px;opacity:.75}
+  .hf{display:flex;gap:8px;justify-content:flex-end;padding:10px 20px 14px;border-top:1px solid var(--line);flex:none}
+  .hf .mb{font-size:14px;padding:8px 16px}
+  @media (max-height:480px){                  /* landscape phones: two columns of settings, tighter cards */
+    #setp.on{width:min(760px,96vw);padding:12px 18px}
+    .sgrid{columns:2;column-gap:28px}
+    .sgrid section{break-inside:avoid}
+    #setp section h3{margin:6px 0 2px}
+    .tog small{display:none}
+    .tog,.st{padding:2px 0}
+    #bback{margin-top:6px;padding:8px}
+    #home{padding:16px 22px 14px;gap:7px}
+    #home h1{font-size:30px}
+    #home .tag{margin-bottom:6px}
+    .mb{padding:8px 16px}
+    .mb.pri{padding:10px 16px}
+    .hh{padding:10px 18px 0}
+    .hh h2{display:none}
+    #hbody{padding:10px 18px 12px}
+    .hf{padding:8px 18px 10px}
+  }
 </style>
 </head>
 <body>
 <div id="wrap"><div id="view"><canvas id="gl"></canvas><canvas id="c"></canvas></div></div>
-<div id="hud"><span class="kb">WASD 移動 · Shift 或連按兩下 W 奔跑 · 空白跳 · 點擊畫面鎖定滑鼠看視角<br>
-左鍵/F 攻擊或挖 · 右鍵/E 放或射箭 · 1–6 / 滾輪 / 點欄位 選方塊<br>
-I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造(創造:背包裡有全部物品,連按兩下空白鍵飛行)<br>
-</span><span class="tc">左半邊拖出搖桿(推過外圈就奔跑) · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
-選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明) · 創造模式按 🕊 飛行<br>
-</span>夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
-種菜:鋤頭翻土 → 右鍵播種 → 保持濕潤(水 4 格內、灑水器、澆水壺、下雨)→ 成熟右鍵收成<br>
-背包上方的分頁:市集、料理、雜交培育圖、農場平面圖、寵物<span class="kb"> · M 農場圖 · P 寵物</span> · 晚上對床右鍵睡到天亮<br>
-寵物:拿野生動物最愛的食物對牠右鍵,多餵幾次就會跟你走 · 空手右鍵摸摸 · 寵物蛋放在地上會孵化<br>
-按住挖掘持續挖 · 石頭要木鎬、鐵礦要石鎬、鑽石要鐵鎬 · 對的工具快很多<span class="kb"><br>
-按住 T 快轉時間 · G 陰影 · R 天氣 · X(按兩次)重置世界 · H 隱藏說明 · Esc 或 ⚙ 開選單/設定</span></div>
+<div id="hud" class="pill"><span class="kb"><b>左鍵</b> 挖/打 · <b>右鍵</b> 放/用 · <b>I</b> 背包 · <b>H</b> 說明 · <b>Esc</b> 選單</span><span class="tap">點一下 <b>使用/放置</b> · 按住 <b>挖/打</b> · 拖曳 <b>看四周</b></span><span class="xh"><b>⛏</b> 挖/打 · <b>＋</b> 使用/放置 · 拖曳 <b>看四周</b></span></div>
+<div id="tut"><div class="th"><b>新手引導</b><span id="tutn"></span><button id="tutx">略過</button></div><div id="tutt"></div><div id="tutd"></div></div>
 <div id="cross"></div>
-<div id="clock">☀ 08:24</div>
+<div id="aim"><div id="mbar"><i></i></div><div id="tip"></div><div id="hint"></div></div>
+<div id="topr">
+  <div id="stat" class="pill"><div id="clock">☀ 08:24</div><div id="coin"></div></div>
+  <div id="bh" class="tb" title="操作說明(H)">❔</div>
+  <div id="bm" class="tb" title="選單(Esc)">⚙</div>
+</div>
 <div id="fps"></div>
-<div id="bd" class="btn">⛏</div>
-<div id="bp" class="btn">＋</div>
-<div id="bj" class="btn">⤒</div>
-<div id="bi" class="btn">🎒</div>
-<div id="bf" class="btn">🕊</div>
-<div id="bdn" class="btn">⤓</div>
-<div id="stk"><div id="knb"></div></div>
-<div id="bar"></div>
-<div id="hp"></div>
-<div id="buffs"></div>
-<div id="coin"></div>
+<div id="bd" class="btn"><i>⛏</i><b>挖/打</b></div>
+<div id="bp" class="btn"><i>＋</i><b>放/用</b></div>
+<div id="bj" class="btn"><i>⤒</i><b>跳</b></div>
+<div id="bf" class="btn"><i>🕊</i><b>飛</b></div>
+<div id="bdn" class="btn"><i>⤓</i><b>下降</b></div>
+<div id="stk"><div id="knb"></div><div id="stkl">移動</div></div>
+<div id="hb">
+  <div id="held"></div>
+  <div id="stats"><div id="hp"></div><div id="buffs"></div></div>
+  <div id="hotbar"><div id="bar"></div><div id="bi" title="背包(I)">🎒</div></div>
+</div>
 <div id="toasts"></div>
-<div id="tip"></div>
 <div id="sleep"></div>
 <div id="dmg"></div>
 <div id="inv"><div class="pw">
@@ -306,17 +449,20 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造(創造:背包
   </div>
   <div id="pbody">
     <div class="pg on" id="pg-bag">
-      <div id="invt">背包 — 拖曳搬移方塊,第一排是快捷欄</div>
-      <div id="invg"></div>
-      <div id="craft"></div>
+      <div id="bagl">
+        <div id="invt"></div>
+        <div id="invg"></div>
+        <div id="iinfo"></div>
+      </div>
+      <div id="craft"><h3>🔨 合成</h3><div id="rlist"></div></div>
       <div id="chead"><div id="chot"></div>
         <input id="catq" type="text" placeholder="🔍 搜尋物品(例如:鑽石、種子、蛋糕)" autocomplete="off" spellcheck="false"></div>
       <div id="cat"></div>
-      <div id="invx">I / Tab / Esc 關閉 · C 切換生存↔創造</div>
+      <div id="invx"><span class="kb">拖曳搬移 · I / Tab / Esc 關閉 · C 切換生存↔創造</span><span class="tc">拖曳搬移 · 點 ✕ 或旁邊的暗處關閉</span></div>
     </div>
     <div class="pg" id="pg-shop"><div class="cols"><div id="sell"></div><div id="buy"></div></div></div>
     <div class="pg" id="pg-cook">
-      <p class="dim">材料夠了就能煮。拿著料理按右鍵吃掉會回血並得到效果,也可以拿去市集賣。雞蛋、牛奶、蜂蜜、松露要靠寵物。</p>
+      <p class="dim" id="cookhint"></p>
       <div id="cooklist"></div>
     </div>
     <div class="pg" id="pg-tree">
@@ -349,40 +495,157 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造(創造:背包
     </div>
   </div>
 </div></div>
-<div id="dead">
-  <div>你被擊倒了</div>
-  <div style="opacity:.7;font-size:13px">背包會保留,重生在出生點</div>
-  <button id="rb">重生</button>
-</div>
+<div id="dead"><div class="card">
+  <h2>你被擊倒了</h2>
+  <p>背包裡的東西都還在,會在出生點重生</p>
+  <button id="rb" class="mb pri">重生</button>
+</div></div>
 <div id="ghost"></div>
-<div id="bm">⚙</div>
 <div id="mnu">
-  <div id="home">
+  <div id="home" class="card">
     <h1>VOXEL</h1>
     <p class="tag">方塊世界 · 種田 · 寵物 · 季節 · 日夜 · 怪物</p>
-    <div style="display:flex;flex-direction:column;gap:9px">
-      <button id="bstart">開始遊戲</button>
-      <button id="bset">設定</button>
-      <button id="bres">重新產生世界</button>
-    </div>
+    <button id="bstart" class="mb pri">開始遊戲</button>
+    <button id="bhelp" class="mb">❔ 操作說明</button>
+    <button id="bset" class="mb">⚙ 設定</button>
+    <button id="bres" class="mb warn">重新產生世界</button>
+    <div id="quick"><span class="kb">W A S D 走路 · 滑鼠看四周<br>左鍵 挖 · 右鍵 放/用 · I 背包 · H 說明</span><span class="tap">左下搖桿走路 · 拖曳畫面看四周<br>點一下 放/用 · 按住 挖</span><span class="xh">左下搖桿走路 · 拖曳畫面看四周<br>⛏ 挖 · ＋ 放/用</span></div>
   </div>
-  <div id="setp">
-    <div class="st">
-      <div class="lab"><span>滑鼠靈敏度</span><b id="vMs">6</b></div>
-      <input type="range" id="sMs" min="1" max="20" step="1" value="6">
+  <div id="setp" class="card">
+    <h2>設定</h2>
+    <div class="sgrid">
+      <section><h3>操作</h3>
+        <div class="st mo"><div class="lab"><span>滑鼠靈敏度</span><b id="vMs">6</b></div>
+          <input type="range" id="sMs" min="1" max="20" step="1" value="6"></div>
+        <div class="st to"><div class="lab"><span>觸控靈敏度</span><b id="vTs">6</b></div>
+          <input type="range" id="sTs" min="1" max="20" step="1" value="6"></div>
+        <div class="tog"><span>Y 軸反轉</span><button id="sIy">關</button></div>
+        <div class="tog to"><span>觸控操作<small>點畫面:點一下放/用、按住挖<br>準心+按鈕:對準後按 ⛏ 或 ＋</small></span><button id="sTm">點畫面</button></div>
+        <div class="tog to"><span>自動跳躍<small>走向一格高的方塊會自己跳上去</small></span><button id="sAj">開</button></div>
+      </section>
+      <section><h3>畫面</h3>
+        <div class="tog"><span>畫質</span><button id="sQ">自動</button></div>
+        <div class="tog"><span>陰影</span><button id="sSh">開</button></div>
+        <div class="tog"><span>顯示 FPS</span><button id="sFp">關</button></div>
+        <div class="tog"><span>操作提示<small>左上角的一行提示</small></span><button id="sHp">開</button></div>
+      </section>
+      <section><h3>遊戲</h3>
+        <div class="tog"><span>模式<small>創造:全部物品無限用,還能飛</small></span><button id="sCr">生存</button></div>
+        <div class="tog"><span>和平模式<small>不會出現怪物</small></span><button id="sPc">關</button></div>
+      </section>
     </div>
-    <div class="st">
-      <div class="lab"><span>觸控靈敏度</span><b id="vTs">6</b></div>
-      <input type="range" id="sTs" min="1" max="20" step="1" value="6">
+    <button id="bback" class="mb pri">返回</button>
+  </div>
+  <div id="helpp" class="card">
+    <div class="hh"><h2>操作說明</h2>
+      <div id="htabs"><button data-h="ctl" class="on">🎮 操作</button><button data-h="farm">🌱 種田</button><button data-h="pet">🐾 寵物</button><button data-h="more">💡 更多</button></div></div>
+    <div id="hbody">
+      <div class="hp on" id="h-ctl">
+        <div class="tc">
+          <h4>觸控<span class="tap">(點畫面模式)</span><span class="xh">(準心+按鈕模式)</span></h4>
+          <div class="keys">
+            <kbd>左下搖桿</kbd><span>走路;推到外圈會奔跑</span>
+            <kbd>拖曳畫面</kbd><span>轉頭看四周</span>
+            <kbd class="tap">點一下</kbd><span class="tap">放方塊、用手上的東西(翻土、播種、澆水、吃、射箭)、收成、餵寵物、打怪</span>
+            <kbd class="tap">按住不放</kbd><span class="tap">挖手指下的方塊、連續打怪</span>
+            <kbd class="xh">⛏</kbd><span class="xh">按住挖準心對著的方塊、打怪</span>
+            <kbd class="xh">＋</kbd><span class="xh">放方塊、用手上的東西、收成、餵寵物</span>
+            <kbd>⤒</kbd><span>跳(走向一格高的方塊會自動跳上去)</span>
+            <kbd>快捷欄</kbd><span>點一格,換手上拿的東西</span>
+            <kbd>🎒</kbd><span>背包:合成、市集、料理、培育圖、農場圖、寵物</span>
+            <kbd>🕊 ⤓</kbd><span>創造模式:🕊 飛起來/落地,按住 ⤒ 上升、⤓ 下降</span>
+            <kbd>⚙ ❔</kbd><span>選單與設定 · 這個說明</span>
+          </div>
+          <p class="dim">設定裡可以換成另一種操作:「點畫面」或「準心+按鈕」。</p>
+        </div>
+        <div class="kbs">
+          <h4>鍵盤滑鼠</h4>
+          <div class="keys">
+            <kbd>W A S D</kbd><span>走路 · Shift 或連按兩下 W 奔跑</span>
+            <kbd>空白鍵</kbd><span>跳</span>
+            <kbd>滑鼠</kbd><span>先點一下畫面鎖定滑鼠,再移動滑鼠看四周</span>
+            <kbd>左鍵 / F</kbd><span>挖方塊(按住)、打怪</span>
+            <kbd>右鍵 / E</kbd><span>放方塊、用手上的東西、收成、餵寵物、睡覺</span>
+            <kbd>1–6 / 滾輪</kbd><span>換快捷欄</span>
+            <kbd>I / Tab</kbd><span>背包與合成</span>
+            <kbd>M · P</kbd><span>農場平面圖 · 寵物</span>
+            <kbd>C</kbd><span>生存 ↔ 創造(創造:連按兩下空白鍵飛行,空白上升、Shift 下降)</span>
+            <kbd>H · Esc</kbd><span>這個說明 · 選單與設定</span>
+            <kbd>T(按住)</kbd><span>時間快轉</span>
+            <kbd>G · R</kbd><span>陰影開關 · 換天氣</span>
+            <kbd>X(按兩次)</kbd><span>重置整個世界</span>
+          </div>
+        </div>
+      </div>
+      <div class="hp" id="h-farm">
+        <h4>種菜四步驟</h4>
+        <ol>
+          <li><b>翻土</b>:拿鋤頭對草地或泥土右鍵,變成耕地</li>
+          <li><b>播種</b>:拿種子對耕地右鍵種下</li>
+          <li><b>保持濕潤</b>:水 4 格內、灑水器、澆水壺、下雨都可以,乾的地長得很慢</li>
+          <li><b>收成</b>:長出果實就成熟了,右鍵收成,還會自動再種下去</li>
+        </ol>
+        <h4>長得好的秘訣</h4>
+        <ul>
+          <li>對準作物會顯示長到幾 %,和它缺什麼(缺水、非當季、太暗)</li>
+          <li>每種作物有自己的季節(每季 2 天);玻璃屋頂下的溫室不分季節</li>
+          <li>稻米、甘蔗、芋頭要種在水旁邊</li>
+          <li>施肥長快 50%;晚上有火把照著的作物也會繼續長</li>
+        </ul>
+        <h4>培育新品種</h4>
+        <ul>
+          <li>兩株<b>不同的成熟作物</b>中間留一格空耕地,就有機會在那格長出新品種</li>
+          <li>🎒 裡的 🧬 培育圖可以看哪兩種能配出什麼</li>
+        </ul>
+        <h4>賺錢與料理</h4>
+        <ul>
+          <li>🏪 市集:賣作物換錢,買工具、灑水器和種子;不合季節的作物賣得比較貴</li>
+          <li>🍳 料理:材料夠了就能煮,吃了會回血,還有跑快、跳高、夜視等效果</li>
+          <li>晚上對床右鍵,一覺睡到天亮</li>
+        </ul>
+      </div>
+      <div class="hp" id="h-pet">
+        <h4>馴服</h4>
+        <ul>
+          <li>草地、森林、水邊會出現野生動物,有些只在傍晚、晚上或某些季節出現</li>
+          <li>對準動物會顯示牠最愛吃什麼;拿著牠最愛的食物,牠會自己走過來</li>
+          <li>拿著食物對牠右鍵餵牠,多餵幾次就會跟著你(最多養 20 隻)</li>
+        </ul>
+        <h4>照顧</h4>
+        <ul>
+          <li>每天餵一次、空手右鍵摸摸,好感會上升;好感越高,幫的忙越多</li>
+          <li>每天早上 6 點,寵物會帶東西給你:雞蛋、牛奶、蜂蜜、種子、金幣……</li>
+          <li>每種寵物有自己的本領:保護你、讓作物長快、吃掉雜草、讓耕地保持濕潤……</li>
+          <li>🎒 裡的 🐾 寵物分頁:改名、讓牠待著或跟著你、全部叫過來、看圖鑑</li>
+        </ul>
+        <h4>寵物蛋</h4>
+        <ul>
+          <li>寵物蛋放在地上會孵出寵物寶寶,旁邊放火把孵得快一倍</li>
+          <li>拔雜草、挖很深的石頭、挖鑽石礦、收成高階作物,都有機會得到蛋</li>
+        </ul>
+      </div>
+      <div class="hp" id="h-more">
+        <h4>生存</h4>
+        <ul>
+          <li>晚上黑暗的地方會出現怪物;火把附近不會生怪,白天怪物會被太陽燒掉</li>
+          <li>被打倒會回到出生點,背包裡的東西都還在</li>
+          <li>生命會慢慢恢復,吃料理能馬上回血</li>
+        </ul>
+        <h4>工具與合成</h4>
+        <ul>
+          <li>石頭要木鎬、鐵礦要石鎬、鑽石礦要鐵鎬才挖得動;用對的工具挖得快很多</li>
+          <li>🎒 背包右邊是合成清單,材料夠了按「做」</li>
+          <li>在背包裡點一下物品,就能看它的用途</li>
+        </ul>
+        <h4>模式與存檔</h4>
+        <ul>
+          <li>生存 ↔ 創造:設定裡的「模式」(鍵盤按 C);創造模式什麼都有、無限用,還能飛</li>
+          <li>和平模式:在設定裡打開,就不會出現怪物</li>
+          <li>遊戲每 8 秒自動存在這個瀏覽器裡</li>
+        </ul>
+      </div>
     </div>
-    <div class="tog"><span>Y 軸反轉</span><button id="sIy">關</button></div>
-    <div class="tog"><span>陰影</span><button id="sSh">開</button></div>
-    <div class="tog"><span>畫質</span><button id="sQ">自動</button></div>
-    <div class="tog"><span>顯示 FPS</span><button id="sFp">關</button></div>
-    <div class="tog"><span>操作說明</span><button id="sHp">開</button></div>
-    <div class="tog"><span>模式</span><button id="sCr">生存</button></div>
-    <div class="tog"><span>和平模式(不生怪)</span><button id="sPc">關</button></div>
-    <button id="bback" style="margin-top:4px">返回</button>
+    <div class="hf"><button id="htut" class="mb">🔁 重新看新手引導</button><button id="hback" class="mb pri">返回</button></div>
   </div>
 </div>
 <script>
@@ -393,8 +656,8 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造(創造:背包
 //  (WebGL2) when it can, else in JavaScript into an ImageData buffer. Sections, in order:
 //    DOM · world · terrain · torch light · items & crops · textures & icons · save/load ·
 //    player · mining & farm tools · entities · farming · pets · sky · CPU renderer ·
-//    GPU renderer · overlays · HUD & panel · farm UI · menu & settings ·
-//    input · main loop · boot
+//    GPU renderer · overlays · HUD & panel · first-time guide · farm UI · menu, settings & help ·
+//    input (keys, mouse, touch: 點畫面 or 準心+按鈕) · main loop · boot
 // =============================================================================
 
 // ---- DOM ---------------------------------------------------------------------
@@ -404,7 +667,10 @@ const FORCE_CPU = /[?&]cpu\b/.test(location.search);                          //
 const hudEl = $('hud'), clockEl = $('clock'), fpsEl = $('fps'), barEl = $('bar'), hpEl = $('hp'),
       dmgEl = $('dmg'), deadEl = $('dead'), menuEl = $('mnu'), setpEl = $('setp'),
       invEl = $('inv'), invGrid = $('invg'), invTitle = $('invt'), ghostEl = $('ghost'),
-      stickEl = $('stk'), knobEl = $('knb');
+      stickEl = $('stk'), knobEl = $('knb'), heldEl = $('held'), aimEl = $('aim'), hintEl = $('hint'),
+      mbarEl = $('mbar'), mbarFill = $('mbar').querySelector('i');
+const isTouch = () => document.body.classList.contains('touch');   // a phone or tablet, or a finger has touched the screen
+const tapMode = () => isTouch() && !settings.tm;                     // 點畫面: tap to use, hold to dig (else 準心+按鈕)
 
 // ---- world -------------------------------------------------------------------
 // SX × SY × SZ cells (128 × 64 × 128), index = y << YSH | z << ZSH | x. The sizes are powers of two,
@@ -1562,7 +1828,8 @@ let tod = .35;                                // time of day 0..1 (.25 sunrise �
 let weather = 0;                              // 0 clear · 1 rain · 2 snow
 let paused = true, started = false, invOpen = false, creative = false;
 let selI = 0, dragI = -1;
-const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1, peace: 0 };  // quality -1 = auto
+const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1, peace: 0,   // quality -1 = auto
+                   tm: 0, aj: 1 };            // tm: touch controls 0 點畫面 · 1 準心+按鈕 · aj: auto-jump with the touch stick
 let needStarter = false, bootMsg = '';       // bootMsg: shown when the game first starts
 let sprinting = false, sprintLatch = false, lastWDown = -1e9, fovK = 1;   // sprint state; fovK widens the view while running
 let flying = false, lastSpaceT = -1e9, upHold = false, downHold = false;   // creative flight; ⤒ / ⤓ held on touch screens
@@ -1713,11 +1980,23 @@ function movePlayer(h, mu, mv, speed, lift = 0) {   // one physics sub-step of h
   P.z = Math.max(1 + PW, Math.min(SZ - 1 - PW, P.z));
 }
 
-// ---- targeting: ray from the eye through the crosshair, reach 7 cells ----
+// ---- targeting: ray from the eye through the crosshair (or, on a touch screen, under the finger), reach 7 cells ----
+let aimDir = null;                            // 點畫面 mode: the unit ray under the finger · null: straight ahead, the crosshair
+function lookDir() {
+  if (aimDir) return aimDir;
+  const cp = Math.cos(P.b);
+  return [Math.sin(P.a) * cp, Math.sin(P.b), Math.cos(P.a) * cp];
+}
+function screenRay(x, y) {                    // the unit ray from the eye through a point on the screen (client pixels)
+  const r = viewEl.getBoundingClientRect(), f = view.f / fovK;
+  const dx = ((x - r.left) * view.w / r.width - view.w / 2) / f, dy = (view.h / 2 - (y - r.top) * view.h / r.height) / f;
+  const sx = Math.sin(P.a), cx = Math.cos(P.a), sp = Math.sin(P.b), cp = Math.cos(P.b);   // F + R·dx + U·dy (see project())
+  const vx = sx * cp + cx * dx - sx * sp * dy, vy = sp + cp * dy, vz = cx * cp - sx * dx - cx * sp * dy, l = Math.hypot(vx, vy, vz);
+  return [vx / l, vy / l, vz / l];
+}
 // returns [hit x,y,z, previous (empty) x,y,z] or null
 function target(wantWater) {                  // water is looked through unless you hold an empty bucket
-  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
-  const px = P.x, py = P.y + EYE, pz = P.z, dx = sx * cp, dy = sp, dz = cx * cp;
+  const px = P.x, py = P.y + EYE, pz = P.z, [dx, dy, dz] = lookDir();
   let gx = px | 0, gy = py | 0, gz = pz | 0;
   const stx = dx > 0 ? 1 : -1, sty = dy > 0 ? 1 : -1, stz = dz > 0 ? 1 : -1;
   const tdx = Math.abs(1 / dx), tdy = Math.abs(1 / dy), tdz = Math.abs(1 / dz);
@@ -1738,7 +2017,7 @@ function target(wantWater) {                  // water is looked through unless 
 // ---- mining (hold to break, gated by tool tier) and placing ----
 let mineIdx = -1, mineProg = 0, holdMine = false, creativeCD = 0;
 let hint = '', hintT = 0;
-const showHint = (s, t) => { hint = s; hintT = t; };
+const showHint = (s, t) => { hint = dev(s); hintT = t; };
 const heldItem = () => creative ? CINV[selI] : INV[selI].id;        // creative: its own hotbar, every item infinite
 const heldTier = () => info(heldItem()).tier || 0;
 function breakSpeed(b) { const t = info(heldItem()); return t.kind && t.kind === info(b).tl ? t.spd : 1; }
@@ -1749,16 +2028,16 @@ function mine(dt) {
   if (!b) { mineIdx = -1; mineProg = 0; return; }
   if (i !== mineIdx) { mineIdx = i; mineProg = 0; }
   if (creative) {                                                    // instant, but not one block per frame
-    if (creativeCD <= 0) { setBlock(i, AIR); creativeCD = .2; }
+    if (creativeCD <= 0) { setBlock(i, AIR); creativeCD = .2; tutMark('mine'); }
     mineIdx = -1; return;
   }
-  if (b >= CROP0 || b === TALL) { breakFarmBlock(i, b); mineIdx = -1; mineProg = 0; return; }   // plants come off at once
+  if (b >= CROP0 || b === TALL) { breakFarmBlock(i, b); mineIdx = -1; mineProg = 0; tutMark('mine'); return; }   // plants come off at once
   const bi = info(b);
   if ((bi.tr || 0) > heldTier()) {
     mineProg = 0; showHint('需要' + TMAT[bi.tr].n + '質以上的' + (bi.tl === 'p' ? '鎬' : '工具'), 1.2); return;
   }
   mineProg += dt * breakSpeed(b) / (bi.hd || .5) * (buffs.dig > 0 ? 1.6 : 1);
-  if (mineProg >= 1) { breakFarmBlock(i, b); setBlock(i, AIR); give(bi.dp || b, 1); oreEgg(i, b); mineProg = 0; mineIdx = -1; }
+  if (mineProg >= 1) { breakFarmBlock(i, b); setBlock(i, AIR); give(bi.dp || b, 1); oreEgg(i, b); mineProg = 0; mineIdx = -1; tutMark('mine'); }
 }
 function place() {
   const o = target();
@@ -1772,6 +2051,7 @@ function place() {
       ay + 1 > P.y && ay < P.y + PH) return;                         // inside the player
   setBlock(idx(ax, ay, az), sel);
   if (!creative) { if (!--INV[selI].n) INV[selI].id = 0; drawBar(); if (invOpen) drawInv(); }
+  tutMark('place');
 }
 function use1() { if (dead || paused) return; if (!melee()) holdMine = true; }   // hit a mob, else start mining
 function use1Up() { holdMine = false; mineProg = 0; mineIdx = -1; }
@@ -1792,7 +2072,7 @@ function use2() {                             // right click / E: pets, sleep, h
     return;
   }
   if (it.kind === 'h') { if (!till(o, it.tier)) showHint('草地或泥土才能翻土', 1.2); return; }
-  if (it.seed !== undefined) { if (!plant(o, it.seed)) showHint('種在耕地上(先用鋤頭翻土)', 1.5); return; }
+  if (it.seed !== undefined) { if (!plant(o, it.seed)) showHint('種在耕地上(先用鋤頭翻土)', 1.5); else tutMark('plant'); return; }
   if (it.can) { if (!waterAt(o)) showHint('對著耕地或作物澆水', 1.2); return; }
   if (it.fert) { if (!fertilize(o)) showHint('對著還沒施肥的耕地', 1.2); return; }
   place();
@@ -1845,26 +2125,31 @@ function hurtPlayer(n) {
   hp -= n; hurtT = .35; regenT = 0; shakeT = .3;
   if (hp <= 0) { hp = 0; dead = true; }
 }
-function melee() {                            // swing at the nearest mob in the crosshair cone
-  const dmg = info(heldItem()).dmg || 1;      // bare hands still hurt a little
-  swingT = .18;
-  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
-  const lx = sx * cp, ly = sp, lz = cx * cp;
+function mobUnderAim() {                      // the nearest monster in reach: in the crosshair cone, or right under the finger
+  const [lx, ly, lz] = lookDir(), ey = P.y + EYE;
   let best = -1, bestD = 1e9;
   for (let i = 0; i < mobs.length; i++) {
-    const m = mobs[i], dx = m.x - P.x, dy = m.y + .8 - (P.y + EYE), dz = m.z - P.z;
+    const m = mobs[i], dx = m.x - P.x, dy = m.y + .8 - ey, dz = m.z - P.z;
     const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    if (d > 3.2 || (dx * lx + dy * ly + dz * lz) / d < .55) continue;  // reach, roughly in front
+    if (d > 3.2) continue;                                             // reach
+    if (aimDir ? rayBox(P.x, ey, P.z, lx, ly, lz, m.x - .45, m.y - .1, m.z - .45, m.x + .45, m.y + 1.9, m.z + .45) > 3.8
+               : (dx * lx + dy * ly + dz * lz) / d < .55) continue;    // under the finger · roughly in front
     if (d < bestD) { bestD = d; best = i; }
   }
+  return best;
+}
+function melee() {                            // swing at the nearest monster in the crosshair cone (or under the finger)
+  const dmg = info(heldItem()).dmg || 1;      // bare hands still hurt a little
+  swingT = .18;
+  const best = mobUnderAim();
   if (best < 0) return false;
   if (hurtMob(mobs[best], dmg)) mobs.splice(best, 1);
   return true;
 }
 function shoot() {
   if (!creative) { if (!take(101, 1)) return; drawBar(); if (invOpen) drawInv(); }
-  const cp = Math.cos(P.b), sp = Math.sin(P.b), cx = Math.cos(P.a), sx = Math.sin(P.a);
-  arrows.push({ x: P.x, y: P.y + 1.4, z: P.z, vx: sx * cp * 24, vy: sp * 24 + 2, vz: cx * cp * 24, life: 4 });
+  const [dx, dy, dz] = lookDir();             // where the crosshair (or the finger) points
+  arrows.push({ x: P.x, y: P.y + 1.4, z: P.z, vx: dx * 24, vy: dy * 24 + 2, vz: dz * 24, life: 4 });
 }
 function tickEntities(h) {                    // one sub-step of h seconds (needs sky.dayf / sky.sunEl)
   const { dayf, sunEl } = sky;
@@ -2616,8 +2901,8 @@ function rayBox(ox, oy, oz, dx, dy, dz, x0, y0, z0, x1, y1, z1) {   // distance 
   axis(ox, dx, x0, x1); axis(oy, dy, y0, y1); axis(oz, dz, z0, z1);
   return tn <= tf && tf > 0 ? Math.max(tn, 0) : Infinity;
 }
-function pickPet(o) {                         // the pet under the crosshair within 4 blocks, unless a block is in front of it
-  const cp = Math.cos(P.b), dx = Math.sin(P.a) * cp, dy = Math.sin(P.b), dz = Math.cos(P.a) * cp, ey = P.y + EYE;
+function pickPet(o) {                         // the pet under the crosshair (or finger) within 4 blocks, unless a block is in front of it
+  const [dx, dy, dz] = lookDir(), ey = P.y + EYE;
   let tMax = 4, best = null;
   if (o) tMax = Math.min(tMax, rayBox(P.x, ey, P.z, dx, dy, dz, o[0], o[1], o[2], o[0] + 1, o[1] + 1, o[2] + 1));
   for (const p of pets) {
@@ -2747,9 +3032,9 @@ const qualityLevel = () => settings.quality < 0 ? autoLevel : settings.quality;
 
 function setResolution(w, h, cpu) {            // the 2D canvas: whole frame on CPU, overlay layer on GPU
   view.w = w; view.h = h;
-  view.f = Math.min(w / 2, h * 5 / 6);        // focal length (px): 90° wide or 62° tall, whichever is tighter
+  view.f = Math.max(Math.min(w / 2, h * 5 / 6), h * .45);   // focal length (px): 90° wide or 62° tall, whichever is tighter (portrait: 96° tall)
   view.cxo = w / 2 / view.f; view.cyo = h / 2 / view.f;
-  view.ui = h / 168;                          // overlays are authored for a 168 px tall frame
+  view.ui = Math.min(w, h) / 168;             // overlays are authored for a 168 px tall frame (portrait: 168 wide)
   canvas.width = w; canvas.height = h;
   if (cpu) {
     view.img = new ImageData(w, h);
@@ -2759,9 +3044,9 @@ function setResolution(w, h, cpu) {            // the 2D canvas: whole frame on 
   makeParticles();
   needRender = true;
 }
-function fitView() {                          // match the screen's shape; letterbox only past 1.25–2.4
+function fitView() {                          // match the screen's shape; letterbox only past .42–2.4 (portrait phones fill the screen)
   const vw = innerWidth || 1, vh = innerHeight || 1;
-  const aspect = Math.min(2.4, Math.max(1.25, vw / vh));
+  const aspect = Math.min(2.4, Math.max(.42, vw / vh));
   let cw = vw, ch = vw / aspect;
   if (ch > vh) { ch = vh; cw = vh * aspect; }
   viewEl.style.width = cw + 'px'; viewEl.style.height = ch + 'px';
@@ -3840,18 +4125,8 @@ function drawOverlays(dt, tg) {
   // the rest is drawn in overlay units: a frame 168 tall and VW wide
   const ui = view.ui, VW = view.w / ui, VH = view.h / ui;
   g2d.save(); g2d.scale(ui, ui);
-  if (mineProg > 0) {                         // mining progress
-    g2d.fillStyle = 'rgba(0,0,0,.55)'; g2d.fillRect(VW / 2 - 26, VH * .62, 52, 4);
-    g2d.fillStyle = '#8fe0a0'; g2d.fillRect(VW / 2 - 25, VH * .62 + 1, 50 * Math.min(1, mineProg), 2);
-  }
-  if (hintT > 0 && hint) {                    // tool / confirmation hint
-    g2d.font = '8px monospace';
-    const tw = Math.max(104, g2d.measureText(hint).width + 10);
-    g2d.fillStyle = 'rgba(0,0,0,.5)'; g2d.fillRect(VW / 2 - tw / 2, VH * .68, tw, 11);
-    g2d.fillStyle = '#ffd9a0'; g2d.textAlign = 'center'; g2d.fillText(hint, VW / 2, VH * .68 + 8); g2d.textAlign = 'left';
-  }
   const held = heldItem(), ic = ICON_CANVAS[held];
-  if (ic && !dead) {                          // held item in the corner, swinging on use
+  if (ic && !dead && !isTouch()) {            // held item in the corner, swinging on use
     const sw = swingT > 0 ? 1 - swingT / .18 : 1;                    // 0 at swing start, 1 at rest
     const arc = swingT > 0 ? Math.sin(sw * 3.14) * 14 : 0;
     g2d.imageSmoothingEnabled = false;
@@ -3878,8 +4153,8 @@ function drawOverlays(dt, tg) {
 }
 
 // ---- HUD: hotbar, bag, crafting, health ----
-function slotHTML(it, i, hb, on) {
-  return '<div class="slot' + (it.id ? ' i' + it.id : ' e') + (hb ? ' hb' : '') + (on ? ' on' : '') + (i === dragI ? ' src' : '') +
+function slotHTML(it, i, hb, on, pick) {
+  return '<div class="slot' + (it.id ? ' i' + it.id : ' e') + (hb ? ' hb' : '') + (on ? ' on' : '') + (i === dragI ? ' src' : '') + (pick ? ' pick' : '') +
     '" data-i="' + i + '" title="' + nameOf(it.id) + '">' +
     (hb ? '<span>' + (i + 1) + '</span>' : '') + (it.id ? '<i>' + (it.n < 0 ? '∞' : it.n > 1 ? it.n : '') + '</i>' : '') + '</div>';
 }
@@ -3892,12 +4167,12 @@ function drawInv() {
   if (creative) drawCatalog();
   else {
     let s = '';
-    for (let i = 0; i < 24; i++) s += slotHTML(INV[i], i, i < 6, i === selI);
+    for (let i = 0; i < 24; i++) s += slotHTML(INV[i], i, i < 6, i === selI, i === infoI);
     invGrid.innerHTML = s;
-    RCP.forEach((rc, ri) => { craftBtns[ri].disabled = !rc[0].every(g => has(g[0], g[1])); });
+    drawItemInfo(); drawCraft();
   }
-  invTitle.textContent = creative ? '創造模式 — 點一個物品放進選中的快捷欄格子(也可以拖曳),全部無限;生存背包原封不動'
-                                  : '背包 — 拖曳搬移方塊,第一排就是快捷欄';
+  invTitle.textContent = creative ? '創造模式:點一個物品放進選中的快捷欄格子(也可以拖曳),全部無限;生存背包原封不動'
+                                  : '背包 · 金框的第一排是快捷欄';
   if (panelTab === 'shop') drawShop(); else if (panelTab === 'cook') drawCook();   // their lists depend on the bag
 }
 // the creative bag: its hotbar on top, then every item by kind; click one (or drag it onto a slot) to hold it
@@ -3932,7 +4207,7 @@ function setCreative(on) {                    // survival ↔ creative (C key, o
   document.body.classList.toggle('creative', creative);
   if (!creative) setFlying(false);
   drawBar(); if (invOpen) drawInv();
-  $('sCr').textContent = creative ? '創造' : '生存';
+  $('sCr').textContent = creative ? '創造' : '生存'; $('sCr').classList.toggle('on', creative);
   if (creative && started && !creativeTold) {
     creativeTold = true;
     toast('🎨 創造模式:背包裡有全部物品(無限),' + (isTouch() ? '按 🕊 飛行' : '連按兩下空白鍵飛行'), 'big');
@@ -3956,23 +4231,48 @@ function drawHP() {
   }
   hpEl.innerHTML = s;
 }
-const craftBtns = RCP.map(rc => {
-  const b = document.createElement('button');
-  b.textContent = rc[2];
-  b.onclick = () => {
-    if (!rc[0].every(g => has(g[0], g[1]))) return;
-    rc[0].forEach(g => take(g[0], g[1]));
-    give(rc[1][0], rc[1][1]);
-    drawInv();
-  };
-  $('craft').appendChild(b);
-  return b;
-});
+// recipes as cards: what it makes, what it takes (have / need, red when short), craftable ones first
+const invCount = id => INV.reduce((a, s) => a + (s.id === id ? s.n : 0), 0);
+function drawCraft() {
+  const list = RCP.map((rc, ri) => [rc, ri, rc[0].every(g => has(g[0], g[1]))]).sort((a, b) => b[2] - a[2] || a[1] - b[1]);
+  $('rlist').innerHTML = list.map(([rc, ri, ok]) => {
+    const [out, n] = rc[1];
+    const ing = rc[0].map(([id, k]) => { const c = invCount(id); return '<span class="ing' + (c >= k ? '' : ' miss') + '">' + iconImg(id) + nameOf(id) + ' ' + c + '/' + k + '</span>'; }).join('');
+    return '<div class="rc' + (ok ? ' ok' : '') + '">' + iconImg(out, 'big') + '<div class="rx"><b>' + nameOf(out) + (n > 1 ? ' ×' + n : '') + '</b><div>' + ing + '</div></div>' +
+           '<button data-craft="' + ri + '"' + (ok ? '' : ' disabled') + '>做</button></div>';
+  }).join('');
+}
+$('rlist').onclick = e => {
+  const ri = e.target.dataset ? e.target.dataset.craft : undefined;
+  if (ri === undefined) return;
+  const rc = RCP[+ri];
+  if (!rc[0].every(g => has(g[0], g[1]))) return;
+  rc[0].forEach(g => take(g[0], g[1]));
+  give(rc[1][0], rc[1][1]);
+  toast('🔨 做好了:' + nameOf(rc[1][0]) + (rc[1][1] > 1 ? ' ×' + rc[1][1] : ''));
+  drawInv();
+};
+// the picked bag slot, described under the grid: what it is for, what it sells for, and a button to hold it
+let infoI = -1;
+function drawItemInfo() {
+  const el = $('iinfo'), it = infoI >= 0 ? INV[infoI] : null;
+  if (!it || !it.id) { el.innerHTML = '<p class="dim">' + (isTouch() ? '點一下物品,看它的用途' : '滑鼠指著物品,看它的用途') + ';按住拖曳可以搬到別格</p>'; return; }
+  const pr = sellPrice(it.id), how = dev(itemHow(it.id));
+  el.innerHTML = iconImg(it.id, 'big') + '<div class="ix"><div class="nm">' + nameOf(it.id) + (it.n > 1 ? ' ×' + it.n : '') + '</div>' +
+    (how ? '<div class="how">' + how + '</div>' : '') + (pr ? '<div class="dim">市集收購 💰' + pr + '</div>' : '') +
+    (infoI === selI ? '<div class="dim">✋ 正拿在手上</div>' : '<button id="ihold">✋ 拿在手上</button>') + '</div>';
+}
+$('iinfo').onclick = e => {                   // hold it: a hotbar slot is picked, anything else swaps into the held slot
+  if (e.target.id !== 'ihold' || infoI < 0 || !INV[infoI].id) return;
+  if (infoI < 6) selI = infoI;
+  else { const a = INV[selI]; INV[selI] = INV[infoI]; INV[infoI] = a; infoI = selI; }
+  toast('✋ 拿著' + nameOf(INV[selI].id));
+  drawBar(); drawInv();
+};
 function toggleInv(open) {
   invOpen = !!open; invEl.classList.toggle('on', invOpen); document.body.classList.toggle('inv', invOpen);
-  dragI = -1; ghostEl.style.display = 'none';
-  barEl.style.display = invOpen ? 'none' : 'flex';                  // the grid's first row already is the hotbar
-  if (invOpen) { resetTouch(); unlockPointer(); drawCoins(); showTab(panelTab); }
+  dragI = -1; bagPress = null; ghostEl.style.display = 'none';
+  if (invOpen) { resetTouch(); unlockPointer(); drawCoins(); showTab(panelTab); tutMark('bag'); }
   else if (!paused && !dead && !isTouch()) lockPointer();
   drawBar();
 }
@@ -3980,7 +4280,7 @@ function respawn() {
   hp = maxHp(); dead = false; hurtT = 0; regenT = 0;
   placeAtSpawn();
   mobs.length = 0; arrows.length = 0;
-  deadEl.classList.remove('on'); drawHP();
+  deadEl.classList.remove('on'); document.body.classList.remove('dead'); drawHP();
 }
 function resetWorld() {
   generateWorld(); relight(); newKit(); mapSel = treeSel = -1;
@@ -3992,14 +4292,14 @@ const coinEl = $('coin'), buffsEl = $('buffs'), toastsEl = $('toasts'), tipEl = 
 const ICON_URL = {};                          // id → data URL, filled by makeIconCSS
 function toast(msg, kind) {
   const d = document.createElement('div');
-  d.className = 'toast' + (kind ? ' ' + kind : ''); d.textContent = msg;
+  d.className = 'toast' + (kind ? ' ' + kind : ''); d.textContent = dev(msg);
   toastsEl.appendChild(d);
   while (toastsEl.children.length > 4) toastsEl.firstChild.remove();
   setTimeout(() => d.classList.add('out'), kind === 'big' ? 3200 : 2200);
   setTimeout(() => d.remove(), kind === 'big' ? 3800 : 2800);
 }
 function drawCoins() {                        // season · day, and coins, under the clock (and in the panel)
-  coinEl.innerHTML = SEASON_ICON[season()] + ' ' + SEASONS[season()] + '天 · 第 ' + day + ' 天<br><b>💰 ' + coins + '</b>';
+  coinEl.innerHTML = SEASON_ICON[season()] + ' ' + SEASONS[season()] + '天 第 ' + day + ' 天 · <b>💰 ' + coins + '</b>';
   $('pcoin').textContent = '💰 ' + coins;
 }
 function fadeSleep() {                        // the screen goes black, then fades back in: a night has passed
@@ -4033,8 +4333,107 @@ function updateTip(tg, pk) {                  // what the crosshair is on: an an
     else if (isEgg(b)) s = nameOf(b) + ' · 孵化 ' + Math.floor(grow[i] * 100) + '%' +
                            (grow[i] >= 1 ? ' · 寵物太多了,孵不出來' : torch[i] >= 12 ? ' · 火把保暖中,孵得快一倍' : ' · 旁邊放火把孵得快一倍');
   }
+  s = dev(s);
   if (s !== lastTip) { tipEl.textContent = s; tipEl.style.display = s ? 'block' : 'none'; lastTip = s; }
 }
+
+// ---- words for this device, what things are for, the held item's line over the hotbar ----
+function dev(s) {                             // 右鍵 is a tap on a touch screen (or ＋ in 準心+按鈕 mode); P / M keys are the 🎒 tabs
+  if (!s || !isTouch()) return s;
+  return s.replace(/右鍵/g, tapMode() ? '點一下' : '按 ＋').replace(/按住左鍵|左鍵/g, tapMode() ? '按住' : '按住 ⛏')
+          .replace(/按 P 看寵物/g, '在 🎒 的 🐾 看寵物').replace(/P 看/g, '🎒 → 🐾 看');
+}
+function itemHow(id) {                        // one line on what a thing is for (in keyboard words; dev() turns them into taps)
+  const it = info(id);
+  if (!id || !it.n) return '';
+  const fans = PETS.filter(d => d.food === id).map(d => d.n), fan = fans.length ? ' · ' + fans.join('、') + '最愛吃' : '';
+  if (it.kind === 'p') return '鎬:挖石頭和礦石,' + ['', '能挖石頭、煤礦', '也能挖鐵礦', '也能挖鑽石礦', '什麼礦都能挖,最快'][it.tier];
+  if (it.kind === 'w') return '劍:打怪物,每下 ' + it.dmg + ' 點傷害';
+  if (it.kind === 'a') return '斧頭:砍木頭、木板很快';
+  if (it.kind === 's') return '鏟子:挖泥土、沙土、草地很快';
+  if (it.kind === 'h') return '鋤頭:對草地或泥土右鍵,翻成可以種菜的耕地' + (it.tier >= 3 ? '(一次 3×3)' : '');
+  if (it.seed !== undefined) { const c = CROPS[it.seed]; return '對耕地右鍵種下 · ' + seasonText(c.s) + '天的作物 · ' + c.g + ' 小時成熟' + (c.w ? ' · 要種在水旁邊' : '') + fan; }
+  if (it.crop !== undefined) return '可以賣錢,或在 🍳 料理煮成料理' + fan;
+  if (it.dish !== undefined) return '右鍵吃掉:' + fxText(DISHES[it.dish]) + fan;
+  if (it.can) return '對耕地右鍵澆水,周圍 3×3 濕潤一整天';
+  if (id === 161) return '對著水右鍵,裝一桶水';
+  if (id === 162) return '右鍵把水倒出來(稻米、甘蔗、芋頭要種在水旁邊)';
+  if (it.fert) return '對耕地右鍵施肥,作物長快 50%';
+  if (it.bow) return '右鍵射箭(背包裡要有箭)';
+  if (id === 101) return '弓的箭,用木頭做';
+  if (isEgg(id)) return '放在地上會孵出寵物,旁邊放火把孵得快一倍';
+  if (id === ITEM_MILK) return '料理材料,也是貓最愛喝的';
+  if (id >= ITEM_EGG && id <= ITEM_TRUFFLE) return '料理材料,也可以賣錢';
+  if (id === TORCH) return '右鍵放下,照亮四周;亮的地方不會生怪物';
+  if (id === BED) return '放下後,晚上對床右鍵睡到天亮';
+  if (id === SPRINK) return '放在田裡,周圍 3×3 的耕地一直保持濕潤';
+  if (id === SPRINK2) return '放在田裡,周圍 5×5 的耕地一直保持濕潤';
+  if (id === GLASS) return '透明的方塊;玻璃屋頂下的作物不分季節';
+  if (id === 102) return '怪物掉的,可以做火把和肥料';
+  if (id === 103) return '做工具和火把的材料';
+  if (id === 104) return '做火把的材料';
+  if (id === 105) return '做鐵工具、水桶、澆水壺、灑水器';
+  if (id === 106) return '做鑽石工具和高級灑水器,也很值錢';
+  if (placeable(id)) return '方塊:右鍵放下' + fan;
+  return fan.slice(3);
+}
+let heldKey = '', heldTimer = 0;
+function showHeld() {                         // the held item's name and what it does, over the hotbar for a few seconds
+  const id = heldItem(), how = dev(itemHow(id));
+  clearTimeout(heldTimer);
+  if (!id) { heldEl.classList.remove('on'); return; }
+  heldEl.innerHTML = '<b>' + nameOf(id) + '</b>' + (how ? '<span class="hw"> · ' + how + '</span>' : '');
+  heldEl.classList.add('on');
+  heldTimer = setTimeout(() => heldEl.classList.remove('on'), 2800);
+}
+
+// ---- the first-time guide: six things to try, ticked off as they happen ----
+const TUT = [
+  { k: 'move', kb: '用 W A S D 走幾步', tc: '用左下角的搖桿走幾步' },
+  { k: 'look', kb: '點一下畫面,再移動滑鼠看看四周', tc: '在畫面右邊拖曳,轉頭看看四周' },
+  { k: 'mine', kb: '對準一個方塊,按住左鍵把它挖掉', tap: '手指按住一個方塊不放,把它挖掉', xh: '準心對準方塊,按住 ⛏ 把它挖掉' },
+  { k: 'place', kb: '按 1 拿泥土,對著地面按右鍵放下', tap: '點快捷欄的泥土,再點一下地面放下', xh: '點快捷欄的泥土,對準地面按 ＋ 放下' },
+  { k: 'bag', kb: '按 I 打開背包看看', tc: '點 🎒 打開背包看看' },
+  { k: 'plant', kb: '拿鋤頭對草地按右鍵翻土,再拿種子對耕地按右鍵種下', tap: '拿鋤頭點一下草地翻土,再拿種子點一下耕地種下',
+    xh: '拿鋤頭對草地按 ＋ 翻土,再拿種子對耕地按 ＋ 種下' },
+];
+let tutDone = null, tutMove = 0, tutLook = 0, tutOkT = 0, tutPA = 0, tutPB = 0;   // tutDone: steps done (null = the guide is off)
+function tutLoad() {                         // true when this browser has seen the guide before
+  let v = null;
+  try { v = localStorage.voxelTut; } catch (e) {}
+  if (v === 'done') { tutDone = null; return true; }
+  let a = [];
+  try { a = JSON.parse(v || '[]'); } catch (e) {}
+  tutDone = new Set(Array.isArray(a) ? a.filter(k => TUT.some(t => t.k === k)) : []);
+  return v != null;
+}
+function tutSave() { try { localStorage.voxelTut = tutDone ? JSON.stringify([...tutDone]) : 'done'; } catch (e) {} }
+function tutMark(k) {                         // a step done: "做得好" for a moment, then the next one
+  if (!tutDone || tutDone.has(k)) return;
+  tutDone.add(k);
+  if (TUT.every(t => tutDone.has(t.k))) { tutDone = null; toast('🎉 新手引導完成!想知道更多玩法,點右上角的 ❔', 'big'); }
+  else tutOkT = 1.4;
+  tutSave(); drawTut();
+}
+function tutRestart() { tutDone = new Set(); tutMove = tutLook = 0; tutOkT = 0; tutSave(); drawTut(); }
+function tutTick(dt, walked, turned) {
+  if (!tutDone) return;
+  if (tutOkT > 0 && (tutOkT -= dt) <= 0) drawTut();
+  if ((tutMove += walked) > 4) tutMark('move');
+  if ((tutLook += turned) > 1.4) tutMark('look');
+}
+function drawTut() {
+  const on = !!tutDone && started;
+  document.body.classList.toggle('tut', on);
+  if (!on) return;
+  const n = TUT.filter(t => tutDone.has(t.k)).length, cur = TUT.find(t => !tutDone.has(t.k));
+  const mode = !isTouch() ? 'kb' : tapMode() ? 'tap' : 'xh', ok = tutOkT > 0;
+  $('tut').classList.toggle('ok', ok);
+  $('tutn').textContent = (ok ? n : n + 1) + ' / ' + TUT.length;
+  $('tutt').textContent = ok ? '✓ 做得好!' : '👉 ' + (cur[mode] || cur.tc);
+  $('tutd').innerHTML = TUT.map(t => '<i class="' + (tutDone.has(t.k) ? 'd' : t === cur ? 'c' : '') + '"></i>').join('');
+}
+$('tutx').onclick = e => { e.currentTarget.blur(); tutDone = null; tutSave(); drawTut(); toast('隨時可以在 ❔ 說明裡重新看新手引導'); };
 
 // ---- the panel: bag · market · cooking · breeding graph · farm map ----
 let panelTab = 'bag';
@@ -4084,6 +4483,7 @@ function fxText(d) {
 }
 function drawCook() {
   if (!invOpen || panelTab !== 'cook') return;
+  $('cookhint').textContent = dev('材料夠了就能煮。拿著料理右鍵吃掉,會回血並得到效果,也可以拿去市集賣。雞蛋、牛奶、蜂蜜、松露要靠寵物。');
   let h = '';
   for (const [j, d] of DISHES.entries()) {
     const ok = d.i.every(([c, k]) => has(ingId(c), k));
@@ -4333,8 +4733,8 @@ function drawPets() {
       '<div class="btns"><button data-mode="' + p.id + '">' + (p.mode ? '跟我走' : '待在這裡') + '</button><button data-call="' + p.id + '">叫過來</button>' +
       '<button data-free="' + p.id + '">' + (petFreeArm === p.id ? '確定放生?' : '放生') + '</button></div></div></div>';
   }
-  $('petlist').innerHTML = h || '<p class="dim">還沒有寵物。拿著野生動物最愛的食物對牠按右鍵(有時要多餵幾次),牠就會跟你走。' +
-    '草叢、稀有作物和礦石裡偶爾藏著寵物蛋,放在地上就會孵化。</p>';
+  $('petlist').innerHTML = h || '<p class="dim">' + dev('還沒有寵物。拿著野生動物最愛的食物對牠右鍵(有時要多餵幾次),牠就會跟你走。' +
+    '草叢、稀有作物和礦石裡偶爾藏著寵物蛋,放在地上就會孵化。') + '</p>';
   const eggs = farmCells().filter(i => isEgg(world[i]));
   $('petegg').innerHTML = eggs.length ? '<h3>孵蛋中</h3>' + eggs.map(i => '<div class="row">' + iconImg(world[i]) + '<span class="nm">' + nameOf(world[i]) +
     ' · (' + ixOf(i) + ', ' + izOf(i) + ')' + (torch[i] >= 12 ? ' · 🔥 火把保暖' : '') + '</span><span class="pr">' + Math.floor(grow[i] * 100) + '%</span></div>').join('') : '';
@@ -4396,14 +4796,20 @@ function applySettings() {                    // settings → live values and la
   $('sFp').textContent = settings.fps ? '開' : '關';
   $('sHp').textContent = settings.help ? '開' : '關';
   $('sPc').textContent = settings.peace ? '開' : '關';
+  $('sTm').textContent = settings.tm ? '準心+按鈕' : '點畫面';
+  $('sAj').textContent = settings.aj ? '開' : '關';
+  for (const [id, on] of [['sIy', settings.invY < 0], ['sSh', settings.shadows], ['sFp', settings.fps], ['sHp', settings.help],
+                          ['sPc', settings.peace], ['sAj', settings.aj], ['sCr', creative]]) $(id).classList.toggle('on', !!on);
   hudEl.classList.toggle('off', !settings.help);
+  setTouchUI();
   fpsEl.classList.toggle('on', !!settings.fps);
   viewDirty = true; needRender = true;
 }
 function saveSettings() {
   try {
     localStorage.voxelS = JSON.stringify({ m: settings.ms, t: settings.ts, i: settings.invY, s: settings.shadows,
-                                           q: settings.quality, f: settings.fps, h: settings.help, p: settings.peace });
+                                           q: settings.quality, f: settings.fps, h: settings.help, p: settings.peace,
+                                           tm: settings.tm, aj: settings.aj });
   } catch (e) {}
 }
 function loadSettings() {
@@ -4413,6 +4819,7 @@ function loadSettings() {
     settings.ms = j.m || 6; settings.ts = j.t || 6; settings.invY = j.i < 0 ? -1 : 1; settings.shadows = j.s ? 1 : 0;
     if (Number.isInteger(j.q) && j.q >= -1 && j.q < QUALITY.length) settings.quality = j.q;
     settings.fps = j.f ? 1 : 0; settings.help = j.h === 0 ? 0 : 1; settings.peace = j.p ? 1 : 0;
+    settings.tm = j.tm ? 1 : 0; settings.aj = j.aj === 0 ? 0 : 1;
   } catch (e) {}
 }
 function setMenu(open) {                      // the menu pauses the world
@@ -4424,11 +4831,41 @@ function setMenu(open) {                      // the menu pauses the world
     if (started) saveGame();
     needRender = true;
   } else {
-    showSettings(false);
+    showSettings(false); showHelp(false);
     if (!started) { started = true; $('bstart').textContent = '繼續遊戲'; if (bootMsg) { toast(bootMsg, 'big'); bootMsg = ''; } }
+    tutPA = P.a; tutPB = P.b; drawTut();
   }
 }
 function showSettings(on) { setpEl.classList.toggle('on', !!on); menuEl.classList.toggle('cfg', !!on); }
+// the help page: 操作 · 種田 · 寵物 · 更多, in this device's words
+let helpTab = 'ctl', helpFromGame = false;
+const HELP_SRC = {};
+for (const id of ['h-farm', 'h-pet', 'h-more']) HELP_SRC[id] = $(id).innerHTML;
+function showHelp(on, fromGame) {
+  menuEl.classList.toggle('hlp', !!on);
+  if (!on) return;
+  helpFromGame = !!fromGame;
+  for (const id in HELP_SRC) $(id).innerHTML = dev(HELP_SRC[id]);
+  $('htut').textContent = tutDone ? '✕ 關掉新手引導' : '🔁 重新看新手引導';
+  showHelpTab(helpTab);
+}
+function showHelpTab(t) {
+  helpTab = t;
+  for (const b of $('htabs').children) b.classList.toggle('on', b.dataset.h === t);
+  for (const p of $('hbody').children) p.classList.toggle('on', p.id === 'h-' + t);
+  $('hbody').scrollTop = 0;
+}
+function openHelp() { if (!paused) setMenu(true); showHelp(true, true); }   // ❔ or H during the game
+function closeHelp() { showHelp(false); if (helpFromGame) closeMenuAndPlay(); }
+$('htabs').onclick = e => { const t = e.target.dataset && e.target.dataset.h; if (t) showHelpTab(t); };
+$('bhelp').onclick = () => showHelp(true, false);
+$('hback').onclick = closeHelp;
+$('htut').onclick = () => {                  // the guide: switch it off while it runs, or start it over
+  if (tutDone) { tutDone = null; tutSave(); drawTut(); $('htut').textContent = '🔁 重新看新手引導'; return; }
+  tutRestart(); showHelp(false); closeMenuAndPlay();
+};
+$('bh').onclick = openHelp;
+$('bh').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); openHelp(); }, { passive: false });
 function closeMenuAndPlay() {
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();   // Space must not re-click a button
   setMenu(false);
@@ -4447,11 +4884,11 @@ $('bres').onclick = e => {
   const b = e.currentTarget;
   clearTimeout(resetArmTimer);
   if (b.dataset.arm !== '1') {
-    b.dataset.arm = '1'; b.textContent = '確定重置?再按一次';
-    resetArmTimer = setTimeout(() => { b.dataset.arm = ''; b.textContent = '重新產生世界'; }, 3000);
+    b.dataset.arm = '1'; b.textContent = '確定重置?再按一次'; b.classList.add('arm');
+    resetArmTimer = setTimeout(() => { b.dataset.arm = ''; b.textContent = '重新產生世界'; b.classList.remove('arm'); }, 3000);
     return;
   }
-  b.dataset.arm = ''; b.textContent = '重新產生世界';
+  b.dataset.arm = ''; b.textContent = '重新產生世界'; b.classList.remove('arm');
   resetWorld(); closeMenuAndPlay();
 };
 $('sMs').oninput = () => { settings.ms = +$('sMs').value; applySettings(); };
@@ -4463,6 +4900,8 @@ $('sFp').onclick = () => { settings.fps ^= 1; applySettings(); saveSettings(); }
 $('sHp').onclick = () => { settings.help ^= 1; applySettings(); saveSettings(); };
 $('sCr').onclick = () => setCreative(!creative);
 $('sPc').onclick = () => { settings.peace ^= 1; if (settings.peace) mobs.length = 0; applySettings(); saveSettings(); };
+$('sTm').onclick = () => { settings.tm ^= 1; resetTouch(); applySettings(); saveSettings(); };
+$('sAj').onclick = () => { settings.aj ^= 1; applySettings(); saveSettings(); };
 $('bm').onclick = () => setMenu(true);
 $('bm').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); setMenu(true); }, { passive: false });
 $('rb').onclick = () => { respawn(); if (!isTouch()) lockPointer(); };
@@ -4493,6 +4932,12 @@ addEventListener('keydown', e => {
     if (!paused) showSettings(false);
     return;
   }
+  if (k === 'h' && !e.repeat) {               // H: the help page, from the game or from the menu
+    if (menuEl.classList.contains('hlp')) closeHelp();
+    else if (paused) { showSettings(false); showHelp(true, false); }
+    else openHelp();
+    return;
+  }
   if (paused) return;                         // menu open: no gameplay keys
   if (k === ' ' || k === 'tab' || (e.code || '').startsWith('Arrow')) e.preventDefault();
   K[k] = 1;
@@ -4510,7 +4955,6 @@ addEventListener('keydown', e => {
   else if (k === 'p') { if (!invOpen) { panelTab = 'pets'; toggleInv(true); } else if (panelTab === 'pets') toggleInv(false); else showTab('pets'); }
   else if (k === 'c') setCreative(!creative);
   else if (k === 'g') { settings.shadows ^= 1; applySettings(); saveSettings(); }
-  else if (k === 'h') { settings.help ^= 1; applySettings(); saveSettings(); }
   else if (k === 'r') weather = (weather + 1) % 3;
   else if (k === 'x') confirmReset();
 });
@@ -4550,6 +4994,9 @@ document.addEventListener('pointerlockchange', () => {
 canvas.addEventListener('contextmenu', e => e.preventDefault());
 canvas.addEventListener('mousedown', e => {
   if (paused) return;
+  if (isTouch() && !document.body.classList.contains('coarse') && performance.now() - lastTouchT > 1500) {
+    document.body.classList.remove('touch'); setTouchUI();
+  }
   if (isLocked()) { if (e.button === 2) use2(); else use1(); }
   else { dragLook = true; lockPointer(); }    // no pointer lock (e.g. sandboxed): drag to look
 });
@@ -4568,27 +5015,50 @@ addEventListener('wheel', e => {
   selectSlot((selI + (e.deltaY > 0 ? 1 : -1) + 6) % 6);
 }, { passive: true });
 
-// touch: left half = floating stick (springs up under the thumb), right half = drag to look
-const RAD = 52;
-const stick = { id: -1, x0: 0, y0: 0, u: 0, v: 0, full: false }, look = { id: -1, x0: 0, y0: 0, dx: 0, dy: 0 };
-let jumpTap = false;
-const isTouch = () => document.body.classList.contains('touch');
-addEventListener('touchstart', () => document.body.classList.add('touch'), { passive: true, capture: true });
+// touch: a stick at the bottom left (it jumps to where the thumb lands), the rest of the screen looks around by dragging.
+// 點畫面 (tap mode, the default): a quick tap uses what you hold on the spot under the finger; holding still digs there.
+// 準心+按鈕: the crosshair in the middle aims, ⛏ digs and ＋ uses.
+const RAD = 54, HOLD_S = .28, TAP_SLOP = 12;  // stick radius (px) · how long a still finger means "dig" (s) · how far a tap may wander (px)
+const stick = { id: -1, x0: 0, y0: 0, u: 0, v: 0, full: false },
+      look = { id: -1, x0: 0, y0: 0, dx: 0, dy: 0, sx: 0, sy: 0, x: 0, y: 0, hx: 0, hy: 0, held: 0, mode: 1 };   // mode: 0 maybe a tap · 1 looking · 2 holding
+let jumpTap = false, lastTouchT = -1e9;
+function setTouchUI() {                       // body classes for the touch layout: 點畫面 or 準心+按鈕
+  const t = isTouch();
+  document.body.classList.toggle('tapmode', t && !settings.tm);
+  document.body.classList.toggle('crossmode', t && !!settings.tm);
+  if (started) drawTut();
+}
+addEventListener('touchstart', () => {
+  lastTouchT = performance.now();
+  if (!isTouch()) { document.body.classList.add('touch'); setTouchUI(); }
+}, { passive: true, capture: true });
+const inStickZone = (x, y) => innerWidth < innerHeight ? x < innerWidth * .5 && y > innerHeight * .45
+                                                      : x < innerWidth * .42 && y > innerHeight * .3;
+function stickStart(t) {
+  stick.id = t.identifier; stick.x0 = t.clientX; stick.y0 = t.clientY;
+  stickEl.classList.add('act');
+  stickEl.style.left = (stick.x0 - RAD - 2) + 'px'; stickEl.style.top = (stick.y0 - RAD - 2) + 'px'; stickEl.style.bottom = 'auto';
+  knobEl.style.left = knobEl.style.top = (RAD - 22) + 'px';
+}
+function stickEnd() {                         // back to its resting place, dimmed
+  stick.id = -1; stick.u = stick.v = 0; stick.full = false;
+  stickEl.classList.remove('act'); stickEl.style.left = stickEl.style.top = stickEl.style.bottom = '';
+  knobEl.style.left = knobEl.style.top = ''; knobEl.classList.remove('run');
+}
 function resetTouch() {
-  stick.id = look.id = -1; stick.u = stick.v = look.dx = look.dy = 0; stick.full = false;
-  stickEl.style.display = 'none'; knobEl.classList.remove('run');
+  stickEnd();
+  if (look.mode === 2) use1Up();
+  look.id = -1; look.mode = 1; look.dx = look.dy = 0;
 }
 const wrapEl = $('wrap');
 wrapEl.addEventListener('touchstart', e => {
   e.preventDefault();
   for (const t of e.changedTouches) {
-    if (t.clientX < innerWidth / 2) {
-      if (stick.id < 0) {
-        stick.id = t.identifier; stick.x0 = t.clientX; stick.y0 = t.clientY;
-        stickEl.style.display = 'block'; stickEl.style.left = (stick.x0 - RAD) + 'px'; stickEl.style.top = (stick.y0 - RAD) + 'px';
-        knobEl.style.left = knobEl.style.top = (RAD - 18) + 'px';
-      }
-    } else if (look.id < 0) { look.id = t.identifier; look.x0 = t.clientX; look.y0 = t.clientY; }
+    if (stick.id < 0 && inStickZone(t.clientX, t.clientY)) stickStart(t);
+    else if (look.id < 0) {
+      look.id = t.identifier; look.x0 = look.sx = look.x = t.clientX; look.y0 = look.sy = look.y = t.clientY;
+      look.held = 0; look.mode = tapMode() ? 0 : 1;
+    }
   }
 }, { passive: false });
 wrapEl.addEventListener('touchmove', e => {
@@ -4597,30 +5067,79 @@ wrapEl.addEventListener('touchmove', e => {
     if (t.identifier === stick.id) {
       let ux = t.clientX - stick.x0, uy = t.clientY - stick.y0, ul = Math.sqrt(ux * ux + uy * uy);
       stick.full = ul >= RAD * 1.3;                                    // finger pushed past the ring: run
-      if (ul > RAD) { ux *= RAD / ul; uy *= RAD / ul; ul = RAD; }  // clamp to the ring
-      knobEl.style.left = (RAD - 18 + ux) + 'px'; knobEl.style.top = (RAD - 18 + uy) + 'px';
+      if (ul > RAD) { ux *= RAD / ul; uy *= RAD / ul; ul = RAD; }      // clamp to the ring
+      knobEl.style.left = (RAD - 22 + ux) + 'px'; knobEl.style.top = (RAD - 22 + uy) + 'px';
       stick.u = ul < 9 ? 0 : ux / RAD; stick.v = ul < 9 ? 0 : -uy / RAD;   // small dead zone; up = forward
       knobEl.classList.toggle('run', stick.full && stick.v > .3);
     } else if (t.identifier === look.id) {
-      look.dx += t.clientX - look.x0; look.dy += t.clientY - look.y0;       // accumulate this frame's drag
-      look.x0 = t.clientX; look.y0 = t.clientY;
+      const x = t.clientX, y = t.clientY;
+      if (look.mode === 0 && Math.hypot(x - look.sx, y - look.sy) > TAP_SLOP) { look.mode = 1; look.x0 = look.sx; look.y0 = look.sy; }   // it moved: a look drag
+      if (look.mode === 2 && Math.hypot(x - look.hx, y - look.hy) > TAP_SLOP * 2) { look.mode = 1; use1Up(); look.x0 = x; look.y0 = y; }   // digging, then dragged: look around instead
+      if (look.mode === 1) { look.dx += x - look.x0; look.dy += y - look.y0; }   // accumulate this frame's drag
+      look.x0 = look.x = x; look.y0 = look.y = y;                      // (holding: the aim follows the finger a little)
     }
   }
 }, { passive: false });
 const touchEnd = e => {
   e.preventDefault();
   for (const t of e.changedTouches) {
-    if (t.identifier === stick.id) { stick.id = -1; stick.u = stick.v = 0; stick.full = false; stickEl.style.display = 'none'; knobEl.classList.remove('run'); }
-    if (t.identifier === look.id) look.id = -1;
+    if (t.identifier === stick.id) stickEnd();
+    if (t.identifier === look.id) {
+      if (look.mode === 0 && e.type === 'touchend') tapAt(look.sx, look.sy);   // a quick tap
+      else if (look.mode === 2) use1Up();                              // done digging
+      look.id = -1; look.mode = 1;
+    }
   }
 };
 wrapEl.addEventListener('touchend', touchEnd, { passive: false });
 wrapEl.addEventListener('touchcancel', touchEnd, { passive: false });
-function touchButton(id, down, up) {           // on-screen buttons: touch, or mouse (released by the window mouseup)
+function tapAt(x, y) {                        // 點畫面: a quick tap hits the monster under the finger, else uses what you hold there
+  if (dead || paused || invOpen) return;
+  aimDir = screenRay(x, y);
+  if (mobUnderAim() >= 0) melee(); else use2();
+  tipAim = aimDir; tipAimT = 1.6; aimXY[0] = x; aimXY[1] = y;
+  aimDir = null;
+}
+// 點畫面, frame by frame: a finger held still for HOLD_S digs the block under it (or keeps hitting the monster there);
+// after a tap the aim stays on that spot for a moment, so the outline and the tip show what was touched
+let tipAim = null, tipAimT = 0, holdAtkT = 0, lastAimK = '', lastHintS = null, lastMb = -1, stickWalk = 0;
+const aimXY = [0, 0];                         // where the finger aim is on the screen (the aim notes sit just above it)
+function touchAimTick(dt, handsOff) {
+  tipAimT = Math.max(0, tipAimT - dt);
+  if (!tapMode()) return;
+  if (look.id >= 0 && look.mode === 0 && !handsOff && (look.held += dt) >= HOLD_S) { look.mode = 2; look.hx = look.x; look.hy = look.y; holdAtkT = 0; }
+  if (look.id >= 0 && look.mode === 2 && !handsOff) {
+    aimDir = screenRay(look.x, look.y); aimXY[0] = look.x; aimXY[1] = look.y;
+    tipAim = aimDir; tipAimT = .8;
+    if (mobUnderAim() >= 0) { holdMine = false; mineProg = 0; if ((holdAtkT -= dt) <= 0) { melee(); holdAtkT = .45; } }
+    else if (pickPet(target())) { holdMine = false; mineProg = 0; }   // a pet is not dug through
+    else holdMine = true;
+  } else if (tipAimT > 0 && tipAim && !handsOff) aimDir = tipAim;
+}
+function placeAim() {                         // 點畫面: the aim notes sit just above the finger (else under the crosshair)
+  const x = aimXY[0] || innerWidth / 2, y = aimXY[1] || innerHeight / 2 + 60;
+  const k = tapMode() ? Math.round(x) + ',' + Math.round(y) : '';
+  if (k === lastAimK) return;
+  lastAimK = k;
+  if (!k) { aimEl.style.left = aimEl.style.top = ''; return; }
+  aimEl.style.left = Math.max(120, Math.min(innerWidth - 120, x)) + 'px';
+  aimEl.style.top = Math.max(100, y - 34) + 'px';
+}
+function stepAhead(mu, mv) {                  // auto-jump: a one-block step right in front, with room over it and over the head
+  const cx = Math.cos(P.a), sx = Math.sin(P.a);
+  let vx = mu * cx + mv * sx, vz = -mu * sx + mv * cx;
+  const l = Math.hypot(vx, vz);
+  if (l < .3 || inWater()) return false;
+  vx /= l; vz /= l;
+  const ax = P.x + vx * (PW + .3), az = P.z + vz * (PW + .3), y = Math.floor(P.y + .01);
+  return solidAt(ax, y, az) && !solidAt(ax, y + 1, az) && !solidAt(ax, y + 2, az) && !solidAt(P.x, y + 2, P.z);
+}
+function touchButton(id, down, up) {           // on-screen buttons: touch (lit while pressed), or mouse (released by the window mouseup)
   const el = $(id);
-  el.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); down(); }, { passive: false });
-  if (up) { el.addEventListener('touchend', e => { e.preventDefault(); up(); }, { passive: false });
-            el.addEventListener('touchcancel', e => { e.preventDefault(); up(); }, { passive: false }); }
+  el.addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); el.classList.add('down'); down(); }, { passive: false });
+  const end = e => { e.preventDefault(); el.classList.remove('down'); if (up) up(); };
+  el.addEventListener('touchend', end, { passive: false });
+  el.addEventListener('touchcancel', end, { passive: false });
   el.addEventListener('mousedown', e => { if (e.button === 0) { e.preventDefault(); down(); } });
 }
 touchButton('bd', use1, use1Up);
@@ -4636,28 +5155,49 @@ barEl.onclick = e => { const i = slotFrom(e); if (i >= 0) selectSlot(i); };
 barEl.addEventListener('touchstart', e => { const i = slotFrom(e); if (i >= 0) { e.preventDefault(); e.stopPropagation(); selectSlot(i); } }, { passive: false });
 invEl.onclick = e => { if (e.target === invEl) toggleInv(false); };  // tap the dim area to close
 const moveGhost = e => { ghostEl.style.left = (e.clientX - 23) + 'px'; ghostEl.style.top = (e.clientY - 23) + 'px'; };
+let bagPress = null;                          // a press in the bag grid: a tap describes (and, on the hotbar row, picks up); a drag moves
+function pickSlot(i) { infoI = i; for (const c of invGrid.children) c.classList.toggle('pick', +c.dataset.i === i); drawItemInfo(); }
 invGrid.onpointerdown = e => {
   const i = slotFrom(e);
-  if (i < 0 || !INV[i].id) return;
-  e.preventDefault(); dragI = i;
-  ghostEl.className = 'i' + INV[i].id; ghostEl.style.display = 'block'; moveGhost(e);
+  if (i < 0) return;
+  e.preventDefault();
+  bagPress = { i, x: e.clientX, y: e.clientY, moved: false };
+  dragI = INV[i].id ? i : -1;
+  if (dragI >= 0) ghostEl.className = 'i' + INV[i].id;
   if (invGrid.setPointerCapture) invGrid.setPointerCapture(e.pointerId);
-  drawInv();
 };
-invGrid.onpointermove = e => { if (dragI >= 0) moveGhost(e); };
-invGrid.onpointercancel = () => { dragI = -1; ghostEl.style.display = 'none'; drawInv(); };
+invGrid.onpointermove = e => {
+  if (!bagPress) {                            // a mouse passing over: describe what is under it
+    if (e.pointerType === 'mouse') { const i = slotFrom(e); if (i >= 0 && INV[i].id && i !== infoI) pickSlot(i); }
+    return;
+  }
+  if (!bagPress.moved && Math.abs(e.clientX - bagPress.x) + Math.abs(e.clientY - bagPress.y) > 6) {
+    bagPress.moved = true;
+    if (dragI >= 0) { ghostEl.style.display = 'block'; drawInv(); }   // the source slot dims
+  }
+  if (bagPress.moved && dragI >= 0) moveGhost(e);
+};
+invGrid.onpointercancel = () => { bagPress = null; dragI = -1; ghostEl.style.display = 'none'; drawInv(); };
 invGrid.onpointerup = e => {
-  if (dragI < 0) return;
-  ghostEl.style.display = 'none';
+  const p = bagPress;
+  bagPress = null; ghostEl.style.display = 'none';
+  if (!p) return;
+  if (!p.moved) {                             // a tap: describe it; on the hotbar row it is picked up as well
+    dragI = -1; infoI = p.i;
+    if (p.i < 6) selectSlot(p.i); else drawInv();
+    return;
+  }
+  if (dragI < 0) { drawInv(); return; }
   let n = document.elementFromPoint(e.clientX, e.clientY);
   n = n && n.closest && n.closest('.slot');
-  const j = n ? +n.dataset.i : -1;
+  const j = n && invGrid.contains(n) ? +n.dataset.i : -1;
   if (j >= 0 && j !== dragI) {
     const a = INV[dragI], b = INV[j];
     if (a.id && a.id === b.id && b.n < maxStack(a.id)) {            // same item: merge stacks
       const k = Math.min(maxStack(a.id) - b.n, a.n); b.n += k; a.n -= k;
       if (!a.n) INV[dragI] = { id: 0, n: 0 };
     } else { INV[dragI] = b; INV[j] = a; }                           // otherwise swap
+    infoI = j;
   }
   dragI = -1; drawInv(); drawBar();
 };
@@ -4753,6 +5293,7 @@ function frame(tm) {
   prevF = !!K.f;
   if ((K.e || tapped.e) && placeCD === 0 && !invOpen) { use2(); placeCD = .15; tapped.e = 0; }  // a tap waits out the cooldown
   tapped.f = tapped[' '] = 0;
+  if (settings.aj && (stick.u || stick.v) && !flying && !handsOff && P.g === 0 && jumpCD === 0 && stepAhead(mu, mv)) jump = true;   // touch: hop up steps
   if (!flying && jump && P.g === 0 && jumpCD === 0) { P.g = buffs.jump > 0 ? 10 : 8; jumpCD = .35; }
   else if (!flying && jump && inWater()) P.g = Math.max(P.g, 4.5);   // swim up
   const lks = .0007 * settings.ts;
@@ -4773,14 +5314,24 @@ function frame(tm) {
   const steps = Math.max(1, Math.ceil(dt / .02)), h = dt / steps;
   const spd = (flying ? (sprinting ? 14 : 8) : (sprinting ? 7 : 5)) * (buffs.run > 0 ? 1.35 : 1);
   const lift = flying && !handsOff ? (K[' '] || upHold ? 1 : 0) - (K.shift || downHold ? 1 : 0) : 0;
+  const px0 = P.x, pz0 = P.z;
   for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); tickEntities(h); tickPets(h); }
   tickGrass(dt);
   if (P.y < -10) { placeAtSpawn(); hurtPlayer(4); }
+  touchAimTick(dt, handsOff);                 // 點畫面: the finger aims; held still, it digs (or fights)
   if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
   hintT = Math.max(0, hintT - dt);
+  if (!handsOff) {                            // the first-time guide watches you walk and look around
+    const walked = mu || mv ? Math.hypot(P.x - px0, P.z - pz0) : 0, turned = Math.abs(P.a - tutPA) + Math.abs(P.b - tutPB);
+    tutPA = P.a; tutPB = P.b;
+    tutTick(dt, walked, turned);
+    if (stick.id >= 0 && (stickWalk += walked) > 3) document.body.classList.add('moved');   // the stick's 移動 label has done its job
+  }
 
   // ---- status ----
-  if (dead && !deadEl.classList.contains('on')) { deadEl.classList.add('on'); if (invOpen) toggleInv(false); unlockPointer(); }
+  if (dead && !deadEl.classList.contains('on')) {
+    deadEl.classList.add('on'); document.body.classList.add('dead'); if (invOpen) toggleInv(false); unlockPointer(); resetTouch();
+  }
   const dmg = (dead ? .55 : hurtT > 0 ? hurtT / .35 * .6 : hp < 7 ? .16 + .05 * Math.sin(tm * .006) : 0).toFixed(2);
   if (dmg !== lastDmg) { dmgEl.style.opacity = dmg; lastDmg = dmg; }
   const hpKey = hp * 64 + maxHp();
@@ -4790,8 +5341,17 @@ function frame(tm) {
 
   // ---- draw ----
   cam.sx = Math.sin(P.a); cam.cx = Math.cos(P.a); cam.sp = Math.sin(P.b); cam.cp = Math.cos(P.b);
-  const tg = target(heldItem() === 161);      // an empty bucket aims at water
-  updateTip(handsOff ? null : tg, handsOff ? null : pickPet(tg));
+  const aiming = !tapMode() || !!aimDir;      // 點畫面: only a finger (or a tap a moment ago) aims
+  const tg = aiming ? target(heldItem() === 161) : null;      // an empty bucket aims at water
+  updateTip(handsOff || !aiming ? null : tg, handsOff || !aiming ? null : pickPet(tg));
+  aimDir = null;
+  placeAim();
+  const hs = hintT > 0 ? hint : '';           // tool hints and the mining bar, under the crosshair (or over the finger)
+  if (hs !== lastHintS) { lastHintS = hs; hintEl.textContent = hs; hintEl.style.display = hs ? 'block' : 'none'; }
+  const mb = mineProg > 0 && !handsOff ? Math.min(1, mineProg) : 0;
+  if (mb !== lastMb) { lastMb = mb; mbarEl.style.display = mb ? 'block' : 'none'; mbarFill.style.width = (mb * 100).toFixed(1) + '%'; }
+  const hk = (creative ? 'c' : 's') + selI + ':' + heldItem();
+  if (hk !== heldKey && !handsOff) { heldKey = hk; showHeld(); }
   if (invOpen && panelTab === 'map' && (mapT -= dt) <= 0) { mapT = 1; drawMap(); }
   if (invOpen && panelTab === 'pets' && (petUiT -= dt) <= 0) { petUiT = 1; drawPets(); }
   if (GPU.gl) { renderGL(tg); g2d.clearRect(0, 0, view.w, view.h); } else renderWorld();
@@ -4816,6 +5376,8 @@ function frame(tm) {
 
 // ---- boot ----
 loadSettings();
+if (window.matchMedia && matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch', 'coarse');   // phones and tablets
+const tutSeen = tutLoad();
 makeTextures(); makeIcons(); makeIconCSS(); loadCreative();
 if (initGL()) { glCanvas.style.display = 'block'; autoLevel = 2; }   // GPU starts at 高, CPU at 中
 newKit();
@@ -4824,6 +5386,7 @@ if (!loadGame()) {
   bootMsg = '🌱 出生點附近有池塘和一小塊菜園:鋤頭翻土、右鍵播種、成熟後右鍵收成\n🐾 草地上的動物可以馴服:拿牠最愛的食物對牠右鍵(狗最愛背包裡的麵包)';
 } else {
   if (needStarter) starterPack();
+  if (!tutSeen && !isTouch()) tutDone = null;  // a computer player with a world already knows the keys (touch players get the new controls shown)
   bootMsg = [loadNote, needStarter ? '🌱 新功能:種菜!鋤頭、澆水壺和種子已經放進背包' : '',
              petNews ? '🐾 新功能:寵物!拿野生動物最愛的食物對牠右鍵就能馴服 · P 看寵物和圖鑑' : ''].filter(Boolean).join('\n');
 }
