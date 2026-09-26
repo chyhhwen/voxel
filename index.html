@@ -37,6 +37,13 @@
   #bd,#bp,#bj{display:none}
   body.touch #bd,body.touch #bp,body.touch #bj{display:flex}
   @media (any-pointer:coarse){#bd,#bp,#bj{display:flex}}
+  /* creative flight on touch screens: 🕊 flies / lands, ⤓ sinks while flying (⤒ climbs) */
+  #bf{right:calc(160px + var(--sr));bottom:calc(152px + var(--sb))}
+  #bdn{right:calc(160px + var(--sr));bottom:calc(84px + var(--sb))}
+  #bf,#bdn{display:none}
+  #bf.on{background:rgba(110,180,255,.5);border-color:#fff}
+  body.touch.creative #bf,body.touch.flying #bdn{display:flex}
+  @media (any-pointer:coarse){body.creative #bf,body.flying #bdn{display:flex}}
   #stk{position:fixed;width:104px;height:104px;border-radius:50%;display:none;z-index:3;
        border:2px solid rgba(255,255,255,.28);background:rgba(0,0,0,.22);pointer-events:none}
   #knb{position:absolute;width:36px;height:36px;border-radius:50%;
@@ -110,6 +117,25 @@
   .pg{display:none}
   .pg.on{display:block}
   #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:100%}
+  /* creative: the bag becomes a catalog of every item, picked into the creative hotbar */
+  #chead,#cat{display:none}
+  body.creative #invg,body.creative #craft{display:none}
+  body.creative #chead{display:flex;flex-direction:column;align-items:center;gap:8px;position:sticky;top:-10px;z-index:1;
+        width:100%;padding:8px 0;background:rgb(18,22,28);border-bottom:1px solid rgba(255,255,255,.08)}
+  #chot{display:flex;gap:6px}
+  body.creative #cat{display:block}
+  #chot .slot{width:46px;height:46px;border-color:rgba(255,215,120,.75)}
+  #chot .slot.on{border-color:#fff}
+  #catq{font:12px monospace;width:min(320px,86vw);box-sizing:border-box;padding:6px 10px;border-radius:6px;
+        border:1px solid rgba(255,255,255,.32);background:rgba(0,0,0,.35);color:#fff;outline:none}
+  #catq:focus{border-color:rgba(255,255,255,.7)}
+  #cat{width:100%;max-width:790px;align-self:center}
+  .catg h4{margin:8px 0 4px;font:600 12px monospace;opacity:.72}
+  .catr{display:flex;flex-wrap:wrap;gap:5px}
+  #cat .slot{width:40px;height:40px;touch-action:pan-y}
+  #cat .slot:hover{border-color:rgba(255,255,255,.85)}
+  .slot.pop{animation:pop .28s ease-out}
+  @keyframes pop{40%{transform:scale(1.18)}}
   #inv h3{margin:0 0 6px;font:600 13px monospace}
   #inv p{margin:4px 0}
   #inv .dim{opacity:.55;font-size:11px}
@@ -190,6 +216,7 @@
     #pg-bag.on{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;align-content:center;justify-content:center}
     #invt,#invx{grid-column:1/-1;text-align:center}
     #craft{max-height:200px;max-width:none}
+    body.creative #pg-bag.on{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:8px}
     #mapc{width:min(300px,100%)}
   }
   #dmg{position:fixed;inset:0;z-index:4;pointer-events:none;opacity:0;
@@ -239,9 +266,9 @@
 <div id="wrap"><div id="view"><canvas id="gl"></canvas><canvas id="c"></canvas></div></div>
 <div id="hud"><span class="kb">WASD 移動 · Shift 或連按兩下 W 奔跑 · 空白跳 · 點擊畫面鎖定滑鼠看視角<br>
 左鍵/F 攻擊或挖 · 右鍵/E 放或射箭 · 1–6 / 滾輪 / 點欄位 選方塊<br>
-I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
+I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造(創造:背包裡有全部物品,連按兩下空白鍵飛行)<br>
 </span><span class="tc">左半邊拖出搖桿(推過外圈就奔跑) · 右半邊拖曳看視角 · ⤒跳 ⛏攻擊/挖 ＋放/射 🎒背包<br>
-選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明)<br>
+選方塊:點欄位 · 🎒 背包裡合成工具武器 · ⚙ 選單(可關掉這段說明) · 創造模式按 🕊 飛行<br>
 </span>夜晚黑暗處會生怪 · 火把能阻止生怪 · 白天怪物會被陽光燒死<br>
 種菜:鋤頭翻土 → 右鍵播種 → 保持濕潤(水 4 格內、灑水器、澆水壺、下雨)→ 成熟右鍵收成<br>
 背包上方的分頁:市集、料理、雜交培育圖、農場平面圖、寵物<span class="kb"> · M 農場圖 · P 寵物</span> · 晚上對床右鍵睡到天亮<br>
@@ -255,6 +282,8 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
 <div id="bp" class="btn">＋</div>
 <div id="bj" class="btn">⤒</div>
 <div id="bi" class="btn">🎒</div>
+<div id="bf" class="btn">🕊</div>
+<div id="bdn" class="btn">⤓</div>
 <div id="stk"><div id="knb"></div></div>
 <div id="bar"></div>
 <div id="hp"></div>
@@ -280,6 +309,9 @@ I 或 Tab 開背包(合成工具武器) · C 切換生存↔創造<br>
       <div id="invt">背包 — 拖曳搬移方塊,第一排是快捷欄</div>
       <div id="invg"></div>
       <div id="craft"></div>
+      <div id="chead"><div id="chot"></div>
+        <input id="catq" type="text" placeholder="🔍 搜尋物品(例如:鑽石、種子、蛋糕)" autocomplete="off" spellcheck="false"></div>
+      <div id="cat"></div>
       <div id="invx">I / Tab / Esc 關閉 · C 切換生存↔創造</div>
     </div>
     <div class="pg" id="pg-shop"><div class="cols"><div id="sell"></div><div id="buy"></div></div></div>
@@ -884,7 +916,6 @@ const info = id => IT[id] || NONE;
 const nameOf = id => info(id).n || '';
 const placeable = id => id > 0 && id < 100 && !isFarm(id) && id !== WATER && id !== TALL;
 const maxStack = id => info(id).st || 64;
-const PAL = [11, 2, 1, 3, PLANK, 4, 5, 6, 7, 8, 9, 10, SPRINK, SPRINK2, BED, EGG, EGG2, EGG3];   // creative palette (infinite)
 const COL = new Int32Array(256);              // 0xRRGGBB per block id, for the CPU renderer (crops use their sprites)
 for (let i = 1; i < CROP0; i++) if (IT[i]) COL[i] = parseInt(IT[i].c.slice(1), 16);
 
@@ -1493,6 +1524,28 @@ function give(id, n) {                        // leftovers when the bag is full 
   drawBar(); if (invOpen) drawInv();
 }
 function has(id, n) { let c = 0; for (const s of INV) if (s.id === id) c += s.n; return c >= n; }
+// creative mode has a hotbar of its own, every item in it infinite, filled from a catalog of everything.
+// The survival bag is left exactly as it was: switching back to survival gives it back.
+const CAT = [
+  ['方塊', [GRASS, DIRT, SAND, STONE, WOOD, PLANK, LEAF, GLASS, TORCH, COAL, IRON, DIAMOND]],
+  ['裝置', [SPRINK, SPRINK2, BED]],
+  ['工具', [110, 111, 112, 113, 130, 131, 132, 140, 141, 142]],
+  ['武器', [120, 121, 122, 123, 100, 101]],
+  ['農具', [150, 151, 152, 153, 160, 161, 162, 163]],
+  ['材料', [103, 104, 105, 106, 102]],
+  ['種子', CROPS.map((_, c) => SEED0 + c)],
+  ['作物', CROPS.map((_, c) => CROP_ITEM0 + c)],
+  ['料理', DISHES.map((_, j) => DISH0 + j)],
+  ['寵物', [EGG, EGG2, EGG3, ITEM_EGG, ITEM_MILK, ITEM_HONEY, ITEM_TRUFFLE]],
+];
+const CINV = [GRASS, DIRT, SAND, WOOD, PLANK, LEAF];   // the creative hotbar: six item ids (0 = empty)
+function saveCreative() { try { localStorage.voxelC = JSON.stringify(CINV); } catch (e) {} }
+function loadCreative() {
+  try {
+    const c = JSON.parse(localStorage.voxelC || 'null');
+    if (Array.isArray(c) && c.length === 6 && c.every(id => id === 0 || (Number.isInteger(id) && !!IT[id]))) for (let i = 0; i < 6; i++) CINV[i] = c[i];
+  } catch (e) {}
+}
 function take(id, n) {
   if (!has(id, n)) return false;
   for (let i = 0; i < 24 && n; i++) if (INV[i].id === id) {
@@ -1508,10 +1561,11 @@ let P = { x: SPX + .5, y: 40, z: SPZ + .5, a: 0, b: 0, g: 0 };
 let tod = .35;                                // time of day 0..1 (.25 sunrise · .5 noon · .75 sunset)
 let weather = 0;                              // 0 clear · 1 rain · 2 snow
 let paused = true, started = false, invOpen = false, creative = false;
-let selI = 0, palPage = 0, dragI = -1;
+let selI = 0, dragI = -1;
 const settings = { ms: 6, ts: 6, invY: 1, shadows: 1, quality: -1, fps: 0, help: 1, peace: 0 };  // quality -1 = auto
 let needStarter = false, bootMsg = '';       // bootMsg: shown when the game first starts
 let sprinting = false, sprintLatch = false, lastWDown = -1e9, fovK = 1;   // sprint state; fovK widens the view while running
+let flying = false, lastSpaceT = -1e9, upHold = false, downHold = false;   // creative flight; ⤒ / ⤓ held on touch screens
 const K = {};                                 // keys held, by name ('w', ' ', 'tab'…)
 const tapped = {};                            // keys pressed since the last frame, so a quick tap is never lost
 
@@ -1636,13 +1690,27 @@ function collide(axis, v) {                   // push the player out of any bloc
       }
 }
 const inWater = () => blockAt(P.x | 0, P.y + .4 | 0, P.z | 0) === WATER || blockAt(P.x | 0, P.y + 1.2 | 0, P.z | 0) === WATER;
-function movePlayer(h, mu, mv, speed) {       // one physics sub-step of h seconds
-  const wet = inWater(), s = speed * h * (wet ? .55 : 1), cx = Math.cos(P.a), sx = Math.sin(P.a);
-  P.g = wet ? Math.max(P.g - 6 * h, -2.5) : Math.max(P.g - 18 * h, -40);   // water: slow sink, jump swims up
-  const vx = (mu * cx + mv * sx) * s, vz = (-mu * sx + mv * cx) * s;
-  P.x += vx; collide(0, vx);
-  P.z += vz; collide(2, vz);
-  P.y += P.g * h; collide(1, P.g);
+function movePlayer(h, mu, mv, speed, lift = 0) {   // one physics sub-step of h seconds · lift: flying up (1) / down (-1)
+  const cx = Math.cos(P.a), sx = Math.sin(P.a);
+  if (flying) {                               // creative flight: no gravity, climbs and sinks at up to 7 blocks/s
+    const s = speed * h, vx = (mu * cx + mv * sx) * s, vz = (-mu * sx + mv * cx) * s;
+    P.g += (lift * 7 - P.g) * Math.min(1, h * 10);
+    const vy = P.g * h;
+    P.x += vx; collide(0, vx);
+    P.z += vz; collide(2, vz);
+    P.y += vy; collide(1, vy);
+    if (vy < 0 && P.g === 0) setFlying(false);                        // touched down: walking again
+    if (P.y > SY + 12) { P.y = SY + 12; P.g = Math.min(P.g, 0); }    // not too far above the world
+  } else {
+    const wet = inWater(), s = speed * h * (wet ? .55 : 1);
+    P.g = wet ? Math.max(P.g - 6 * h, -2.5) : Math.max(P.g - 18 * h, -40);   // water: slow sink, jump swims up
+    const vx = (mu * cx + mv * sx) * s, vz = (-mu * sx + mv * cx) * s;
+    P.x += vx; collide(0, vx);
+    P.z += vz; collide(2, vz);
+    P.y += P.g * h; collide(1, P.g);
+  }
+  P.x = Math.max(1 + PW, Math.min(SX - 1 - PW, P.x));                // never past the glass wall (even flying over it)
+  P.z = Math.max(1 + PW, Math.min(SZ - 1 - PW, P.z));
 }
 
 // ---- targeting: ray from the eye through the crosshair, reach 7 cells ----
@@ -1671,7 +1739,7 @@ function target(wantWater) {                  // water is looked through unless 
 let mineIdx = -1, mineProg = 0, holdMine = false, creativeCD = 0;
 let hint = '', hintT = 0;
 const showHint = (s, t) => { hint = s; hintT = t; };
-const heldItem = () => creative ? 0 : INV[selI].id;                 // creative uses the palette, not the bag
+const heldItem = () => creative ? CINV[selI] : INV[selI].id;        // creative: its own hotbar, every item infinite
 const heldTier = () => info(heldItem()).tier || 0;
 function breakSpeed(b) { const t = info(heldItem()); return t.kind && t.kind === info(b).tl ? t.spd : 1; }
 function mine(dt) {
@@ -1695,7 +1763,7 @@ function mine(dt) {
 function place() {
   const o = target();
   if (!o) return;
-  const sel = creative ? PAL[(palPage * 6 + selI) % PAL.length] : INV[selI].id;
+  const sel = heldItem();
   if (!placeable(sel)) return;                                       // empty hand, or holding a tool
   const ax = o[3], ay = o[4], az = o[5];
   const cur = blockAt(ax, ay, az);
@@ -2053,16 +2121,18 @@ function fertilize(o) {
 function harvest(i, replant) {                // ripe crop: produce + seeds; right-click replants it on the spot
   const c = cropOf(world[i]), cr = CROPS[c], soil = world[i - LAYER];
   const n = 1 + (Math.random() < .5) + (buffs.yield > 0 ? 1 : 0) + (soil >= FARM_F && Math.random() < .5);
-  give(CROP_ITEM0 + c, n);
   const seeds = replant ? (Math.random() < .3 ? 1 : 0) : 1 + (Math.random() < .5);
-  if (seeds) give(SEED0 + c, seeds);
-  harvested[c]++;
-  if (cr.tier >= 4 && Math.random() < .03) { give(EGG2, 1); toast('🥚 在' + cr.n + '底下找到一顆稀有寵物蛋!', 'big'); }
+  if (!creative) {                            // creative harvests leave the survival bag (and the records) alone
+    give(CROP_ITEM0 + c, n);
+    if (seeds) give(SEED0 + c, seeds);
+    harvested[c]++;
+    if (cr.tier >= 4 && Math.random() < .03) { give(EGG2, 1); toast('🥚 在' + cr.n + '底下找到一顆稀有寵物蛋!', 'big'); }
+  }
   if (replant) { grow[i] = cr.r || 0; world[i] = cropId(c, cr.r ? Math.min(2, cr.r * 3 | 0) : 0); }
   else { world[i] = AIR; grow[i] = 0; }
   if (cr.glow) relightAround(i);
   worldVer++; worldDirty = true; swingT = .18;
-  toast('+' + n + ' ' + cr.n + (seeds ? '  +' + seeds + ' 種子' : ''));
+  if (!creative) toast('+' + n + ' ' + cr.n + (seeds ? '  +' + seeds + ' 種子' : ''));
   puff(ixOf(i) + .5, iyOf(i) + .4, izOf(i) + .5, 'rgb(' + cr.f.join(',') + ')', 10, .6, 2.6);
 }
 function breakFarmBlock(i, b) {               // drops for crops, weeds and farmland; true when handled here
@@ -2099,7 +2169,7 @@ function sleep() {
 }
 function eat(id) {
   const d = DISHES[info(id).dish];
-  if (!take(id, 1)) return;
+  if (!creative && !take(id, 1)) return;     // creative food is never used up
   const fx = d.fx || [];
   for (let k = 0; k < fx.length; k += 2) buffs[fx[k]] = Math.max(buffs[fx[k]] || 0, fx[k + 1]);
   hp = Math.min(maxHp(), hp + d.heal);
@@ -2303,23 +2373,25 @@ function groundBelow(p) {                     // the height of the first solid (
   }
   return p.y - 20;
 }
-function petTeleport(p) {                     // pops up next to you (behind you, if there is room)
-  const pos = [p.x, p.y, p.z];
+function standY(x, y, z) {                    // where something dropped straight down from (x, y, z) would stand
+  for (let Y = Math.min(YM, Math.floor(y)); Y > 0; Y--) if (solidAt(x, Y - 1, z)) return Y;
+  return 0;
+}
+function petTeleport(p) {                     // pops up next to you (behind you, if there is room) — on the ground under you
+  const [x0, y0, z0] = [p.x, p.y, p.z], d = PETS[p.s], fx = Math.sin(P.a), fz = Math.cos(P.a);
   puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
-  const d = PETS[p.s], fx = Math.sin(P.a), fz = Math.cos(P.a);
   for (const [bk, sd] of [[1.6, 0], [1.3, 1.1], [1.3, -1.1], [0, 1.5], [0, -1.5], [-1.5, 0]]) {
-    const x = P.x - fx * bk + fz * sd, z = P.z - fz * bk - fx * sd;
-    for (const dy of [0, 1, -1]) {
-      const y = Math.floor(P.y) + dy;
-      p.x = x; p.z = z; p.y = y + (d.fly ? d.fly * .6 : 0);
-      if (!petHits(p) && (d.fly || solidAt(x, y - 1, z))) {
-        p.vy = 0; p.stuck = 0; p.goal = null;
-        puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
-        return;
-      }
+    const x = P.x - fx * bk + fz * sd, z = P.z - fz * bk - fx * sd, y = standY(x, P.y + 1, z);
+    if (!y || P.y - y > 30) continue;
+    p.x = x; p.z = z; p.y = y + (d.fly ? d.fly * .6 : 0);
+    if (!petHits(p)) {
+      p.vy = 0; p.stuck = 0; p.goal = null;
+      puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
+      return;
     }
   }
-  const [x0, y0, z0] = pos;                    // nowhere to stand: on your spot, if it fits, else it stays put for now
+  p.x = x0; p.y = y0; p.z = z0;               // nowhere to stand: on your spot, if it fits (not in mid-air), else it waits
+  if (flying) return;
   p.x = P.x; p.y = P.y; p.z = P.z;
   if (petHits(p)) { p.x = x0; p.y = y0; p.z = z0; } else { p.vy = 0; p.stuck = 0; }
 }
@@ -2379,7 +2451,7 @@ function tickPets(h) {
   if ((petSpawnT -= h) <= 0) { petSpawnT = 4 + Math.random() * 3; spawnAnimal(); }
   const think = (petThinkT -= h) <= 0;
   if (think) petThinkT = .25;
-  const held = heldItem();
+  const held = heldItem(), py = flying ? standY(P.x, P.y, P.z) : P.y;   // flying: pets keep to the ground under you
   let nf = 0, fi = 0;
   for (const p of pets) if (!p.wild && p.mode === 0) nf++;
   for (let k = pets.length - 1; k >= 0; k--) {
@@ -2407,7 +2479,7 @@ function tickPets(h) {
       const j = fi++, row = j / 7 | 0, col = j % 7, inRow = Math.min(7, nf - row * 7);
       const ang = P.a + Math.PI + (col - (inRow - 1) / 2) * .5, rad = 1.9 + row * 1.3 + d.r;
       gx = P.x + Math.sin(ang) * rad; gz = P.z + Math.cos(ang) * rad;
-      if (dist > 20 || Math.abs(P.y - p.y) > (d.fly ? 18 : 10) || (p.stuck > 3 && dist > 5)) { petTeleport(p); continue; }
+      if (dist > 20 || Math.abs(py - p.y) > (d.fly ? 18 : 10) || (p.stuck > 3 && dist > 5)) { petTeleport(p); continue; }
       const gd = Math.hypot(gx - p.x, gz - p.z);
       if (gd > .6) speed = Math.min(d.spd * 2.4, gd * 3);               // the further behind, the faster it runs
       else look = [P.x, P.z];
@@ -2771,7 +2843,7 @@ function renderWorld() {
     if (key !== shadowKey || geomVer !== shadowVer) { shadowCache.fill(0); shadowKey = key; shadowVer = geomVer; }
   }
   // view distance: rays stop there, and the fog has fully turned into the sky colour by then
-  const fog = GFX.fog, far = fog ? (weather ? 30 : [40, 48, 56, 56][qualityLevel()]) : Infinity;
+  const fog = GFX.fog, far = fog ? (weather ? 30 : [40, 48, 56, 56][qualityLevel()]) + Math.min(48, flyAlt()) : Infinity;
   const fogStart = weather ? 5 : far * .4, fogK = 1 / (far - fogStart);
   const starOn = sunEl < .06, nf = Math.max(0, Math.min(1, -sunEl * 4)), sunOn = sunEl > -.06, moonOn = sunEl < .12;
   const water0 = eyeUnderWater() ? 2 : 0;     // under water, everything looks blue
@@ -2789,6 +2861,11 @@ function renderWorld() {
           tz = dirZ !== 0 ? (Z0 + (dirZ > 0) - oz) / dirZ : Infinity;
       let X = X0, Y = Y0, Z = Z0, face = 1, t = 0, glass = 0, id = 0, water = water0, plantC = -1;
       const tFar = fog ? far / Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ) : Infinity;
+      if (Y0 >= SY && dirY < 0) {                                  // flying above the world: straight down to its ceiling
+        const t0 = (SY - oy) / dirY;
+        X = Math.floor(ox + dirX * t0); Z = Math.floor(oz + dirZ * t0); Y = SY; ty = t0;
+        tx = dirX !== 0 ? (X + (dirX > 0) - ox) / dirX : Infinity; tz = dirZ !== 0 ? (Z + (dirZ > 0) - oz) / dirZ : Infinity;
+      }
       // DDA. The camera's own cell is skipped, so a torch at eye level can't fill the screen.
       // A ray that leaves the world while moving away from it can never hit anything: stop.
       for (let n = nSteps; n > 0; n--) {
@@ -2903,6 +2980,7 @@ uniform sampler3D uLight;                       // torch light level / 255, line
 uniform sampler2DArray uTex;                    // block textures (id*3 + face), crack stages, plant sprites
 uniform sampler2D uHeight;                      // per column: y of the highest solid block (snow settles there), tree id
 uniform sampler3D uBrick;                       // 1 where a 4×4×4 brick holds anything but air, texel (x, z, y) / 4
+uniform sampler3D uBrick2;                      // the same for 16×16×16 blocks, texel (x, z, y) / 16
 uniform vec2 uRes;
 uniform vec3 uEye, uFwd, uRight, uUp;
 uniform float uFocal;
@@ -2941,8 +3019,12 @@ bool occludes(ivec3 c) { return solidB(cellId(c)); }
 bool isPlant(int b) { return b == TALL || b >= CROP0; }
 // in an empty 4×4×4 brick, set the march up so that its next step lands on the first cell past the brick
 bool skipBrick(inout ivec3 c, inout vec3 tM, float t, vec3 ro, vec3 rd, vec3 r, vec3 inv, ivec3 st) {
-  if (texelFetch(uBrick, ivec3(c.x >> 2, c.z >> 2, c.y >> 2), 0).r > .5) return false;
-  vec3 tB = (vec3(c & ivec3(~3)) + vec3(greaterThan(r, vec3(0.))) * 4. - ro) * inv;   // where the ray leaves the brick, per axis
+  int sz = 16;                                  // an empty 16³ block first, else an empty 4³ brick
+  if (texelFetch(uBrick2, ivec3(c.x >> 4, c.z >> 4, c.y >> 4), 0).r > .5) {
+    if (texelFetch(uBrick, ivec3(c.x >> 2, c.z >> 2, c.y >> 2), 0).r > .5) return false;
+    sz = 4;
+  }
+  vec3 tB = (vec3(c & ivec3(-sz)) + vec3(greaterThan(r, vec3(0.))) * float(sz) - ro) * inv;   // where the ray leaves it, per axis
   float tE = min(min(tB.x, tB.y), tB.z);
   if (tE < t + 1.) return true;                 // nearly out anyway: take the ordinary step
   ivec3 nc = ivec3(floor(ro + rd * tE + r * 1e-3));
@@ -3146,6 +3228,13 @@ void main() {
   vec3 tD = abs(inv), tM = (vec3(cell) + max(vec3(st), 0.) - ro) * inv;
   float t = 0., tHit = 1e9, wD = 0., wT = -1.; int axis = 1, id = AIR, hit = 0;   // hit: 1 cube · 2 torch · 3 model · 4 plant
   vec3 acc = vec3(0.); float tr = 1.; bool border = false;
+  if (ro.y > float(WDIM.y) && r.y < 0.) {       // flying above the world: straight down to its ceiling
+    float t0 = (float(WDIM.y) - ro.y) * inv.y;
+    vec3 p = ro + rd * t0;
+    cell = ivec3(int(floor(p.x)), WDIM.y, int(floor(p.z)));
+    tM = (vec3(cell) + max(vec3(st), 0.) - ro) * inv;
+    tM.y = t0;                                  // so the first step lands in the top layer
+  }
   if (uUnder == 1) {                            // eye under water: the stretch to the first cell wall is water too
     float te = min(min(tM.x, tM.y), tM.z);
     if (rd.y > 0. && cellId(cell + ivec3(0, 1, 0)) != WATER) te = min(te, (float(cell.y) + WATER_Y - ro.y) / rd.y);
@@ -3393,7 +3482,16 @@ function brickTile(gl, tx, tz) {              // rays skip empty bricks in one s
   gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, tx * 4); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, tz * 4);
   gl.texSubImage3D(gl.TEXTURE_3D, 0, tx * 4, tz * 4, 0, 4, 4, BY, gl.RED, gl.UNSIGNED_BYTE, bricks);
   for (const p of [gl.UNPACK_ROW_LENGTH, gl.UNPACK_IMAGE_HEIGHT, gl.UNPACK_SKIP_PIXELS, gl.UNPACK_SKIP_ROWS]) gl.pixelStorei(p, 0);
+  for (let sy = 0; sy < BY >> 2; sy++) {        // the tile is one column of 16³ blocks: is each of them all air?
+    let any = 0;
+    for (let by = sy * 4; by < sy * 4 + 4 && !any; by++) for (let bz = tz * 4; bz < tz * 4 + 4 && !any; bz++)
+      for (let bx = tx * 4; bx < tx * 4 + 4; bx++) if (bricks[(by * BZ + bz) * BX + bx]) { any = 255; break; }
+    bricks2[sy] = any;
+  }
+  gl.activeTexture(gl.TEXTURE6);
+  gl.texSubImage3D(gl.TEXTURE_3D, 0, tx, tz, 0, 1, 1, BY >> 2, gl.RED, gl.UNSIGNED_BYTE, bricks2);
 }
+const bricks2 = new Uint8Array(BY >> 2);
 const woodNear = new Uint8Array((TILE + 2) * (TILE + 2));   // scratch: which columns around a tile hold a trunk
 function heightTile(tx, tz) {                 // snow height and tree colour key for one tile's columns
   const x0 = tx * TILE - 1, z0 = tz * TILE - 1, W = TILE + 2;
@@ -3459,7 +3557,7 @@ function initGL() {
     for (const n of ['uWorld', 'uLight', 'uTex', 'uRes', 'uEye', 'uFwd', 'uRight', 'uUp', 'uFocal', 'uSun', 'uZen', 'uHor',
                      'uFog', 'uShade', 'uSunEl', 'uAmb', 'uDayf', 'uFlk', 'uWt', 'uCt', 'uCbr', 'uTod', 'uMine', 'uShadows',
                      'uMobN', 'uTarget', 'uMob', 'uMobHurt', 'uHeight', 'uTime', 'uSnow', 'uLeafMix', 'uGrass', 'uLeaf',
-                     'uLeaf2', 'uUnder', 'uFar', 'uBrick', 'uAnimal', 'uPetA', 'uPetB', 'uPetC', 'uPetD', 'uPetN']) GPU.u[n] = gl.getUniformLocation(prog, n);
+                     'uLeaf2', 'uUnder', 'uFar', 'uBrick', 'uBrick2', 'uAnimal', 'uPetA', 'uPetB', 'uPetC', 'uPetD', 'uPetN']) GPU.u[n] = gl.getUniformLocation(prog, n);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     const tex3 = (unit, filter) => {
       const t = gl.createTexture();
@@ -3490,6 +3588,12 @@ function initGL() {
     gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, BX, BZ, BY, 0, gl.RED, gl.UNSIGNED_BYTE, null);
     gl.uniform1i(GPU.u.uWorld, 0); gl.uniform1i(GPU.u.uLight, 1); gl.uniform1i(GPU.u.uTex, 2); gl.uniform1i(GPU.u.uHeight, 3);
     gl.uniform1i(GPU.u.uBrick, 4);
+    gl.activeTexture(gl.TEXTURE6);              // 16³ blocks: all air or not
+    gl.bindTexture(gl.TEXTURE_3D, gl.createTexture());
+    for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE],
+                          [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_3D, p, v);
+    gl.texImage3D(gl.TEXTURE_3D, 0, gl.R8, BX >> 2, BZ >> 2, BY >> 2, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+    gl.uniform1i(GPU.u.uBrick2, 6);
     gl.activeTexture(gl.TEXTURE5);              // pet shapes: sent once
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
     for (const [p, v] of [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST],
@@ -3528,7 +3632,7 @@ function renderGL(tg) {
   gl.uniform1f(u.uFocal, GPU.f / fovK);
   gl.uniform3f(u.uSun, s.sdx, s.sdy, s.sdz);
   gl.uniform3f(u.uZen, s.zR / 255, s.zG / 255, s.zB / 255); gl.uniform3f(u.uHor, s.hR / 255, s.hG / 255, s.hB / 255);
-  const far = GFX.fog ? (weather ? 32 : QUALITY[qualityLevel()].far) : 400, fs = weather ? 5 : far * .45;   // view distance
+  const far = GFX.fog ? (weather ? 32 : QUALITY[qualityLevel()].far) + Math.min(64, flyAlt()) : 400, fs = weather ? 5 : far * .45;   // view distance
   gl.uniform3f(u.uFog, fs, 1 / (far - fs), GFX.fog ? 1 : 0);
   gl.uniform1f(u.uFar, far);
   gl.uniform3f(u.uShade, GFX.shade[0], GFX.shade[1], GFX.shade[2]);
@@ -3746,7 +3850,7 @@ function drawOverlays(dt, tg) {
     g2d.fillStyle = 'rgba(0,0,0,.5)'; g2d.fillRect(VW / 2 - tw / 2, VH * .68, tw, 11);
     g2d.fillStyle = '#ffd9a0'; g2d.textAlign = 'center'; g2d.fillText(hint, VW / 2, VH * .68 + 8); g2d.textAlign = 'left';
   }
-  const held = heldItem() || (creative ? PAL[(palPage * 6 + selI) % PAL.length] : 0), ic = ICON_CANVAS[held];
+  const held = heldItem(), ic = ICON_CANVAS[held];
   if (ic && !dead) {                          // held item in the corner, swinging on use
     const sw = swingT > 0 ? 1 - swingT / .18 : 1;                    // 0 at swing start, 1 at rest
     const arc = swingT > 0 ? Math.sin(sw * 3.14) * 14 : 0;
@@ -3781,21 +3885,68 @@ function slotHTML(it, i, hb, on) {
 }
 function drawBar() {
   let s = '';
-  for (let i = 0; i < 6; i++) s += slotHTML(creative ? { id: PAL[(palPage * 6 + i) % PAL.length], n: -1 } : INV[i], i, true, i === selI);
+  for (let i = 0; i < 6; i++) s += slotHTML(creative ? { id: CINV[i], n: -1 } : INV[i], i, true, i === selI);
   barEl.innerHTML = s;
 }
 function drawInv() {
-  let s = '';
-  for (let i = 0; i < 24; i++) s += slotHTML(INV[i], i, i < 6, i === selI);
-  invGrid.innerHTML = s;
-  RCP.forEach((rc, ri) => { craftBtns[ri].disabled = !rc[0].every(g => has(g[0], g[1])); });
-  invTitle.textContent = creative ? '背包 — 創造模式中,快捷欄是無限方塊,背包內容原封不動' : '背包 — 拖曳搬移方塊,第一排就是快捷欄';
+  if (creative) drawCatalog();
+  else {
+    let s = '';
+    for (let i = 0; i < 24; i++) s += slotHTML(INV[i], i, i < 6, i === selI);
+    invGrid.innerHTML = s;
+    RCP.forEach((rc, ri) => { craftBtns[ri].disabled = !rc[0].every(g => has(g[0], g[1])); });
+  }
+  invTitle.textContent = creative ? '創造模式 — 點一個物品放進選中的快捷欄格子(也可以拖曳),全部無限;生存背包原封不動'
+                                  : '背包 — 拖曳搬移方塊,第一排就是快捷欄';
   if (panelTab === 'shop') drawShop(); else if (panelTab === 'cook') drawCook();   // their lists depend on the bag
 }
+// the creative bag: its hotbar on top, then every item by kind; click one (or drag it onto a slot) to hold it
+let catBuilt = false, catDrag = null, catDragged = false;
+function drawCatalog() {
+  let hot = '';
+  for (let i = 0; i < 6; i++) hot += slotHTML({ id: CINV[i], n: -1 }, i, true, i === selI);
+  $('chot').innerHTML = hot;
+  if (catBuilt) return;
+  catBuilt = true;
+  $('cat').innerHTML = CAT.map(([h, ids]) => '<div class="catg" data-h="' + h + '"><h4>' + h + ' <span class="dim">' + ids.length + '</span></h4><div class="catr">' +
+    ids.map(id => '<div class="slot i' + id + '" data-id="' + id + '" title="' + nameOf(id) + '"></div>').join('') + '</div></div>').join('');
+  filterCatalog();
+}
+function filterCatalog() {                    // the search box: by name, or a whole kind by its heading
+  const q = $('catq').value.trim().toLowerCase();
+  for (const g of $('cat').children) {
+    const all = !q || g.dataset.h.includes(q);
+    let any = false;
+    for (const n of g.querySelectorAll('.slot')) { const show = all || n.title.toLowerCase().includes(q); n.style.display = show ? '' : 'none'; any = any || show; }
+    g.style.display = any ? '' : 'none';
+  }
+}
+function setCreativeSlot(i, id) {
+  CINV[i] = id; saveCreative(); drawBar();
+  if (invOpen) { drawCatalog(); const n = $('chot').children[i]; if (n) n.classList.add('pop'); }
+}
 function selectSlot(i) { selI = i; drawBar(); if (invOpen) drawInv(); }
+let creativeTold = false;
 function setCreative(on) {                    // survival ↔ creative (C key, or 模式 in settings)
-  creative = !!on; drawBar(); if (invOpen) drawInv();
+  creative = !!on;
+  document.body.classList.toggle('creative', creative);
+  if (!creative) setFlying(false);
+  drawBar(); if (invOpen) drawInv();
   $('sCr').textContent = creative ? '創造' : '生存';
+  if (creative && started && !creativeTold) {
+    creativeTold = true;
+    toast('🎨 創造模式:背包裡有全部物品(無限),' + (isTouch() ? '按 🕊 飛行' : '連按兩下空白鍵飛行'), 'big');
+  }
+}
+const flyAlt = () => flying ? Math.max(0, P.y - standY(P.x, P.y, P.z)) : 0;   // how high above the ground you fly
+function setFlying(on) {                      // creative only: double-tap Space (or 🕊 on touch screens)
+  on = !!on && creative;
+  if (on === flying) return;
+  flying = on; P.g = on ? 3 : 0;              // a little lift when taking off from the ground
+  document.body.classList.toggle('flying', on);
+  $('bf').classList.toggle('on', on);
+  if (on) showHint(isTouch() ? '🕊 飛行中 · 按住 ⤒ 上升、⤓ 下降 · 再按 🕊 落下' : '🕊 飛行中 · 空白鍵上升 · Shift 下降 · 連按兩下空白鍵落下', 2.8);
+  else if (creative) showHint('停止飛行', 1);
 }
 function drawHP() {
   let s = '';
@@ -4331,7 +4482,10 @@ function keyOf(e) {
 }
 let autoMenuAt = -1e9;
 addEventListener('keydown', e => {
-  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') return;   // typing a pet's name
+  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') {         // typing: a pet's name, or a search
+    if (e.target.id === 'catq' && (e.key === 'Escape' || e.key === 'Enter')) e.target.blur();
+    return;
+  }
   const k = keyOf(e);
   if (k === 'escape') {                       // Esc: bag first, then the menu
     if (performance.now() - autoMenuAt < 400) return;               // losing the pointer lock already opened it
@@ -4349,6 +4503,7 @@ addEventListener('keydown', e => {
     if (now - lastWDown < 350) sprintLatch = true;
     lastWDown = now;
   }
+  if (k === ' ') spaceTap();
   if (k >= '1' && k <= '6' && k.length === 1) selectSlot(+k - 1);
   else if (k === 'i' || k === 'tab') toggleInv(!invOpen);
   else if (k === 'm') { if (!invOpen) { panelTab = 'map'; toggleInv(true); } else if (panelTab === 'map') toggleInv(false); else showTab('map'); }
@@ -4360,7 +4515,12 @@ addEventListener('keydown', e => {
   else if (k === 'x') confirmReset();
 });
 addEventListener('keyup', e => { const k = keyOf(e); K[k] = 0; if (k === 'w') sprintLatch = false; });
+function spaceTap() {                         // double-tap Space (or ⤒) in creative: take off / land
+  const now = performance.now();
+  if (creative && now - lastSpaceT < 300) { setFlying(!flying); lastSpaceT = -1e9; } else lastSpaceT = now;
+}
 function releaseInput() {                     // drop everything held (blur, tab switch, menu)
+  upHold = downHold = false;
   for (const k in K) K[k] = 0;
   for (const k in tapped) tapped[k] = 0;
   sprintLatch = false;
@@ -4393,7 +4553,7 @@ canvas.addEventListener('mousedown', e => {
   if (isLocked()) { if (e.button === 2) use2(); else use1(); }
   else { dragLook = true; lockPointer(); }    // no pointer lock (e.g. sandboxed): drag to look
 });
-addEventListener('mouseup', () => { dragLook = false; use1Up(); });
+addEventListener('mouseup', () => { dragLook = false; use1Up(); upHold = downHold = false; });
 let skipMoves = 0;                            // Chrome can report one huge movement right after locking
 addEventListener('mousemove', e => {
   if (paused || !(isLocked() || dragLook)) return;
@@ -4405,13 +4565,7 @@ addEventListener('mousemove', e => {
 });
 addEventListener('wheel', e => {
   if (paused || dead || invOpen || !e.deltaY) return;
-  let i = selI + (e.deltaY > 0 ? 1 : -1);
-  const pages = Math.ceil(PAL.length / 6);
-  if (creative && PAL.length > 6) {           // wrap onto the next palette page
-    if (i > 5) { palPage = (palPage + 1) % pages; i = 0; }
-    else if (i < 0) { palPage = (palPage + pages - 1) % pages; i = 5; }
-  } else i = (i + 6) % 6;
-  selectSlot(i);
+  selectSlot((selI + (e.deltaY > 0 ? 1 : -1) + 6) % 6);
 }, { passive: true });
 
 // touch: left half = floating stick (springs up under the thumb), right half = drag to look
@@ -4471,7 +4625,9 @@ function touchButton(id, down, up) {           // on-screen buttons: touch, or m
 }
 touchButton('bd', use1, use1Up);
 touchButton('bp', use2);
-touchButton('bj', () => { jumpTap = true; });
+touchButton('bj', () => { jumpTap = true; upHold = true; spaceTap(); }, () => { upHold = false; });
+touchButton('bdn', () => { downHold = true; }, () => { downHold = false; });
+touchButton('bf', () => setFlying(!flying));
 touchButton('bi', () => toggleInv(!invOpen));
 
 // hotbar picking, and drag & drop inside the bag (pointer events = mouse + touch)
@@ -4505,6 +4661,35 @@ invGrid.onpointerup = e => {
   }
   dragI = -1; drawInv(); drawBar();
 };
+$('catq').oninput = filterCatalog;
+$('cat').onclick = e => {
+  if (catDragged) return;
+  const n = e.target.closest && e.target.closest('.slot');
+  if (n) setCreativeSlot(selI, +n.dataset.id);
+};
+$('chot').onclick = e => { if (catDragged) return; const i = slotFrom(e); if (i >= 0) selectSlot(i); };
+const catDown = (e, id, from) => { if (e.pointerType === 'mouse' && id) catDrag = { id, from, x: e.clientX, y: e.clientY, moved: false }; };
+$('cat').addEventListener('pointerdown', e => { const n = e.target.closest && e.target.closest('.slot'); if (n) catDown(e, +n.dataset.id, -1); });
+$('chot').addEventListener('pointerdown', e => { const i = slotFrom(e); if (i >= 0) catDown(e, CINV[i], i); });
+addEventListener('pointermove', e => {
+  if (!catDrag) return;
+  if (!catDrag.moved) {
+    if (Math.abs(e.clientX - catDrag.x) + Math.abs(e.clientY - catDrag.y) < 6) return;
+    catDrag.moved = true; ghostEl.className = 'i' + catDrag.id; ghostEl.style.display = 'block';
+  }
+  moveGhost(e);
+});
+addEventListener('pointerup', e => {
+  const d = catDrag;
+  catDrag = null;
+  if (!d || !d.moved) return;                 // a plain click: the click handlers take it
+  catDragged = true; setTimeout(() => { catDragged = false; }, 0);
+  ghostEl.style.display = 'none';
+  const n = document.elementFromPoint(e.clientX, e.clientY), slot = n && n.closest && n.closest('#chot .slot');
+  if (slot) { const j = +slot.dataset.i; if (d.from >= 0) CINV[d.from] = CINV[j]; CINV[j] = d.id; selI = j; }
+  else if (d.from >= 0) CINV[d.from] = 0;     // dragged off the hotbar: that slot is emptied
+  saveCreative(); drawBar(); drawCatalog();
+});
 addEventListener('resize', () => { viewDirty = true; needRender = true; });
 
 // ---- main loop ---------------------------------------------------------------------
@@ -4557,7 +4742,7 @@ function frame(tm) {
   mu = Math.max(-1, Math.min(1, mu)); mv = Math.max(-1, Math.min(1, mv));
   const ml = Math.sqrt(mu * mu + mv * mv);
   if (ml > 1) { mu /= ml; mv /= ml; }         // diagonals are no faster than straight lines
-  sprinting = !handsOff && mv > .3 && !!(K.shift || sprintLatch || stick.full);
+  sprinting = !handsOff && mv > .3 && !!((K.shift && !flying) || sprintLatch || stick.full);   // flying: Shift sinks
   const fovGoal = sprinting ? 1.12 : 1;       // running widens the view a little
   fovK += (fovGoal - fovK) * Math.min(1, dt * 10);
   if (Math.abs(fovK - fovGoal) < 1e-3) fovK = fovGoal;
@@ -4568,8 +4753,8 @@ function frame(tm) {
   prevF = !!K.f;
   if ((K.e || tapped.e) && placeCD === 0 && !invOpen) { use2(); placeCD = .15; tapped.e = 0; }  // a tap waits out the cooldown
   tapped.f = tapped[' '] = 0;
-  if (jump && P.g === 0 && jumpCD === 0) { P.g = buffs.jump > 0 ? 10 : 8; jumpCD = .35; }
-  else if (jump && inWater()) P.g = Math.max(P.g, 4.5);              // swim up
+  if (!flying && jump && P.g === 0 && jumpCD === 0) { P.g = buffs.jump > 0 ? 10 : 8; jumpCD = .35; }
+  else if (!flying && jump && inWater()) P.g = Math.max(P.g, 4.5);   // swim up
   const lks = .0007 * settings.ts;
   P.a += look.dx * lks;                       // drag right = turn right
   P.b = Math.max(-1.5, Math.min(1.5, P.b - look.dy * lks * settings.invY));   // drag down = look down
@@ -4586,8 +4771,9 @@ function frame(tm) {
 
   // ---- physics + entities in ≤20 ms sub-steps, so arrows and falls stay accurate on slow frames ----
   const steps = Math.max(1, Math.ceil(dt / .02)), h = dt / steps;
-  const spd = (sprinting ? 7 : 5) * (buffs.run > 0 ? 1.35 : 1);
-  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd); tickEntities(h); tickPets(h); }
+  const spd = (flying ? (sprinting ? 14 : 8) : (sprinting ? 7 : 5)) * (buffs.run > 0 ? 1.35 : 1);
+  const lift = flying && !handsOff ? (K[' '] || upHold ? 1 : 0) - (K.shift || downHold ? 1 : 0) : 0;
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); tickEntities(h); tickPets(h); }
   tickGrass(dt);
   if (P.y < -10) { placeAtSpawn(); hurtPlayer(4); }
   if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
@@ -4618,7 +4804,7 @@ function frame(tm) {
   }
   const hh = tod * 24 | 0, mm = (tod * 24 - hh) * 60 | 0;
   const clock = (sky.sunEl > .12 ? '☀' : sky.sunEl < -.12 ? '🌙' : '🌆') + (weather === 1 ? '🌧' : weather === 2 ? '❄' : '') +
-                ' ' + pad2(hh) + ':' + pad2(mm) + (creative ? ' ∞' : '');
+                ' ' + pad2(hh) + ':' + pad2(mm) + (creative ? ' ∞' : '') + (flying ? ' 🕊' : '');
   if (clock !== lastClock) { clockEl.textContent = clock; lastClock = clock; }
 
   if (dt > 0) {                               // frame cost, for auto quality and the FPS readout
@@ -4630,7 +4816,7 @@ function frame(tm) {
 
 // ---- boot ----
 loadSettings();
-makeTextures(); makeIcons(); makeIconCSS();
+makeTextures(); makeIcons(); makeIconCSS(); loadCreative();
 if (initGL()) { glCanvas.style.display = 'block'; autoLevel = 2; }   // GPU starts at 高, CPU at 中
 newKit();
 if (!loadGame()) {
