@@ -337,6 +337,56 @@
          background-color:rgba(16,18,22,.75);background-repeat:no-repeat;background-position:center;
          background-size:78%;image-rendering:pixelated}
 
+  /* ---- multiplayer: chat, the 多人連線 card, the joining / lost screen ---- */
+  .mpo{display:none!important}
+  body.mp .mpo{display:flex!important}
+  #chat{position:fixed;left:calc(10px + var(--sl));top:calc(52px + var(--st));width:min(380px,calc(100vw - 20px));z-index:4;
+        pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+  body.tut #chat{top:calc(110px + var(--st))}
+  #chatlog{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:100%}
+  .cl{background:rgba(0,0,0,.5);border-radius:8px;padding:2px 9px;font-size:13px;line-height:1.5;max-width:100%;
+      text-shadow:0 1px 1px rgba(0,0,0,.6);transition:opacity .8s;overflow-wrap:anywhere}
+  .cl b{font-weight:600}
+  .cl.old{opacity:0}
+  body.chatting .cl.old{opacity:.85}
+  #chatlog .cl:nth-last-child(n+9){display:none}
+  #chatin{display:none;pointer-events:auto;width:100%;box-sizing:border-box;font-size:15px;padding:8px 12px;border-radius:10px;
+          border:1px solid var(--line2);background:rgba(10,12,16,.88);color:#fff;outline:none;margin-top:4px}
+  body.chatting #chatin{display:block}
+  body.inv #chat{display:none}
+  @media (max-aspect-ratio:1/1){#chat{top:calc(96px + var(--st))} body.tut #chat{top:calc(160px + var(--st))}}
+  #mpp{display:none;flex-direction:column;gap:8px;width:min(460px,94vw);max-height:calc(100vh - 24px);overflow-y:auto;padding:16px 20px;margin:auto}
+  #mnu.mpc #home{display:none}
+  #mnu.mpc #mpp{display:flex}
+  .mpn{display:flex;align-items:center;gap:10px;font-size:13px}
+  #mpname{flex:1;min-width:0;font-size:15px;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);background:rgba(0,0,0,.35);color:#fff;outline:none}
+  #mpname:disabled{opacity:.7;background:transparent;border-color:transparent;padding-left:0}
+  #mppvp:disabled{opacity:.6;cursor:default}
+  #mp-home,#mp-host,#mp-join,#mp-in{display:flex;flex-direction:column;gap:8px}
+  .mpstep{font-size:13px;display:flex;align-items:center;gap:8px;margin-top:4px}
+  .mpstep b{width:20px;height:20px;border-radius:50%;background:var(--acc);color:#0b1520;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+  .mprow{display:flex;gap:8px;flex-wrap:wrap}
+  .mprow .mb{flex:1;font-size:14px;padding:8px 12px}
+  #mpp textarea{width:100%;box-sizing:border-box;height:66px;resize:none;font:12px/1.4 var(--mono);padding:7px 9px;border-radius:8px;
+                border:1px solid var(--line2);background:rgba(0,0,0,.35);color:#dfe8f2;outline:none;word-break:break-all;user-select:text;-webkit-user-select:text}
+  .mpstat{font-size:13px;line-height:1.55;min-height:1.5em;color:#cfd8e3}
+  .mpstat.bad{color:var(--bad)}
+  .mpstat.good{color:var(--good)}
+  #mplist{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;align-items:center;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05)}
+  #mplist b{width:100%;font-weight:600;font-size:12px;opacity:.7}
+  .mpp{display:inline-flex;align-items:center;gap:5px}
+  .mpp i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .hf2{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+  .hf2 .mb{font-size:14px;padding:8px 16px}
+  #netov{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:rgba(8,11,16,.84)}
+  #netov.on{display:flex}
+  #netov .card{padding:22px 28px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;width:min(360px,90vw)}
+  #netov p{margin:0;opacity:.8;font-size:13px}
+  #nvbar{width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+  #nvbar i{display:block;height:100%;width:0;background:var(--good);transition:width .2s}
+  @media (max-width:430px){#mpp textarea{height:84px}}
+  @media (max-height:480px){#mpp textarea{height:44px} #mpp{gap:5px;padding:10px 16px} .mpstep{margin-top:0}}
+
   /* ---- menu · settings · help ---- */
   #mnu{position:fixed;inset:0;z-index:8;display:flex;padding:12px;box-sizing:border-box;overflow:auto;
        background:rgba(8,11,16,.78);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
@@ -418,6 +468,8 @@
 <div id="aim"><div id="mbar"><i></i></div><div id="tip"></div><div id="hint"></div></div>
 <div id="topr">
   <div id="stat" class="pill"><div id="clock">☀ 08:24</div><div id="coin"></div></div>
+  <div id="bchat" class="tb mpo" title="聊天(Enter)">💬</div>
+  <div id="bmp" class="tb mpo" title="多人連線">👥</div>
   <div id="bh" class="tb" title="操作說明(H)">❔</div>
   <div id="bm" class="tb" title="選單(Esc)">⚙</div>
 </div>
@@ -434,6 +486,8 @@
   <div id="hotbar"><div id="bar"></div><div id="bi" title="背包(I)">🎒</div></div>
 </div>
 <div id="toasts"></div>
+<div id="chat"><div id="chatlog"></div><input id="chatin" type="text" maxlength="80" placeholder="說點什麼…(Enter 送出,Esc 取消)" autocomplete="off" spellcheck="false" enterkeyhint="send"></div>
+<div id="netov"><div class="card"><h2 id="nvt"></h2><p id="nvp"></p><div id="nvbar"><i></i></div><button id="nvb" class="mb pri">回到我的世界</button></div></div>
 <div id="sleep"></div>
 <div id="dmg"></div>
 <div id="inv"><div class="pw">
@@ -506,6 +560,7 @@
     <h1>VOXEL</h1>
     <p class="tag">方塊世界 · 種田 · 寵物 · 季節 · 日夜 · 怪物</p>
     <button id="bstart" class="mb pri">開始遊戲</button>
+    <button id="bmp2" class="mb">👥 多人連線</button>
     <button id="bhelp" class="mb">❔ 操作說明</button>
     <button id="bset" class="mb">⚙ 設定</button>
     <button id="bres" class="mb warn">重新產生世界</button>
@@ -535,6 +590,37 @@
       </section>
     </div>
     <button id="bback" class="mb pri">返回</button>
+  </div>
+  <div id="mpp" class="card">
+    <h2>👥 多人連線</h2>
+    <label class="mpn">你的名字 <input id="mpname" type="text" maxlength="10" autocomplete="off" spellcheck="false"></label>
+    <div id="mp-home">
+      <button id="mphost" class="mb pri">🏠 開房間(用我的世界)</button>
+      <button id="mpjoin" class="mb">🚪 加入朋友的房間</button>
+      <p class="dim">最多 8 人一起玩。用 LINE、Discord 之類互傳一次連線碼就能連上,不需要伺服器;房主的世界就是大家的世界。</p>
+    </div>
+    <div id="mp-host">
+      <div class="mpstep"><b>1</b>按「產生邀請碼」,把代碼傳給朋友</div>
+      <div class="mprow"><button id="mpinv" class="mb">➕ 產生邀請碼</button><button id="mpcopy1" class="mb">📋 複製</button></div>
+      <textarea id="mpcode1" readonly placeholder="邀請碼會出現在這裡"></textarea>
+      <div class="mpstep"><b>2</b>貼上朋友傳回來的回覆碼</div>
+      <textarea id="mpans" placeholder="把回覆碼貼在這裡" spellcheck="false"></textarea>
+      <div class="mprow"><button id="mpaccept" class="mb pri">連線</button></div>
+    </div>
+    <div id="mp-join">
+      <div class="mpstep"><b>1</b>貼上房主給你的邀請碼</div>
+      <textarea id="mpoff" placeholder="把邀請碼貼在這裡" spellcheck="false"></textarea>
+      <div class="mprow"><button id="mpnext" class="mb pri">下一步</button></div>
+      <div class="mpstep"><b>2</b>把回覆碼傳回給房主</div>
+      <textarea id="mpcode2" readonly placeholder="回覆碼會出現在這裡"></textarea>
+      <div class="mprow"><button id="mpcopy2" class="mb">📋 複製</button></div>
+    </div>
+    <div id="mpstat" class="mpstat"></div>
+    <div id="mp-in">
+      <div id="mplist"></div>
+      <div class="tog"><span>玩家互打<small>房主決定;關掉就只能合作</small></span><button id="mppvp">開</button></div>
+    </div>
+    <div class="hf2"><button id="mpleave" class="mb warn">離開</button><button id="mpback" class="mb pri">返回</button></div>
   </div>
   <div id="helpp" class="card">
     <div class="hh"><h2>操作說明</h2>
@@ -636,6 +722,13 @@
           <li>石頭要木鎬、鐵礦要石鎬、鑽石礦要鐵鎬才挖得動;用對的工具挖得快很多</li>
           <li>🎒 背包右邊是合成清單,材料夠了按「做」</li>
           <li>在背包裡點一下物品,就能看它的用途</li>
+        </ul>
+        <h4>多人連線</h4>
+        <ul>
+          <li>選單的「👥 多人連線」:房主按「開房間」再「產生邀請碼」,把代碼傳給朋友;朋友按「加入」貼上,把產生的回覆碼傳回來,房主貼上就連上了</li>
+          <li>最多 8 人。大家在房主的世界裡一起蓋房子、種田、打怪、養寵物;時間和天氣跟著房主,背包、金幣和生命是各自的</li>
+          <li>Enter(手機按 💬)聊天;房主可以決定要不要開「玩家互打」</li>
+          <li>加入別人的世界不會動到你自己的世界,離開後就回到自己的世界</li>
         </ul>
         <h4>模式與存檔</h4>
         <ul>
@@ -1858,7 +1951,7 @@ function packTile(tx, tz) {
   packTmp[o++] = prev; packTmp[o++] = n - 1;
   return packTmp.slice(0, o);
 }
-function packWorld() {
+function packWorldBytes() {                     // the whole world packed (a save, or a guest joining)
   const SW32 = new Uint32Array(savedWorld.buffer);
   let total = 0;
   for (let tz = 0; tz < TILES_Z; tz++) for (let tx = 0; tx < TILES_X; tx++) {
@@ -1868,10 +1961,11 @@ function packWorld() {
   }
   const all = new Uint8Array(total);
   for (let k = 0, o = 0; k < tilePacks.length; k++) { all.set(tilePacks[k], o); o += tilePacks[k].length; }
-  return bytesToB64(all);
+  return all;
 }
-function unpackWorld(t) {
-  const u = b64ToBytes(t);
+const packWorld = () => bytesToB64(packWorldBytes());
+const unpackWorld = t => unpackWorldBytes(b64ToBytes(t));
+function unpackWorldBytes(u) {
   let k = 0;
   for (let tz = 0; tz < TILES_Z; tz++) for (let tx = 0; tx < TILES_X; tx++) {
     let left = 0, b = 0;
@@ -1886,6 +1980,7 @@ function unpackWorld(t) {
   return k === u.length;
 }
 function saveGame() {
+  if (net.role === 'guest') { savePockets(); return; }   // in someone else's world: only our bag and wallet are ours to keep
   try {
     if (worldDirty) { localStorage.voxelW3 = packWorld(); worldDirty = false; }
     localStorage.voxelP3 = JSON.stringify({ x: P.x, y: P.y, z: P.z, a: P.a, b: P.b });
@@ -2058,9 +2153,11 @@ function use1Up() { holdMine = false; mineProg = 0; mineIdx = -1; }
 function use2() {                             // right click / E: pets, sleep, harvest, eat, shoot, farm tools, else place
   if (dead || paused) return;
   const held = heldItem(), it = info(held), o = target(held === 161), pet = pickPet(o);
-  if (pet && petUse(pet, held)) return;
+  if (pet && net.role === 'guest') {          // the host has the animals: tell it, if the click is theirs
+    if (petTakesClick(pet, held)) { netSend(netHost(), { t: 'pet', id: pet.id, a: 'use', h: held, cr: creative ? 1 : 0 }); swingT = .18; return; }
+  } else if (pet && petUse(pet, held)) return;
   const i = o ? idx(o[0], o[1], o[2]) : -1, b = o ? world[i] : AIR;
-  if (b === BED) return sleep();
+  if (b === BED) { if (net.role === 'guest') netSend(netHost(), { t: 'sleep' }); else sleep(); return; }
   if (b >= CROP0 && stageOf(b) === 3) return harvest(i, true);
   if (it.dish !== undefined) return eat(held);
   if (it.bow) return shoot();
@@ -2082,6 +2179,7 @@ function use2() {                             // right click / E: pets, sleep, h
 // mob: x,y,z · vy vertical speed · hp · gr grounded · ht hurt flash · ck attack cooldown ·
 //      jc jump cooldown · bn burning-in-sun timer
 const mobs = [], arrows = [], MOB_MAX = 14, HP_MAX = 20;
+let mobSeq = 0;                               // monster ids (guests follow them by id)
 let hp = HP_MAX, dead = false, hurtT = 0, regenT = 0, swingT = 0, shakeT = 0, spawnT = 2.5;
 
 function mobHits(m) {
@@ -2102,13 +2200,13 @@ function spawnMob() {                         // night only, on solid ground, in
   if (mobs.length >= MOB_MAX) return;
   for (let tries = 8; tries--;) {
     const a = Math.random() * 6.2832, r = 10 + Math.random() * 20;
-    const x = P.x + Math.cos(a) * r | 0, z = P.z + Math.sin(a) * r | 0;
+    const c = someone(), x = c.x + Math.cos(a) * r | 0, z = c.z + Math.sin(a) * r | 0;   // around a player (alone: you)
     if (x < 1 || z < 1 || x > SX - 2 || z > SZ - 2) continue;
     let y = -1;
     for (let k = SY - 3; k > 0; k--) if (solidAt(x, k, z) && !solidAt(x, k + 1, z) && !solidAt(x, k + 2, z)) { y = k + 1; break; }
     if (y < 0 || lightAt(x, y, z) > 6 || blockAt(x, y, z) === WATER) continue;   // torchlight keeps them away
     if (petNear('dragon', x + .5, y, z + .5, 16, 16)) continue;       // and so does a tamed dragon
-    mobs.push({ x: x + .5, y, z: z + .5, vy: 0, hp: 12, gr: 0, ht: 0, ck: 0, jc: 0, bn: 0 });
+    mobs.push({ id: ++mobSeq, x: x + .5, y, z: z + .5, vy: 0, hp: 12, gr: 0, ht: 0, ck: 0, jc: 0, bn: 0 });
     return;
   }
 }
@@ -2120,10 +2218,15 @@ function hurtMob(m, dmg, fx = P.x, fz = P.z) {   // damage with knockback away f
   if (m.hp <= 0) { give(102, 1 + (Math.random() < .35 ? 1 : 0)); return true; }
   return false;
 }
-function hurtPlayer(n) {
+function hurtPlayer(n, fx, fz, by) {           // fx, fz: knocked away from there (multiplayer hits) · by: who, for the message
   if (creative || dead) return;
   hp -= n; hurtT = .35; regenT = 0; shakeT = .3;
-  if (hp <= 0) { hp = 0; dead = true; }
+  if (fx !== undefined && Number.isFinite(fx)) {
+    const dx = P.x - fx, dz = P.z - fz, l = Math.hypot(dx, dz) || 1, kx = dx / l * .5, kz = dz / l * .5;
+    P.x += kx; collide(0, kx); P.z += kz; collide(2, kz);
+    if (P.g === 0 && !flying) P.g = 4;
+  }
+  if (hp <= 0) { hp = 0; dead = true; if (net.role) netDied(by); }
 }
 function mobUnderAim() {                      // the nearest monster in reach: in the crosshair cone, or right under the finger
   const [lx, ly, lz] = lookDir(), ey = P.y + EYE;
@@ -2141,15 +2244,25 @@ function mobUnderAim() {                      // the nearest monster in reach: i
 function melee() {                            // swing at the nearest monster in the crosshair cone (or under the finger)
   const dmg = info(heldItem()).dmg || 1;      // bare hands still hurt a little
   swingT = .18;
+  const q = playerUnderAim();                 // multiplayer, with 玩家互打 on: another player in front comes first
+  if (q) { netHitPlayer(q, dmg); return true; }
   const best = mobUnderAim();
   if (best < 0) return false;
+  if (net.role === 'guest') { netSend(netHost(), { t: 'hit', m: mobs[best].id, d: dmg }); mobs[best].ht = .25; return true; }   // the host has the monsters
   if (hurtMob(mobs[best], dmg)) mobs.splice(best, 1);
   return true;
 }
 function shoot() {
   if (!creative) { if (!take(101, 1)) return; drawBar(); if (invOpen) drawInv(); }
   const [dx, dy, dz] = lookDir();             // where the crosshair (or the finger) points
-  arrows.push({ x: P.x, y: P.y + 1.4, z: P.z, vx: dx * 24, vy: dy * 24 + 2, vz: dz * 24, life: 4 });
+  const a = { x: P.x, y: P.y + 1.4, z: P.z, vx: dx * 24, vy: dy * 24 + 2, vz: dz * 24, life: 4 };
+  if (net.role === 'guest') netSend(netHost(), { t: 'arrow', x: r2(a.x), y: r2(a.y), z: r2(a.z), vx: r2(a.vx), vy: r2(a.vy), vz: r2(a.vz) });   // the host flies it
+  else { if (net.role) a.by = 1; arrows.push(a); }
+}
+function tickSelf(h) {                        // your own timers: hurt flash, swing, shake, health coming back (a guest runs only this)
+  hurtT = Math.max(0, hurtT - h); swingT = Math.max(0, swingT - h); shakeT = Math.max(0, shakeT - h);
+  if (!dead && hp < maxHp()) { regenT += h; if (regenT > 4) { regenT = 0; hp = Math.min(maxHp(), hp + 1); } }
+  if (creative) hp = maxHp();
 }
 function tickEntities(h) {                    // one sub-step of h seconds (needs sky.dayf / sky.sunEl)
   const { dayf, sunEl } = sky;
@@ -2157,20 +2270,21 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
   for (let i = mobs.length; i--;) {
     const m = mobs[i];
     m.ht = Math.max(0, m.ht - h); m.ck = Math.max(0, m.ck - h); m.jc = Math.max(0, m.jc - h);
-    const dx = P.x - m.x, dz = P.z - m.z, dy = P.y - m.y, d = Math.sqrt(dx * dx + dz * dz);
     if (dayf > .5 && sunEl > .15 && !shadowRay(m.x, m.y + 1.7, m.z)) {   // daylight burns them
       m.bn += h;
       if (m.bn > 1.6) { m.hp -= 6; m.bn = 0; m.ht = .25; if (m.hp <= 0) { mobs.splice(i, 1); continue; } }
     } else m.bn = 0;
     m.vy -= 18 * h;
-    if (d < 16 && !dead && !creative) {                              // chase
+    const tg = mobTarget(m);                  // the nearest player it can go for (alone: you)
+    if (tg) {                                                        // chase
+      const dx = tg.x - m.x, dz = tg.z - m.z, dy = tg.y - m.y, d = tg.d;
       const sp = d > 1.4 ? 2.6 : 0, mx = dx / (d || 1) * sp * h, mz = dz / (d || 1) * sp * h;
       const px = m.x, pz = m.z;
       mobMove(m, mx, m.vy * h, mz);
       if (m.gr && !m.jc && Math.abs(m.x - px) + Math.abs(m.z - pz) < Math.abs(mx) + Math.abs(mz) - 1e-4) { m.vy = 7.4; m.jc = .6; }  // blocked: hop
-      if (d < 1.5 && Math.abs(dy) < 2 && !m.ck) { m.ck = 1; hurtPlayer(3); }
+      if (d < 1.5 && Math.abs(dy) < 2 && !m.ck) { m.ck = 1; if (tg.id === 1) hurtPlayer(3); else netHurt(tg.id, 3, m.x, m.z); }
     } else mobMove(m, 0, m.vy * h, 0);
-    if (m.y < -8 || Math.abs(m.x - P.x) > 64 || Math.abs(m.z - P.z) > 64) mobs.splice(i, 1);   // fell out, or left far behind
+    if (m.y < -8 || farFromAll(m.x, m.z, 64)) mobs.splice(i, 1);      // fell out, or left far behind
   }
   for (let i = arrows.length; i--;) {
     const a = arrows[i];
@@ -2183,18 +2297,23 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
     for (let j = mobs.length; j--;) {
       const m = mobs[j];
       if (Math.abs(m.x - nx) < .45 && Math.abs(m.z - nz) < .45 && ny > m.y - .2 && ny < m.y + 1.9) {
-        if (hurtMob(m, 7)) mobs.splice(j, 1);
+        if (a.by > 1 ? hurtMob(m, 7, a.x - a.vx, a.z - a.vz) : hurtMob(m, 7)) mobs.splice(j, 1);
         hit = true; break;
       }
+    }
+    if (!hit && a.by && net.pvp) {            // multiplayer: arrows hit players too (never the one who shot)
+      const on = (x, y, z) => Math.abs(x - nx) < .4 && Math.abs(z - nz) < .4 && ny > y - .1 && ny < y + 1.9;
+      const shooter = a.by === 1 ? net.name : (net.peers.find(p => p.id === a.by) || {}).name;
+      if (a.by !== 1 && !dead && !creative && on(P.x, P.y, P.z)) { hurtPlayer(7, a.x - a.vx, a.z - a.vz, shooter); hit = true; }
+      else for (const q of net.players.values())
+        if (q.id !== a.by && !q.dead && !q.cr && on(q.x, q.y, q.z)) { netHurt(q.id, 7, a.x - a.vx, a.z - a.vz, shooter); hit = true; break; }
     }
     if (hit) { arrows.splice(i, 1); continue; }
     a.x = nx; a.y = ny; a.z = nz;
   }
-  hurtT = Math.max(0, hurtT - h); swingT = Math.max(0, swingT - h); shakeT = Math.max(0, shakeT - h);
-  if (!dead && hp < maxHp()) { regenT += h; if (regenT > 4) { regenT = 0; hp = Math.min(maxHp(), hp + 1); } }
-  if (creative) hp = maxHp();
+  tickSelf(h);
   spawnT -= h;
-  if (spawnT <= 0) { spawnT = 2.5; if (dayf < .25 && !creative && !settings.peace) spawnMob(); }
+  if (spawnT <= 0) { spawnT = 2.5; if (dayf < .25 && (!creative || net.players.size) && !settings.peace) spawnMob(); }
   if (dayf > .6 && mobs.length && Math.random() < h * .15) mobs.pop();
 }
 
@@ -2440,7 +2559,7 @@ function breakFarmBlock(i, b) {               // drops for crops, weeds and farm
   if (isFarm(b) && i < VOL - LAYER && world[i + LAYER] >= CROP0) breakFarmBlock(i + LAYER, world[i + LAYER]);
   return false;
 }
-function sleep() {
+function sleep(by) {                          // by: a guest who went to bed (multiplayer: one sleeper is enough for everyone)
   if (tod > .25 && tod < .75) { toast('🛏 只有晚上才能睡覺'); return; }
   const hours = (tod >= .75 ? 1.25 - tod : .25 - tod) * 24;
   if (tod >= .75) newDay();
@@ -2449,6 +2568,7 @@ function sleep() {
   mobs.length = 0; arrows.length = 0; hp = maxHp();
   fadeSleep();
   toast('☀ 早安!第 ' + day + ' 天 · ' + SEASONS[season()] + '天', 'big');
+  if (net.role === 'host') { netAll({ t: 'slept', n: by || net.name }); if (by) chatSys('💤 ' + by + ' 睡了一覺,天亮了'); }
   petsMorning();
   saveGame();
 }
@@ -2520,7 +2640,7 @@ function saveFarm() {
   }
   const f2 = v => Math.round(v * 100) / 100;
   const pp = tamedPets().map(p => ({ s: p.s, x: f2(p.x), y: f2(p.y), z: f2(p.z), n: p.name, a: p.aff, f: p.fed, p: p.pat, m: p.mode,
-                                     hx: f2(p.hx), hy: f2(p.hy), hz: f2(p.hz), g: Math.round(p.grown * 1000) / 1000, tr: p.tr }));
+                                     hx: f2(p.hx), hy: f2(p.hy), hz: f2(p.hz), g: Math.round(p.grown * 1000) / 1000, tr: p.tr, o: p.o || undefined }));
   localStorage.voxelF3 = JSON.stringify({ c: coins, d: day, g, w, disc: [...discovered], h: harvested, b: buffs, wx: weather,
                                           pets: pp, seen: [...petSeen], tamed: [...petTamed] });
 }
@@ -2542,6 +2662,7 @@ function loadFarm(json, at = i => i) {        // false: no farm saved yet · at:
     p.name = String(q.n || '').slice(0, 12) || petName();
     p.aff = Math.max(0, Math.min(100, num(q.a, 20))); p.fed = num(q.f, 0); p.pat = num(q.p, 0); p.mode = q.m ? 1 : 0; p.tr = num(q.tr, 0);
     p.hx = num(q.hx, q.x); p.hy = num(q.hy, q.y); p.hz = num(q.hz, q.z); p.grown = Math.max(.55, Math.min(1, num(q.g, 1)));
+    p.o = typeof q.o === 'string' ? q.o.slice(0, 10) : '';                // a friend's pet (multiplayer), or yours ('')
     pets.push(p);
   }
   for (const k of f.seen || []) if (PETS[k]) petSeen.add(k);
@@ -2571,7 +2692,7 @@ const tamedPets = () => pets.filter(p => !p.wild);
 function newPet(s, x, y, z, wild) {
   return { id: ++petSeq, s, x, y, z, a: Math.random() * 6.2832, vy: 0, gr: 0, wild, name: '', aff: 0, fed: 0, pat: 0,
            mode: 0, hx: x, hy: y, hz: z, grown: 1, t: 0, amp: 0, cd: 0, foe: null, tr: 0, goal: null, wt: 0, life: 0,
-           stuck: 0, tries: 0, at: Math.random(), lift: 0, side: 1, sideT: 0 };
+           stuck: 0, tries: 0, at: Math.random(), lift: 0, side: 1, sideT: 0, o: '' };   // o: its owner's name ('' = you / the host)
 }
 function petName() {                          // a name none of your pets has yet
   const used = new Set(pets.map(p => p.name)), free = PET_NAMES.filter(n => !used.has(n));
@@ -2605,10 +2726,11 @@ function spawnAnimal() {                      // every few seconds: maybe a wild
   let wild = 0;
   for (const p of pets) if (p.wild) wild++;
   if (wild >= PET_WILD_MAX) return;
+  const c = someone();                        // around a player (alone: you)
   for (let tries = 6; tries--;) {
     const ang = Math.random() * 6.2832, r = 14 + Math.random() * 20;
-    if (Math.sin(ang + P.a) > .6 && r < 28) continue;                 // not right in front of you
-    const x = P.x + Math.cos(ang) * r | 0, z = P.z + Math.sin(ang) * r | 0;
+    if (Math.sin(ang + c.a) > .6 && r < 28) continue;                 // not right in front of them
+    const x = c.x + Math.cos(ang) * r | 0, z = c.z + Math.sin(ang) * r | 0;
     if (x < 2 || z < 2 || x > SX - 3 || z > SZ - 3) continue;
     const { y, hab } = habitatAt(x, z);
     if (!hab.length || y >= YM - 3 || SOLID[world[idx(x, y + 1, z)]] || SOLID[world[idx(x, y + 2, z)]]) continue;
@@ -2662,12 +2784,13 @@ function standY(x, y, z) {                    // where something dropped straigh
   for (let Y = Math.min(YM, Math.floor(y)); Y > 0; Y--) if (solidAt(x, Y - 1, z)) return Y;
   return 0;
 }
-function petTeleport(p) {                     // pops up next to you (behind you, if there is room) — on the ground under you
-  const [x0, y0, z0] = [p.x, p.y, p.z], d = PETS[p.s], fx = Math.sin(P.a), fz = Math.cos(P.a);
+function petTeleport(p, L = LEAD_ME()) {     // pops up next to its owner (behind them, if there is room) — on the ground under them
+  if (!L) return;                             // its owner is not here
+  const [x0, y0, z0] = [p.x, p.y, p.z], d = PETS[p.s], fx = Math.sin(L.a), fz = Math.cos(L.a);
   puff(p.x, p.y + .3, p.z, 'rgba(235,235,235,.9)', 6, .5, 1.2);
   for (const [bk, sd] of [[1.6, 0], [1.3, 1.1], [1.3, -1.1], [0, 1.5], [0, -1.5], [-1.5, 0]]) {
-    const x = P.x - fx * bk + fz * sd, z = P.z - fz * bk - fx * sd, y = standY(x, P.y + 1, z);
-    if (!y || P.y - y > 30) continue;
+    const x = L.x - fx * bk + fz * sd, z = L.z - fz * bk - fx * sd, y = standY(x, L.y + 1, z);
+    if (!y || L.y - y > 30) continue;
     p.x = x; p.z = z; p.y = y + (d.fly ? d.fly * .6 : 0);
     if (!petHits(p)) {
       p.vy = 0; p.stuck = 0; p.goal = null;
@@ -2675,10 +2798,20 @@ function petTeleport(p) {                     // pops up next to you (behind you
       return;
     }
   }
-  p.x = x0; p.y = y0; p.z = z0;               // nowhere to stand: on your spot, if it fits (not in mid-air), else it waits
-  if (flying) return;
-  p.x = P.x; p.y = P.y; p.z = P.z;
+  p.x = x0; p.y = y0; p.z = z0;               // nowhere to stand: on their spot, if it fits (not in mid-air), else it waits
+  if (L.fly) return;
+  p.x = L.x; p.y = L.y; p.z = L.z;
   if (petHits(p)) { p.x = x0; p.y = y0; p.z = z0; } else { p.vy = 0; p.stuck = 0; }
+}
+const LEAD_ME = () => ({ x: P.x, y: P.y, z: P.z, a: P.a, fly: flying, held: heldItem(), dead });   // you, as a pet sees you
+function petLure(p, food, me, dist) {         // the nearest player holding its favourite food within 8 blocks
+  let best = me.held === food && dist < 8 && !me.dead ? me : null, bd = best ? dist : 8;
+  for (const q of net.players.values()) {
+    if (q.held !== food || q.dead) continue;
+    const d = Math.hypot(q.x - p.x, q.z - p.z);
+    if (d < bd) { bd = d; best = q; }
+  }
+  return best;
 }
 function petWander(p, h, cx, cz, rad) {       // strolls between random spots near (cx, cz), with pauses; null = standing
   if ((p.wt -= h) <= 0) {
@@ -2736,48 +2869,53 @@ function tickPets(h) {
   if ((petSpawnT -= h) <= 0) { petSpawnT = 4 + Math.random() * 3; spawnAnimal(); }
   const think = (petThinkT -= h) <= 0;
   if (think) petThinkT = .25;
-  const held = heldItem(), py = flying ? standY(P.x, P.y, P.z) : P.y;   // flying: pets keep to the ground under you
-  let nf = 0, fi = 0;
-  for (const p of pets) if (!p.wild && p.mode === 0) nf++;
+  const me = LEAD_ME(), fans = new Map();     // fans: followers per owner — how many, and the next place in the fan
+  for (const p of pets) if (!p.wild && p.mode === 0) { const f = fans.get(p.o); if (f) f[0]++; else fans.set(p.o, [1, 0]); }
   for (let k = pets.length - 1; k >= 0; k--) {
     const p = pets[k], d = PETS[p.s];
+    const L = p.wild || !p.o ? me : netPlayerNamed(p.o);            // who it is with (null: its owner is not here now)
     if (petHits(p)) {                         // a block was put where it stands: climb on top, or else get out of there
       const y0 = p.y;
       p.y = Math.floor(p.y) + 1;
-      if (petHits(p)) { p.y = y0; if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p); }
+      if (petHits(p)) { p.y = y0; if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p, L); }
     }
-    if (p.y < -4) { if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p); }
-    const dx = P.x - p.x, dz = P.z - p.z, dist = Math.sqrt(dx * dx + dz * dz);
+    if (p.y < -4) { if (p.wild) { pets.splice(k, 1); continue; } petTeleport(p, L); }
     let gx = 0, gz = 0, speed = 0, look = null;
     p.cd = Math.max(0, p.cd - h);
     if (p.wild) {
+      const dx = P.x - p.x, dz = P.z - p.z, dist = Math.sqrt(dx * dx + dz * dz), far = netNearest(p.x, p.z, dist);
       p.life += h;
-      if (dist > 56 || (p.life > 300 && dist > 24)) { pets.splice(k, 1); continue; }
+      if (far > 56 || (p.life > 300 && far > 24)) { pets.splice(k, 1); continue; }
       if (think && dist < 12 && !petSeen.has(p.s) && !lineBlocked(p.x, p.y + petH(p) / 2, p.z, Math.hypot(dist, P.y + EYE - p.y - petH(p) / 2))) {
         petSeen.add(p.s);
         toast('🐾 發現野生的' + d.n + '!最愛吃' + nameOf(d.food) + '(P 看圖鑑)');
       }
-      if (held === d.food && dist < 8 && !dead) {           // it smells its favourite food and comes over
-        if (dist > 1.5) { gx = P.x; gz = P.z; speed = d.spd * .6; } else look = [P.x, P.z];
+      const lu = petLure(p, d.food, me, dist);                       // it smells its favourite food and comes over
+      if (lu) {
+        if (Math.hypot(lu.x - p.x, lu.z - p.z) > 1.5) { gx = lu.x; gz = lu.z; speed = d.spd * .6; } else look = [lu.x, lu.z];
       } else { const g = petWander(p, h, p.x, p.z, 5); if (g) { gx = g[0]; gz = g[1]; speed = d.spd * .4; } }
-    } else if (p.mode === 0) {                              // following: its own spot in a fan behind you
-      const j = fi++, row = j / 7 | 0, col = j % 7, inRow = Math.min(7, nf - row * 7);
-      const ang = P.a + Math.PI + (col - (inRow - 1) / 2) * .5, rad = 1.9 + row * 1.3 + d.r;
-      gx = P.x + Math.sin(ang) * rad; gz = P.z + Math.cos(ang) * rad;
-      if (dist > 20 || Math.abs(py - p.y) > (d.fly ? 18 : 10) || (p.stuck > 3 && dist > 5)) { petTeleport(p); continue; }
+    } else if (p.mode === 0 && L) {                         // following: its own spot in a fan behind its owner
+      const f = fans.get(p.o), j = f[1]++, nf = f[0], row = j / 7 | 0, col = j % 7, inRow = Math.min(7, nf - row * 7);
+      const ang = L.a + Math.PI + (col - (inRow - 1) / 2) * .5, rad = 1.9 + row * 1.3 + d.r;
+      gx = L.x + Math.sin(ang) * rad; gz = L.z + Math.cos(ang) * rad;
+      const dist = Math.hypot(L.x - p.x, L.z - p.z), py = L.fly ? standY(L.x, L.y, L.z) : L.y;   // flying: pets keep to the ground under them
+      if (dist > 20 || Math.abs(py - p.y) > (d.fly ? 18 : 10) || (p.stuck > 3 && dist > 5)) { petTeleport(p, L); continue; }
       const gd = Math.hypot(gx - p.x, gz - p.z);
       if (gd > .6) speed = Math.min(d.spd * 2.4, gd * 3);               // the further behind, the faster it runs
-      else look = [P.x, P.z];
+      else look = [L.x, L.z];
+    } else if (p.mode === 0) {                              // its owner is away: it waits around where it is
+      const g = petWander(p, h, p.x, p.z, 3);
+      if (g) { gx = g[0]; gz = g[1]; speed = d.spd * .4; }
     } else {                                                // staying: strolls around its spot
       const g = petWander(p, h, p.hx, p.hz, 4);
       if (g) { gx = g[0]; gz = g[1]; speed = d.spd * .4; }
       if (Math.hypot(p.x - p.hx, p.z - p.hz) > 12 || p.y < p.hy - 8) { p.x = p.hx; p.y = p.hy; p.z = p.hz; p.vy = 0; }
     }
-    if (d.dmg && !p.wild) {                                 // guards: chase and bite monsters near you (or near home)
+    if (d.dmg && !p.wild) {                                 // guards: chase and bite monsters near their owner (or near home)
       if (think) {
         p.foe = null;
         let best = 10;
-        const cx = p.mode ? p.hx : P.x, cz = p.mode ? p.hz : P.z;
+        const cx = p.mode ? p.hx : L ? L.x : p.x, cz = p.mode ? p.hz : L ? L.z : p.z;
         for (const m of mobs) {
           const md = Math.hypot(m.x - p.x, m.z - p.z);
           if (md < best && Math.hypot(m.x - cx, m.z - cz) < 12 && Math.abs(m.y - p.y) < 5) { best = md; p.foe = m; }
@@ -2804,13 +2942,17 @@ function petChores(p) {                       // once a second: the duck eats we
     if (i < 0) return;
     world[i] = AIR; grassEdit();
     puff(ixOf(i) + .5, iyOf(i) + .3, izOf(i) + .5, '#5f9f3c', 6);
-    if (Math.random() < .25) { const c = Math.random() * 8 | 0; give(SEED0 + c, 1); toast('🦆 ' + p.name + ' 從草裡翻出了' + CROPS[c].n + '種子'); }
+    if (Math.random() < .25) { const c = Math.random() * 8 | 0; petGive(p, SEED0 + c, 1, '🦆 ' + p.name + ' 從草裡翻出了' + CROPS[c].n + '種子'); }
   } else if (d.abil === 'truffle' && p.mode === 0 && p.amp > .5 && p.tr < 3 && p.grown >= 1 &&
              blockAt(p.x | 0, p.y - .5 | 0, p.z | 0) === GRASS && Math.random() < .015) {
-    p.tr++; give(ITEM_TRUFFLE, 1);
+    p.tr++; petGive(p, ITEM_TRUFFLE, 1, '🐷 ' + p.name + ' 拱出了一顆松露!');
     puff(p.x, p.y + .2, p.z, '#6b4a32', 8, .4, 1.8);
-    toast('🐷 ' + p.name + ' 拱出了一顆松露!');
   }
+}
+function petGive(p, id, n, msg) {             // something a pet found, for its owner (a guest gets it sent over)
+  if (!p.o) { give(id, n); if (msg) toast(msg); return; }
+  const peer = netPeerNamed(p.o);
+  if (peer) netSend(peer, { t: 'give', l: [[id, n]], c: 0, ts: msg ? [[msg, '']] : [] });
 }
 function nearestBlock(p, id, r) {             // the closest cell holding this block within r (and 2 up or down)
   const X = p.x | 0, Y = p.y | 0, Z = p.z | 0;
@@ -2839,37 +2981,47 @@ function flowersNear(p, r) {                  // grown flower crops near the bee
 
 // ---- every morning at 6:00: what the tamed animals bring you (babies are still too small to help) ----
 function petsMorning() {
-  const got = {}, news = [];
-  let cash = 0;
-  const add = (id, n) => { if (n > 0) { give(id, n); got[id] = (got[id] || 0) + n; } };
+  const bags = new Map();                     // owner → what their pets brought { got: {id: n}, cash, news } ('' is you)
   for (const p of pets) {
     if (p.wild) continue;
     const d = PETS[p.s];
+    let b = bags.get(p.o);
+    if (!b) bags.set(p.o, b = { got: {}, cash: 0, news: [] });
+    const add = (id, n) => { if (n > 0) b.got[id] = (b.got[id] || 0) + n; };
     p.aff = Math.min(100, p.aff + 1); p.tr = 0;
     if (p.grown < 1) continue;
-    if (d.abil === 'egg') { add(ITEM_EGG, 1 + (p.aff >= 60) + (p.aff >= 100)); if (Math.random() < .04) { add(EGG, 1); news.push('🥚 ' + p.name + ' 下了一顆寵物蛋!'); } }
+    if (d.abil === 'egg') { add(ITEM_EGG, 1 + (p.aff >= 60) + (p.aff >= 100)); if (Math.random() < .04) { add(EGG, 1); b.news.push('🥚 ' + p.name + ' 下了一顆寵物蛋!'); } }
     else if (d.abil === 'milk') add(ITEM_MILK, 1 + (p.aff >= 70));
     else if (d.abil === 'pollen') { if (flowersNear(p, 8)) add(ITEM_HONEY, 1 + (p.aff >= 80)); }
-    else if (d.abil === 'coin') { const n = 5 + (p.aff / 4 | 0) + (Math.random() * 6 | 0); coins += n; cash += n; if (Math.random() < .03) { add(EGG2, 1); news.push('🥚 ' + p.name + ' 撿回一顆稀有寵物蛋!'); } }
+    else if (d.abil === 'coin') { b.cash += 5 + (p.aff / 4 | 0) + (Math.random() * 6 | 0); if (Math.random() < .03) { add(EGG2, 1); b.news.push('🥚 ' + p.name + ' 撿回一顆稀有寵物蛋!'); } }
     else if (d.abil === 'forage') { const known = [...discovered].filter(c => CROPS[c].tier <= 3); add(CROP_ITEM0 + known[Math.random() * known.length | 0], 1 + (p.aff >= 60)); }
     else if (d.abil === 'gift') {
       const known = [...discovered];
       add(SEED0 + known[Math.random() * known.length | 0], 2);
-      if (Math.random() < .2) {                // now and then: a crop you have not found yet, from parents you know
+      if (Math.random() < .2) {                // now and then: a crop nobody has found yet, from parents the world knows
         const next = CROPS.map((_, c) => c).filter(c => !discovered.has(c) && CROPS[c].a !== undefined && discovered.has(CROPS[c].a) && discovered.has(CROPS[c].b));
         if (next.length) {
           const c = next[Math.random() * next.length | 0];
           add(SEED0 + c, 1); discovered.add(c);
-          news.push('🐱 ' + p.name + ' 叼回了沒見過的種子:' + CROPS[c].n + '!');
+          b.news.push('🐱 ' + p.name + ' 叼回了沒見過的種子:' + CROPS[c].n + '!');
         }
       }
-      if (Math.random() < .03) { add(EGG, 1); news.push('🥚 ' + p.name + ' 叼回一顆寵物蛋!'); }
+      if (Math.random() < .03) { add(EGG, 1); b.news.push('🥚 ' + p.name + ' 叼回一顆寵物蛋!'); }
     }
   }
-  const parts = Object.keys(got).map(id => nameOf(+id) + '×' + got[id]);
-  if (cash) { parts.push('金幣 +' + cash); drawCoins(); }
-  if (parts.length) toast('🐾 寵物們帶來了:' + parts.join('、'));
-  for (const n of news) toast(n, 'big');
+  for (const [o, b] of bags) {
+    const parts = Object.keys(b.got).map(id => nameOf(+id) + '×' + b.got[id]);
+    if (b.cash) parts.push('金幣 +' + b.cash);
+    const msgs = (parts.length ? [['🐾 寵物們帶來了:' + parts.join('、'), '']] : []).concat(b.news.map(n => [n, 'big']));
+    if (!o) {                                 // yours
+      for (const id in b.got) give(+id, b.got[id]);
+      if (b.cash) { coins += b.cash; drawCoins(); }
+      for (const [m, k] of msgs) toast(m, k);
+    } else {                                  // a friend's pets: sent to them, if they are here
+      const peer = netPeerNamed(o);
+      if (peer) netSend(peer, { t: 'give', l: Object.keys(b.got).map(id => [+id, b.got[id]]), c: b.cash, ts: msgs });
+    }
+  }
   if (invOpen && panelTab === 'pets') drawPets();
 }
 function hatchEgg(i) {                        // the egg cracks: a baby that already knows you
@@ -2878,10 +3030,12 @@ function hatchEgg(i) {                        // the egg cracks: a baby that alr
   for (const [k, w] of pool) if ((roll -= w) < 0) { s = k; break; }
   world[i] = AIR; grow[i] = 0;
   const p = newPet(s, ixOf(i) + .5, iyOf(i), izOf(i) + .5, false);
-  p.grown = .55; p.aff = 40; p.name = petName(); p.fed = day;
+  p.grown = .55; p.aff = 40; p.name = petName(); p.fed = day; p.o = net.eggOwner.get(i) || '';   // whoever put the egg down
+  net.eggOwner.delete(i);
   pets.push(p); petSeen.add(s); petTamed.add(s);
   puff(p.x, p.y + .4, p.z, '#fff6d8', 14, .5, 2);
-  toast('🐣 蛋孵出來了!是一隻' + PETS[s].n + '寶寶,取名叫「' + p.name + '」', 'big');
+  const msg = '🐣 蛋孵出來了!是一隻' + PETS[s].n + '寶寶,取名叫「' + p.name + '」';
+  if (!p.o) toast(msg, 'big'); else { const peer = netPeerNamed(p.o); if (peer) netSend(peer, { t: 'toast', m: msg, k: 'big' }); }
   if (invOpen && panelTab === 'pets') drawPets();
 }
 function oreEgg(i, b) {                       // eggs hidden in the rock: dragon eggs next to diamonds, rare eggs deep down
@@ -2915,41 +3069,47 @@ function petLove(p, n) {
   p.aff = Math.min(100, p.aff + n);
   puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 4, .5, 1.3, '♥');
 }
-function petTame(p) {
+function petTame(p, who = ME) {
   const d = PETS[p.s];
-  p.wild = false; p.name = petName(); p.aff = 20; p.mode = 0; p.fed = day; p.life = 0; p.goal = null;
+  p.wild = false; p.name = petName(); p.aff = 20; p.mode = 0; p.fed = day; p.life = 0; p.goal = null; p.o = who.name;
   petTamed.add(p.s); petSeen.add(p.s);
   puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 10, .8, 1.6, '♥');
-  toast('💕 ' + d.n + '願意跟著你了!取名叫「' + p.name + '」(按 P 看寵物)', 'big');
+  who.toast('💕 ' + d.n + '願意跟著你了!取名叫「' + p.name + '」(按 P 看寵物)', 'big');
   if (invOpen && panelTab === 'pets') drawPets();
 }
-function petUse(p, held) {                    // right-click on an animal; false = not for it (the click goes to the block)
-  const used = petUse1(p, held);
-  if (used) swingT = .18;
+// who is doing it: you (ME), or a guest the host acts for (netActor) — their name, creative mode, what they hold, where words go
+const ME = { name: '', get creative() { return creative; }, take: () => takeHeld(), hint: (s, t) => showHint(s, t), toast: (s, k) => toast(s, k) };
+function petUse(p, held, who = ME) {          // right-click on an animal; false = not for it (the click goes to the block)
+  const used = petUse1(p, held, who);
+  if (used && who === ME) swingT = .18;
   return used;
 }
-function petUse1(p, held) {
+function petTakesClick(p, held) {             // (a guest decides this much; the host does the rest)
+  const d = PETS[p.s], it = info(held), food = held === d.food, edible = food || it.crop !== undefined || it.dish !== undefined;
+  return p.wild ? creative || food || edible || !held : edible || !held;
+}
+function petUse1(p, held, who) {
   const d = PETS[p.s], it = info(held), food = held === d.food, edible = food || it.crop !== undefined || it.dish !== undefined;
   if (p.wild) {
-    if (tamedPets().length >= PET_MAX) { showHint('寵物已經 ' + PET_MAX + ' 隻了', 2); return true; }
-    if (creative) { petTame(p); return true; }                        // creative: any animal comes along at once
+    if (tamedPets().length >= PET_MAX) { who.hint('寵物已經 ' + PET_MAX + ' 隻了', 2); return true; }
+    if (who.creative) { petTame(p, who); return true; }               // creative: any animal comes along at once
     if (!food) {
       if (held && !edible) return false;
-      showHint(d.n + '最愛吃' + nameOf(d.food), 2); return true;
+      who.hint(d.n + '最愛吃' + nameOf(d.food), 2); return true;
     }
-    takeHeld();
-    if (Math.random() < d.tame * (1 + p.tries * .35)) petTame(p);
-    else { p.tries++; puff(p.x, p.y + petH(p), p.z, 'rgba(210,210,210,.9)', 5, .3, 1); showHint(d.n + '吃掉了……再餵一次試試', 1.6); }
+    who.take();
+    if (Math.random() < d.tame * (1 + p.tries * .35)) petTame(p, who);
+    else { p.tries++; puff(p.x, p.y + petH(p), p.z, 'rgba(210,210,210,.9)', 5, .3, 1); who.hint(d.n + '吃掉了……再餵一次試試', 1.6); }
     return true;
   }
   if (edible) {
-    if (p.fed === day) { showHint(p.name + '今天吃飽了', 1.5); return true; }
-    takeHeld(); p.fed = day; petLove(p, food ? 15 : 5);
-    showHint(p.name + (food ? '最愛這個了!好感 +15' : '吃得很開心,好感 +5'), 1.6);
+    if (p.fed === day) { who.hint(p.name + '今天吃飽了', 1.5); return true; }
+    who.take(); p.fed = day; petLove(p, food ? 15 : 5);
+    who.hint(p.name + (food ? '最愛這個了!好感 +15' : '吃得很開心,好感 +5'), 1.6);
     return true;
   }
   if (held) return false;                     // holding a tool or a block: use that instead
-  if (p.pat !== day) { p.pat = day; petLove(p, 5); showHint('摸摸' + p.name + ',好感 +5', 1.4); }
+  if (p.pat !== day) { p.pat = day; petLove(p, 5); who.hint('摸摸' + p.name + ',好感 +5', 1.4); }
   else puff(p.x, p.y + petH(p) + .1, p.z, '#ff5d86', 2, .4, 1.2, '♥');
   return true;
 }
@@ -2958,12 +3118,13 @@ function petUse1(p, held) {
 const sky = { sunA: 0, sunEl: 0, sdx: 0, sdy: 1, sdz: 0, light: 1, dayf: 1, flk: 1, wt: 0, ct: 0, cbr: 0,
               zR: 0, zG: 0, zB: 0, hR: 0, hG: 0, hB: 0 };
 function updateSky(dt, tm) {
-  const dTod = dt / 1440 * (K.t ? 100 : 1);                         // full day = 24 min (hold T = 100×)
-  if (tod + dTod >= 1) newDay();
+  const guest = net.role === 'guest';        // a guest's clock runs along between the host's time checks, nothing more
+  const dTod = dt / 1440 * (K.t && !guest ? 100 : 1);               // full day = 24 min (hold T = 100×)
+  if (tod + dTod >= 1 && !guest) newDay();
   const was = tod;
   tod = (tod + dTod) % 1;
-  if (was < .25 && tod >= .25) petsMorning();                        // 6:00: the pets bring what they found
-  farmHours += dTod * 24;
+  if (was < .25 && tod >= .25 && !guest) petsMorning();             // 6:00: the pets bring what they found
+  if (!guest) farmHours += dTod * 24;
   const s = sky;
   s.sunA = (tod - .25) * 6.2832; s.sunEl = Math.sin(s.sunA);        // sun elevation -1..1
   let dx = Math.cos(s.sunA), dy = s.sunEl, dz = .15;
@@ -3282,6 +3443,9 @@ uniform vec4 uPetB[12];                         // cos(heading) / size, sin(head
 uniform vec4 uPetC[12];                         // a sphere around the whole animal: centre, radius
 uniform vec4 uPetD[12];                         // leg swing 0–1, radius of its shadow
 uniform int uPetN;
+uniform vec4 uPl[8];                            // other players (multiplayer): feet position, heading
+uniform vec4 uPlB[8];                           // shirt colour, walk phase, leg swing 0–1, hurt
+uniform int uPlN;
 out vec4 outColor;
 
 const int AIR = 0, LEAF = 4, GLASS = 5, TORCH = 6, GRASS = 11, FARM = 12, FARM_FW = 15, WATER = 16, TALL = 17,
@@ -3292,6 +3456,16 @@ const vec3 PMIN[6] = vec3[6](vec3(-.24, 0., -.12), vec3(.01, 0., -.12), vec3(-.2
                              vec3(-.46, 1.12, -.12), vec3(.24, 1.12, -.12), vec3(-.23, 1.36, -.23));
 const vec3 PMAX[6] = vec3[6](vec3(-.01, .72, .12), vec3(.24, .72, .12), vec3(.24, 1.36, .13),
                              vec3(-.24, 1.34, .62), vec3(.46, 1.34, .62), vec3(.23, 1.82, .23));
+const vec3 QMIN[6] = vec3[6](vec3(-.24, 0., -.12), vec3(.01, 0., -.12), vec3(-.24, .72, -.13),   // a player: legs, body, arms down, head
+                             vec3(-.46, .74, -.12), vec3(.24, .74, -.12), vec3(-.23, 1.36, -.23));
+const vec3 QMAX[6] = vec3[6](vec3(-.01, .72, .12), vec3(.24, .72, .12), vec3(.24, 1.36, .13),
+                             vec3(-.25, 1.36, .12), vec3(.46, 1.36, .12), vec3(.23, 1.82, .23));
+const vec3 SHIRT[8] = vec3[8](vec3(.31, .56, .97), vec3(.94, .33, .31), vec3(.26, .77, .4), vec3(.96, .65, .14),
+                              vec3(.67, .37, .91), vec3(.94, .42, .66), vec3(.15, .71, .66), vec3(.96, .49, .2));
+vec3 plOff(int p, float ph, float amp) {        // a walking player's arms and legs swing, opposite each other
+  float s = sin(ph) * .1 * amp;
+  return vec3(0., 0., p == 0 || p == 4 ? s : p == 1 || p == 3 ? -s : 0.);
+}
 const vec3 PCOL[6] = vec3[6](vec3(.2, .15, .3), vec3(.2, .15, .3), vec3(.26, .19, .38),
                              vec3(.3, .22, .44), vec3(.3, .22, .44), vec3(.33, .25, .47));
 
@@ -3483,6 +3657,21 @@ void main() {
       if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { tMob = tt.x; mob = i; part = p; }
     }
   }
+  // ---- other players: box figures like the monsters but upright, arms swinging, shirts in their colour ----
+  float tPl = 1e9; int pl = -1, plPart = 0;
+  for (int i = 0; i < 8; i++) {
+    if (i >= uPlN) break;
+    float cy = cos(uPl[i].w), sy = sin(uPl[i].w);
+    vec3 o = ro - uPl[i].xyz;
+    vec3 lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
+    vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), li = 1.0 / ld, n;
+    vec2 bb = boxT(lo, li, vec3(-.5, 0., -.4), vec3(.5, 1.84, .4), n);
+    if (bb.x > bb.y || bb.y < 0. || bb.x > min(tPl, tMob)) continue;
+    for (int p = 0; p < 6; p++) {
+      vec2 tt = boxT(lo - plOff(p, uPlB[i].y, uPlB[i].z), li, QMIN[p], QMAX[p], n);
+      if (tt.x < tt.y && tt.x > 0. && tt.x < tPl) { tPl = tt.x; pl = i; plPart = p; }
+    }
+  }
   // ---- pets: boxes from uAnimal in each pet's own frame (it faces +z, feet at 0), animated. The frame is
   //      scaled by 1 / size, the ray too, so distances come out in world units ----
   float tPet = 1e9; int pet = -1, ppart = 0;
@@ -3505,7 +3694,7 @@ void main() {
       if (tt.x < tt.y && tt.x > 0. && tt.x < tPet) { tPet = tt.x; pet = i; ppart = k0 + k; }
     }
   }
-  float tEnt = min(tMob, tPet);                 // the nearest creature: the march stops there
+  float tEnt = min(min(tMob, tPet), tPl);       // the nearest creature: the march stops there
 
   // ---- voxel march: glass and torch glow add light in front, water absorbs, leaves and plants are cut out.
   //      The loop only finds what is hit and where (few live values keep it fast); shading comes after. ----
@@ -3594,7 +3783,21 @@ void main() {
   vec3 col = vec3(0.), base = vec3(0.), N = vec3(0.), HP = ro + rd * tHit, c0 = vec3(cell);
   float AO = 1., SH = 1., dist = tHit, mark = 1.;
   bool lit = true, plant = false, aimed = uTarget.w == 1 && cell == uTarget.xyz;
-  if (mob >= 0 && tMob < tHit && tMob <= tPet) {   // ---- mob ----
+  if (pl >= 0 && tPl < tHit && tPl <= tMob && tPl <= tPet) {   // ---- another player ----
+    float cy = cos(uPl[pl].w), sy = sin(uPl[pl].w);
+    vec3 o = ro - uPl[pl].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy) - plOff(plPart, uPlB[pl].y, uPlB[pl].z);
+    vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
+    boxT(lo, 1.0 / ld, QMIN[plPart], QMAX[plPart], ln);
+    vec3 lp = lo + ld * tPl, skin = vec3(.93, .76, .6);
+    N = vec3(ln.x * cy + ln.z * sy, ln.y, -ln.x * sy + ln.z * cy);
+    base = plPart <= 1 ? (lp.y < .1 ? vec3(.2, .15, .12) : vec3(.22, .27, .42)) : plPart == 5 ? skin : SHIRT[int(uPlB[pl].x + .5) & 7];
+    if ((plPart == 3 || plPart == 4) && lp.y < .86) base = skin;                                             // hands
+    if (plPart == 5 && (lp.y > 1.73 || ln.z < -.5 || (abs(ln.x) > .5 && lp.y > 1.6))) base = vec3(.3, .2, .12);   // hair
+    if (plPart == 5 && ln.z > .5 && abs(abs(lp.x) - .1) < .035 && abs(lp.y - 1.57) < .035) base = vec3(.08, .08, .12);   // eyes
+    base *= .94 + .1 * hash3(floor(lp * 16.));
+    if (uPlB[pl].w > 0.) base = mix(base, vec3(1., .45, .45), .6);                                           // just got hit
+    HP = ro + rd * tPl; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tPl; aimed = false;
+  } else if (mob >= 0 && tMob < tHit && tMob <= tPet) {   // ---- mob ----
     float cy = cos(uMob[mob].w), sy = sin(uMob[mob].w);
     vec3 o = ro - uMob[mob].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
@@ -3842,7 +4045,8 @@ function initGL() {
     for (const n of ['uWorld', 'uLight', 'uTex', 'uRes', 'uEye', 'uFwd', 'uRight', 'uUp', 'uFocal', 'uSun', 'uZen', 'uHor',
                      'uFog', 'uShade', 'uSunEl', 'uAmb', 'uDayf', 'uFlk', 'uWt', 'uCt', 'uCbr', 'uTod', 'uMine', 'uShadows',
                      'uMobN', 'uTarget', 'uMob', 'uMobHurt', 'uHeight', 'uTime', 'uSnow', 'uLeafMix', 'uGrass', 'uLeaf',
-                     'uLeaf2', 'uUnder', 'uFar', 'uBrick', 'uBrick2', 'uAnimal', 'uPetA', 'uPetB', 'uPetC', 'uPetD', 'uPetN']) GPU.u[n] = gl.getUniformLocation(prog, n);
+                     'uLeaf2', 'uUnder', 'uFar', 'uBrick', 'uBrick2', 'uAnimal', 'uPetA', 'uPetB', 'uPetC', 'uPetD', 'uPetN',
+                     'uPl', 'uPlB', 'uPlN']) GPU.u[n] = gl.getUniformLocation(prog, n);
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
     const tex3 = (unit, filter) => {
       const t = gl.createTexture();
@@ -3954,6 +4158,8 @@ function renderGL(tg) {
   }
   gl.uniform1i(u.uPetN, np);
   gl.uniform4fv(u.uPetA, petBufA); gl.uniform4fv(u.uPetB, petBufB); gl.uniform4fv(u.uPetC, petBufC); gl.uniform4fv(u.uPetD, petBufD);
+  gl.uniform1i(u.uPlN, net.players.size ? netGLPlayers(far) : 0);
+  gl.uniform4fv(u.uPl, plBufA); gl.uniform4fv(u.uPlB, plBufB);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -4022,13 +4228,14 @@ function drawEntities(gpu) {                  // CPU: billboards, far to near ·
   const list = [];
   for (const m of mobs) list.push([m, 0, 0]);
   for (const a of arrows) list.push([a, 1, 0]);
+  for (const q of net.players.values()) if (!q.dead) list.push([q, 2, 0]);   // other players (multiplayer)
   for (const e of list) {
-    const o = e[0], dx = o.x - P.x, dy = o.y + (e[1] ? 0 : .85) - (P.y + EYE), dz = o.z - P.z;
+    const o = e[0], dx = o.x - P.x, dy = o.y + (e[1] === 1 ? 0 : .85) - (P.y + EYE), dz = o.z - P.z;
     e[2] = dx * dx + dy * dy + dz * dz;
   }
   list.sort((a, b) => b[2] - a[2]);
-  for (const [o, isArrow, d2] of list) {
-    const d = Math.sqrt(d2), oy = o.y + (isArrow ? 0 : .85);
+  for (const [o, kind, d2] of list) {
+    const isArrow = kind === 1, d = Math.sqrt(d2), oy = o.y + (isArrow ? 0 : .85);
     if (d > 40) continue;
     const s = project(o.x, oy, o.z);
     if (!s || lineBlocked(o.x, oy, o.z, d)) continue;
@@ -4039,6 +4246,13 @@ function drawEntities(gpu) {                  // CPU: billboards, far to near ·
       continue;
     }
     const bw = u * .62, bh = u * 1.7;                                // body width / height
+    if (kind === 2) {                         // a player: trousers, a shirt in their colour, a face (the GPU draws them in 3D)
+      if (gpu) continue;
+      g2d.fillStyle = o.ht > 0 ? '#ff9a9a' : '#384870'; g2d.fillRect(s[0] - bw * .42, s[1] + bh * .08, bw * .84, bh * .42);
+      g2d.fillStyle = o.ht > 0 ? '#ffb0b0' : NET_COLS[o.col]; g2d.fillRect(s[0] - bw / 2, s[1] - bh * .3, bw, bh * .38);
+      g2d.fillStyle = '#eec29a'; g2d.fillRect(s[0] - bw * .36, s[1] - bh * .57, bw * .72, bh * .27);
+      continue;
+    }
     if (gpu) {
       const top = o.hp < 12 && u > 3 ? project(o.x, o.y + 2.02, o.z) : null;
       if (top) {
@@ -4101,7 +4315,7 @@ function drawPetSprites(gpu) {                // CPU: each pet is its portrait, 
 }
 function drawOverlays(dt, tg) {
   const gpu = !!GPU.gl;                       // the GPU draws mobs, pets and the block outline itself
-  drawEntities(gpu); drawPetSprites(gpu);
+  drawEntities(gpu); drawPetSprites(gpu); drawPlayerTags();
   drawSpray(); drawPuffs(dt);
   if (!gpu && tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {   // outline the face under the crosshair
     const [gx, gy, gz] = tg, fx = gx - tg[3], fy = gy - tg[4], fz = gz - tg[5];
@@ -4646,6 +4860,12 @@ function drawMap() {
     g.beginPath(); g.arc((p.x - x0) * S, (p.z - z0) * S, Math.max(2.5, S / 4), 0, 7); g.fill();
     if (!p.wild) { g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.stroke(); }
   }
+  for (const q of net.players.values()) {    // other players: arrows in their colours
+    g.save(); g.translate((q.x - x0) * S, (q.z - z0) * S); g.rotate(-q.a);
+    g.fillStyle = NET_COLS[q.col]; g.strokeStyle = '#000'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(0, 6); g.lineTo(-4, -3.5); g.lineTo(0, -1.2); g.lineTo(4, -3.5); g.closePath(); g.stroke(); g.fill();
+    g.restore();
+  }
   g.save(); g.translate((P.x - x0) * S, (P.z - z0) * S); g.rotate(-P.a);   // you: an arrow pointing where you look
   g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 1.5;
   g.beginPath(); g.moveTo(0, 7); g.lineTo(-4.5, -4); g.lineTo(0, -1.5); g.lineTo(4.5, -4); g.closePath(); g.stroke(); g.fill();
@@ -4715,10 +4935,10 @@ $('mapme').onclick = () => { mapView.follow = true; drawMap(); };
 // ---- the pets page: your pets (rename, follow / stay, call, let go), eggs being hatched, and the 圖鑑 ----
 const escHTML = t => String(t).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';');
 let petFreeArm = 0, petFreeTimer = 0, petUiT = 0, petRenaming = false;
-const petById = id => pets.find(p => p.id === id && !p.wild);
+const petById = id => net.role === 'guest' ? net.petInfo.get(id) : pets.find(p => p.id === id && !p.wild);
 function drawPets() {
   if (!invOpen || panelTab !== 'pets' || petRenaming) return;
-  const mine = tamedPets();
+  const mine = net.role === 'guest' ? [...net.petInfo.values()].filter(q => q.o === net.name) : tamedPets().filter(p => !p.o);
   $('petsum').textContent = '我的寵物 ' + mine.length + ' / ' + PET_MAX + ' · 圖鑑 ' + petSeen.size + ' / ' + PETS.length + '(馴服過 ' + petTamed.size + ' 種)';
   let h = '';
   for (const p of mine) {
@@ -4758,7 +4978,7 @@ function startRename(id, el) {                // the name becomes a text box: En
     if (done) return;
     done = true; petRenaming = false;
     const v = inp.value.trim();
-    if (keep && v) p.name = v.slice(0, 8);
+    if (keep && v) { p.name = v.slice(0, 8); if (net.role === 'guest') netSend(netHost(), { t: 'pet', id: p.id, a: 'name', v: p.name }); }
     drawPets();
   };
   inp.onkeydown = e => {
@@ -4772,10 +4992,21 @@ function startRename(id, el) {                // the name becomes a text box: En
 }
 $('pg-pets').onclick = e => {
   const t = e.target, d = t.dataset;
-  if (t.id === 'petcall') { for (const p of tamedPets()) { p.mode = 0; petTeleport(p); } drawPets(); return; }
+  if (t.id === 'petcall') {
+    if (net.role === 'guest') netSend(netHost(), { t: 'pet', a: 'callall' });
+    else for (const p of tamedPets()) if (!p.o) { p.mode = 0; petTeleport(p); }
+    drawPets(); return;
+  }
   if (d.rename) { startRename(+d.rename, t); return; }
   const p = petById(+(d.mode || d.call || d.free));
   if (!p) return;
+  if (net.role === 'guest') {                 // the host runs the pets: ask it (the page shows the answer within a second)
+    if (d.free && petFreeArm !== p.id) { clearTimeout(petFreeTimer); petFreeArm = p.id; petFreeTimer = setTimeout(() => { petFreeArm = 0; drawPets(); }, 3000); drawPets(); return; }
+    netSend(netHost(), { t: 'pet', id: p.id, a: d.mode ? 'mode' : d.call ? 'call' : 'free' });
+    if (d.mode) p.mode ^= 1;
+    if (d.free) { petFreeArm = 0; toast('👋 ' + p.name + ' 回到野外去了'); net.petInfo.delete(p.id); }
+    drawPets(); return;
+  }
   if (d.mode) { p.mode ^= 1; p.hx = p.x; p.hy = p.y; p.hz = p.z; p.goal = null; }
   else if (d.call) { p.mode = 0; petTeleport(p); }
   else if (d.free) {                          // letting a pet go takes two clicks
@@ -4796,6 +5027,7 @@ function applySettings() {                    // settings → live values and la
   $('sFp').textContent = settings.fps ? '開' : '關';
   $('sHp').textContent = settings.help ? '開' : '關';
   $('sPc').textContent = settings.peace ? '開' : '關';
+  $('sPc').disabled = net.role === 'guest';   // in a friend's world, their setting counts
   $('sTm').textContent = settings.tm ? '準心+按鈕' : '點畫面';
   $('sAj').textContent = settings.aj ? '開' : '關';
   for (const [id, on] of [['sIy', settings.invY < 0], ['sSh', settings.shadows], ['sFp', settings.fps], ['sHp', settings.help],
@@ -4822,7 +5054,7 @@ function loadSettings() {
     settings.tm = j.tm ? 1 : 0; settings.aj = j.aj === 0 ? 0 : 1;
   } catch (e) {}
 }
-function setMenu(open) {                      // the menu pauses the world
+function setMenu(open) {                      // the menu pauses the world (not while friends are playing in it)
   paused = !!open;
   menuEl.style.display = open ? 'flex' : 'none';
   if (open) {
@@ -4831,7 +5063,7 @@ function setMenu(open) {                      // the menu pauses the world
     if (started) saveGame();
     needRender = true;
   } else {
-    showSettings(false); showHelp(false);
+    showSettings(false); showHelp(false); mpShow(false);
     if (!started) { started = true; $('bstart').textContent = '繼續遊戲'; if (bootMsg) { toast(bootMsg, 'big'); bootMsg = ''; } }
     tutPA = P.a; tutPB = P.b; drawTut();
   }
@@ -4844,6 +5076,7 @@ for (const id of ['h-farm', 'h-pet', 'h-more']) HELP_SRC[id] = $(id).innerHTML;
 function showHelp(on, fromGame) {
   menuEl.classList.toggle('hlp', !!on);
   if (!on) return;
+  menuEl.classList.remove('mpc');
   helpFromGame = !!fromGame;
   for (const id in HELP_SRC) $(id).innerHTML = dev(HELP_SRC[id]);
   $('htut').textContent = tutDone ? '✕ 關掉新手引導' : '🔁 重新看新手引導';
@@ -4873,6 +5106,7 @@ function closeMenuAndPlay() {
 }
 let resetArm = 0, resetArmTimer = 0;          // "press twice" guards for the destructive reset
 function confirmReset() {
+  if (net.role) { showHint('多人連線中不能重置世界', 2); return; }
   if (resetArm > 0) { resetArm = 0; resetWorld(); showHint('世界已重置', 1.5); }
   else { resetArm = 3; showHint('再按一次 X 重置整個世界', 3); }
 }
@@ -4882,6 +5116,7 @@ $('bset').onclick = () => showSettings(true);
 $('bback').onclick = () => { showSettings(false); saveSettings(); };
 $('bres').onclick = e => {
   const b = e.currentTarget;
+  if (net.role) { mpStatus(''); b.textContent = '多人連線中不能重置'; setTimeout(() => { b.textContent = '重新產生世界'; }, 2000); return; }
   clearTimeout(resetArmTimer);
   if (b.dataset.arm !== '1') {
     b.dataset.arm = '1'; b.textContent = '確定重置?再按一次'; b.classList.add('arm');
@@ -4906,6 +5141,839 @@ $('bm').onclick = () => setMenu(true);
 $('bm').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); setMenu(true); }, { passive: false });
 $('rb').onclick = () => { respawn(); if (!isTouch()) lockPointer(); };
 
+// =============================================================================
+// ---- multiplayer: one host (it is their world) and up to seven guests, over WebRTC data channels.
+//      No server: the host makes an invite code, the friend answers with a reply code, both swapped by hand
+//      (LINE, Discord…). The host runs the world — crops, monsters, pets, time and weather — and sends it
+//      out; guests send what they change. Everyone keeps their own bag, wallet and health.
+// =============================================================================
+const NET_VER = 1, NET_MAX = 8;
+const NET_COLS = ['#4f8ef7', '#ef5350', '#43c465', '#f5a623', '#ab5fe8', '#f06ba8', '#26b5a8', '#f57c33'];   // shirts and name tags
+const ICE_SERVERS = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
+const net = {
+  role: '',                   // '' alone · 'host' · 'guest'
+  id: 1, name: '', col: 0,    // me (the host is always id 1 with colour 0)
+  peers: [],                  // host: one per guest · guest: just the host. {id, name, col, pc, r, u, open, ready, t0}
+  players: new Map(),         // everyone else, as drawn here: id → {id, name, col, x, y, z, a, b, tx, ty, tz, ta, tb, amp, t, fly, cr, dead, held, ht}
+  pending: null,              // host: the invite waiting for its reply · guest: the link being made
+  pvp: true,                  // players can hurt each other (the host decides)
+  frameAt: 0, bgAt: 0,        // when the last frame ran, and the last background step (a hidden host keeps the world going)
+  shadow: null, shadow32: null, scanVer: -1,   // the world as the other side has it (host: as last sent · guest: as agreed)
+  tick: 0, meT: 0, envT: 0, farmT: 0,
+  loading: null,              // guest: the world on its way {n, got, parts, f, queue}
+  spawn: null,                // guest: where to stand when it arrives
+  eggOwner: new Map(),        // host: who put each egg down (cell → name), so the chick is theirs
+  petInfo: new Map(),         // guest: names, affection… of the tamed pets (id → details), merged into the moving ones
+  nextId: 2,
+};
+const netLive = () => net.peers.some(p => p.ready);
+const netHost = () => net.role === 'guest' ? net.peers[0] : null;
+const ownerKey = () => net.role === 'guest' ? net.name : '';     // whose pets are "mine": the host's (and alone: yours) are ''
+const r2 = v => Math.round(v * 100) / 100;
+
+// ---- connection codes: the few SDP fields that matter (ICE user and password, the DTLS fingerprint, the setup role,
+//      UDP candidates), packed into bytes with a checksum, base64url: about 150 letters. The other side builds a
+//      minimal SDP back out of them. An SDP of an unexpected shape travels whole instead ('V0'). ----
+const B64U = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+function b64u(u) {
+  let s = '';
+  for (let i = 0; i < u.length; i += 3) {
+    const n = u[i] << 16 | (u[i + 1] || 0) << 8 | (u[i + 2] || 0);
+    s += B64U[n >> 18 & 63] + B64U[n >> 12 & 63] + (i + 1 < u.length ? B64U[n >> 6 & 63] : '') + (i + 2 < u.length ? B64U[n & 63] : '');
+  }
+  return s;
+}
+function unb64u(s) {
+  const out = [];
+  let acc = 0, bits = 0;
+  for (const ch of s) {
+    const v = B64U.indexOf(ch);
+    if (v < 0) throw new Error('code');
+    acc = (acc << 6 | v) & 0xffffff; bits += 6;
+    if (bits >= 8) { bits -= 8; out.push(acc >> bits & 255); }
+  }
+  return new Uint8Array(out);
+}
+const CAND_T = ['host', 'srflx', 'prflx', 'relay'], SETUP = ['actpass', 'active', 'passive'];
+function codePack(desc, name) {                // a local description (offer or answer) and my name → a code
+  const L = desc.sdp.split(/\r?\n/), get = k => { const l = L.find(x => x.startsWith('a=' + k + ':')); return l ? l.slice(k.length + 3).trim() : ''; };
+  const ufrag = get('ice-ufrag'), pwd = get('ice-pwd'), fp = get('fingerprint'), setup = SETUP.indexOf(get('setup'));
+  const hex = /^sha-256 /i.test(fp) ? fp.split(' ')[1].split(':') : [];
+  const enc = new TextEncoder(), b = [16 | (desc.type === 'answer' ? 1 : 0) | Math.max(0, setup) << 1];
+  const str = s => { const u = enc.encode(s).slice(0, 255); b.push(u.length, ...u); };
+  if (!ufrag || !pwd || setup < 0 || hex.length !== 32 || ufrag.length > 64 || pwd.length > 64)
+    return 'V0' + b64u(enc.encode(JSON.stringify({ t: desc.type, s: desc.sdp, n: name })));
+  str(ufrag); str(pwd);
+  for (const h of hex) b.push(parseInt(h, 16) & 255);
+  const cands = [];
+  for (const l of L) {
+    const m = /^a=candidate:\S+ 1 udp \d+ (\S+) (\d+) typ (\w+)/i.exec(l);
+    if (m && CAND_T.includes(m[3]) && cands.length < 12) cands.push([CAND_T.indexOf(m[3]), m[1], +m[2]]);
+  }
+  b.push(cands.length);
+  for (const [t, a, p] of cands) {
+    const v4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/.exec(a), md = /^([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})\.local$/i.exec(a);
+    if (v4) { b.push(t); b.push(...v4.slice(1).map(Number)); }                                   // IPv4: 4 bytes
+    else if (md) { b.push(t | 4); b.push(...md.slice(1).join('').match(/../g).map(h => parseInt(h, 16))); }   // mDNS name: its 16-byte UUID
+    else { b.push(t | 8); str(a); }                                                              // anything else (IPv6): as text
+    b.push(p >> 8 & 255, p & 255);
+  }
+  str(String(name || '').slice(0, 10));
+  let sum = 0;
+  for (const x of b) sum = sum + x & 255;
+  b.push(sum);
+  return 'V1' + b64u(Uint8Array.from(b));
+}
+function codeUnpack(code) {                    // a code (spaces and line breaks from a chat app are fine) → {type, sdp, name}
+  code = String(code || '').replace(/\s+/g, '');
+  if (code.startsWith('V0')) {
+    let j;
+    try { j = JSON.parse(new TextDecoder().decode(unb64u(code.slice(2)))); } catch (e) { throw new Error('code'); }
+    if (!j || (j.t !== 'offer' && j.t !== 'answer') || typeof j.s !== 'string') throw new Error('code');
+    return { type: j.t, sdp: j.s, name: String(j.n || '').slice(0, 10) };
+  }
+  if (!code.startsWith('V1')) throw new Error('code');
+  const u = unb64u(code.slice(2));
+  let sum = 0;
+  for (let i = 0; i < u.length - 1; i++) sum = sum + u[i] & 255;
+  if (u.length < 40 || sum !== u[u.length - 1]) throw new Error('code');
+  let k = 0;
+  const byte = () => { if (k >= u.length - 1) throw new Error('code'); return u[k++]; };
+  const str = () => { const n = byte(); if (k + n > u.length - 1) throw new Error('code'); const s = new TextDecoder().decode(u.subarray(k, k + n)); k += n; return s; };
+  const h0 = byte();
+  if (h0 >> 4 !== 1) throw new Error('code');
+  const type = h0 & 1 ? 'answer' : 'offer', setup = SETUP[h0 >> 1 & 3] || 'actpass';
+  const ufrag = str(), pwd = str(), fp = [];
+  for (let i = 0; i < 32; i++) fp.push(byte().toString(16).toUpperCase().padStart(2, '0'));
+  const n = byte(), cl = [];
+  for (let i = 0; i < n; i++) {
+    const tb = byte(), t = tb & 3, kind = tb >> 2 & 3;
+    let a;
+    if (kind === 0) a = [byte(), byte(), byte(), byte()].join('.');
+    else if (kind === 1) {
+      let h = '';
+      for (let j = 0; j < 16; j++) h += byte().toString(16).padStart(2, '0');
+      a = h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20) + '.local';
+    } else a = str();
+    const p = byte() << 8 | byte(), pri = [126, 100, 110, 0][t] * 16777216 + (65535 - i) * 256 + 255;
+    cl.push('a=candidate:' + (i + 1) + ' 1 udp ' + pri + ' ' + a + ' ' + p + ' typ ' + CAND_T[t] + (t ? ' raddr 0.0.0.0 rport 0' : '') + ' generation 0');
+  }
+  const name = str();
+  const sdp = ['v=0', 'o=- ' + (1e6 + Math.floor(Math.random() * 1e9)) + ' 2 IN IP4 127.0.0.1', 's=-', 't=0 0', 'a=group:BUNDLE 0', 'a=msid-semantic: WMS',
+    'm=application 9 UDP/DTLS/SCTP webrtc-datachannel', 'c=IN IP4 0.0.0.0', ...cl, 'a=ice-ufrag:' + ufrag, 'a=ice-pwd:' + pwd,
+    'a=fingerprint:sha-256 ' + fp.join(':'), 'a=setup:' + setup, 'a=mid:0', 'a=sctp-port:5000', 'a=max-message-size:262144', ''].join('\r\n');
+  return { type, sdp, name };
+}
+
+// ---- peers: a connection with two data channels made the same way on both sides (no renegotiation):
+//      'r' reliable and in order (the world, changes, chat) · 'u' unreliable (positions: a newer one comes 1/10 s later) ----
+function netPeer(extra) {
+  if (typeof RTCPeerConnection !== 'function') throw new Error('rtc');
+  const peer = Object.assign({ id: 0, name: '', col: 0, open: false, ready: false, t0: performance.now() }, extra);
+  const pc = peer.pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  peer.r = pc.createDataChannel('r', { negotiated: true, id: 0 });
+  peer.u = pc.createDataChannel('u', { negotiated: true, id: 1, ordered: false, maxRetransmits: 0 });
+  peer.r.binaryType = 'arraybuffer';
+  peer.r.onmessage = peer.u.onmessage = e => netRecv(peer, e.data);
+  peer.r.onopen = () => { peer.open = true; if (peer.host) netSend(peer, { t: 'hi', n: net.name, v: NET_VER }); mpDraw(); };
+  peer.r.onclose = () => netGone(peer);
+  pc.onconnectionstatechange = () => {      // (a friend's link still waiting for the host to paste the reply is left alone: it can still work out)
+    if (pc.connectionState === 'failed' && (peer.open || !peer.host)) netGone(peer);
+  };
+  return peer;
+}
+const iceDone = (pc, ms) => new Promise(res => {   // every candidate gathered (or enough waiting): codes carry them all at once
+  if (pc.iceGatheringState === 'complete') return res();
+  const t = setTimeout(res, ms);
+  pc.addEventListener('icegatheringstatechange', () => { if (pc.iceGatheringState === 'complete') { clearTimeout(t); res(); } });
+});
+function netSend(peer, m, fast) {
+  const ch = fast ? peer.u : peer.r;
+  if (ch && ch.readyState === 'open') try { ch.send(typeof m === 'string' ? m : JSON.stringify(m)); } catch (e) {}
+}
+function netAll(m, except, fast) { const s = JSON.stringify(m); for (const p of net.peers) if (p.ready && p !== except) netSend(p, s, fast); }
+function netDrop(peer) {                       // close a connection and forget it
+  try { peer.pc.close(); } catch (e) {}
+  if (net.pending === peer) net.pending = null;
+  const k = net.peers.indexOf(peer);
+  if (k >= 0) net.peers.splice(k, 1);
+}
+function netGone(peer) {                       // a connection ended (closed, failed, or the other side left)
+  if (peer.gone) return;
+  peer.gone = true;
+  const was = peer.ready, known = net.peers.includes(peer);
+  netDrop(peer);
+  if (net.role === 'host' && known) {
+    net.players.delete(peer.id);
+    if (was) { chatSys('👋 ' + peer.name + ' 離開了'); netAll({ t: 'left', id: peer.id }); }
+  } else if (net.role === 'guest' && peer.host) netOverlay('lost', peer.why === 'ver' ? '兩邊的遊戲版本不同:請兩邊都重新整理網頁再連一次。' :
+                                                             peer.why === 'bye' ? '房主關閉了房間。' : '房主離開了,或是網路斷了。');
+  mpDraw();
+}
+
+// ---- host: opening the room, inviting, accepting ----
+function netOpenRoom() {
+  net.role = 'host'; net.id = 1; net.col = 0; net.pvp = true;
+  net.shadow = world.slice(); net.shadow32 = new Uint32Array(net.shadow.buffer); net.scanVer = worldVer;
+  document.body.classList.add('mp');
+}
+async function netInvite() {                  // a fresh invite code for one more friend (it replaces an unanswered one)
+  if (net.peers.length >= NET_MAX - 1) throw new Error('full');
+  if (net.pending) netDrop(net.pending);
+  const peer = netPeer(), pc = peer.pc;
+  net.pending = peer;
+  await pc.setLocalDescription(await pc.createOffer());
+  await iceDone(pc, 3500);
+  return net.pending === peer ? codePack(pc.localDescription, net.name) : '';
+}
+async function netAccept(code) {              // the friend's reply code: the connection starts
+  const peer = net.pending;
+  if (!peer) throw new Error('noinv');
+  const d = codeUnpack(code);
+  if (d.type !== 'answer') throw new Error('type');
+  await peer.pc.setRemoteDescription({ type: 'answer', sdp: d.sdp });
+  net.pending = null;
+  peer.id = net.nextId++; peer.name = netUniqueName(d.name || '玩家'); peer.col = netFreeCol(); peer.t0 = performance.now();
+  net.peers.push(peer);
+  return peer;
+}
+function netUniqueName(n, self) {             // names tell players (and whose pets are whose) apart
+  n = String(n || '玩家').trim().slice(0, 10) || '玩家';
+  const taken = s => s === net.name || net.peers.some(p => p !== self && p.name === s);
+  let v = n, k = 2;
+  while (taken(v)) v = n.slice(0, 8) + k++;
+  return v;
+}
+function netFreeCol() { for (let c = 1; c < NET_MAX; c++) if (!net.peers.some(p => p.col === c)) return c; return 1; }
+function netRoster(except) {                  // everyone in the room but one: {id, n, c, x, y, z}
+  const l = [{ id: 1, n: net.name, c: 0, x: r2(P.x), y: r2(P.y), z: r2(P.z) }];
+  for (const p of net.peers) if (p.ready && p !== except) { const q = net.players.get(p.id); if (q) l.push({ id: p.id, n: p.name, c: p.col, x: r2(q.x), y: r2(q.y), z: r2(q.z) }); }
+  return l;
+}
+function netSpawnNear() {                     // a free spot beside the host for someone arriving
+  const fx = Math.sin(P.a), fz = Math.cos(P.a);
+  for (const [f, s] of [[1.5, 1.2], [1.5, -1.2], [0, 2], [0, -2], [-1.5, 0], [2.5, 0]]) {
+    const x = P.x + fx * f + fz * s, z = P.z + fz * f - fx * s, y = standY(x, P.y + 1.5, z);
+    if (y && !solidAt(x, y, z) && !solidAt(x, y + 1, z) && Math.abs(y - P.y) < 3) return [r2(x), y, r2(z)];
+  }
+  return [r2(P.x), r2(P.y), r2(P.z)];
+}
+async function netSendWorld(peer) {           // the whole world in 16 KB pieces, then it gets every change like the others
+  const bytes = packWorldBytes();
+  peer.ready = true;                          // (changes sent from now on reach it after the world: it applies them once loaded)
+  netSend(peer, { t: 'wbeg', n: bytes.length, f: netFarmState() });
+  for (let o = 0; o < bytes.length; o += 16384) {
+    while (peer.r.readyState === 'open' && peer.r.bufferedAmount > 1 << 20) await new Promise(res => setTimeout(res, 25));
+    if (peer.r.readyState !== 'open') return;
+    try { peer.r.send(bytes.slice(o, o + 16384)); } catch (e) { return; }
+  }
+  netSend(peer, { t: 'wend' });
+}
+function netFarmState() {                     // what a guest needs of the farm besides the blocks
+  const g = [];
+  for (const i of farmCells()) if ((world[i] >= CROP0 || isEgg(world[i])) && grow[i] > 0) g.push(i, Math.round(grow[i] * 1000));
+  return { g, disc: [...discovered], h: harvested, day, tod, wx: weather };
+}
+
+// ---- guest: answering an invite ----
+async function netJoin(code) {                // the host's invite code → a reply code to send back
+  const d = codeUnpack(code);
+  if (d.type !== 'offer') throw new Error('type');
+  if (net.pending) netDrop(net.pending);
+  const peer = netPeer({ id: 1, name: d.name || '房主', col: 0, host: true }), pc = peer.pc;
+  net.pending = peer;
+  await pc.setRemoteDescription({ type: 'offer', sdp: d.sdp });
+  await pc.setLocalDescription(await pc.createAnswer());
+  await iceDone(pc, 3500);
+  return net.pending === peer ? codePack(pc.localDescription, net.name) : '';
+}
+function netWorldArrived() {                  // the host's world takes the place of ours — in memory only: our own save stays as it was
+  const L = net.loading, f = L.f;
+  net.loading = null;
+  relight();
+  grow.fill(0); wetT.fill(0);
+  for (let k = 0; k + 1 < f.g.length; k += 2) if (f.g[k] >= 0 && f.g[k] < VOL) grow[f.g[k]] = f.g[k + 1] / 1000;
+  discovered.clear(); for (const c of f.disc) if (CROPS[c]) discovered.add(c);
+  (f.h || []).forEach((n, c) => { if (c < harvested.length) harvested[c] = n; });
+  day = f.day; tod = f.tod; weather = f.wx;
+  mobs.length = 0; arrows.length = 0; pets.length = 0; net.petInfo.clear();
+  worldVer++; geomVer++; waterVer++; farmListVer = -1; invalidateShadows(); GPU.ver = -1; needRender = true;
+  net.shadow = world.slice(); net.shadow32 = new Uint32Array(net.shadow.buffer); net.scanVer = worldVer;
+  setFlying(false); P.x = net.spawn[0]; P.y = net.spawn[1]; P.z = net.spawn[2]; P.g = 0;
+  const host = netHost();
+  host.ready = true;
+  for (const q of L.queue) GUEST.ed(host, q);   // changes that came in while it loaded
+  bootMsg = ''; mapSel = treeSel = -1;
+  document.body.classList.add('mp');
+  netOverlay('');
+  drawBar(); drawCoins(); drawHP(); drawBuffs();
+  mpShow(false); mpStatus('✓ 已加入 ' + host.name + ' 的房間', 'good');
+  if (paused) closeMenuAndPlay();
+  chatSys('🏠 來到了 ' + host.name + ' 的世界(Enter 或 💬 聊天)');
+}
+function savePockets() {                      // a guest keeps their bag and wallet; their own world is left as it was saved
+  try {
+    localStorage.voxelI = JSON.stringify(INV);
+    const f = JSON.parse(localStorage.voxelF3 || 'null');
+    if (f) { f.c = coins; localStorage.voxelF3 = JSON.stringify(f); }
+  } catch (e) {}
+}
+
+// ---- messages ----
+function netRecv(peer, data) {
+  if (typeof data !== 'string') {             // a piece of the world
+    const L = net.loading;
+    if (L) { L.parts.push(new Uint8Array(data)); L.got += data.byteLength; netOverlay('load', L.got / L.n); }
+    return;
+  }
+  let m;
+  try { m = JSON.parse(data); } catch (e) { return; }
+  const f = (peer.host ? GUEST : HOST)[m && m.t];
+  if (f) try { f(peer, m); } catch (e) { console.warn('net', m.t, e); }
+}
+const HOST = {                                // what the host hears from a guest
+  hi(peer, m) {
+    if (m.v !== NET_VER) { netSend(peer, { t: 'bye', why: 'ver' }); setTimeout(() => netDrop(peer), 800); return; }
+    if (peer.ready) return;
+    const [x, y, z] = netSpawnNear();
+    netSend(peer, { t: 'wel', id: peer.id, col: peer.col, name: peer.name, host: net.name, pvp: net.pvp, players: netRoster(peer), x, y, z });
+    net.players.set(peer.id, netPlayer(peer.id, peer.name, peer.col, x, y, z));
+    netSendWorld(peer);
+    netAll({ t: 'join', id: peer.id, n: peer.name, c: peer.col, x, y, z }, peer);
+    chatSys('👋 ' + peer.name + ' 加入了');
+    mpDraw();
+  },
+  me(peer, m) {                               // where a guest is and what they are doing (about 15 times a second)
+    const q = net.players.get(peer.id);
+    if (!q || ![m.x, m.y, m.z, m.a, m.b].every(Number.isFinite)) return;
+    q.tx = m.x; q.ty = m.y; q.tz = m.z; q.ta = m.a; q.tb = m.b;
+    q.fly = m.f ? 1 : 0; q.dead = m.d ? 1 : 0; q.held = m.h | 0; q.cr = m.cr ? 1 : 0;
+    if (m.hu) q.ht = .25;
+  },
+  ed(peer, m) { if (Array.isArray(m.e)) netApplyEdits(m.e, m.g, peer); },
+  hit(peer, m) {                              // a guest hit a monster
+    const k = mobs.findIndex(o => o.id === m.m), q = net.players.get(peer.id);
+    if (k >= 0 && q && hurtMob(mobs[k], Math.max(1, Math.min(20, m.d | 0)), q.x, q.z)) mobs.splice(k, 1);
+  },
+  pvp(peer, m) {                              // a guest hit another player
+    const q = net.players.get(peer.id);
+    if (net.pvp && q) netHurt(m.to, Math.max(1, Math.min(20, m.d | 0)), q.x, q.z, peer.name);
+  },
+  arrow(peer, m) {
+    if ([m.x, m.y, m.z, m.vx, m.vy, m.vz].every(Number.isFinite) && arrows.length < 60)
+      arrows.push({ x: m.x, y: m.y, z: m.z, vx: m.vx, vy: m.vy, vz: m.vz, life: 4, by: peer.id });
+  },
+  pet(peer, m) {                              // a guest feeding, patting or taming an animal, or looking after their own pets
+    const who = netActor(peer, m);
+    if (m.a === 'callall') { for (const p of pets) if (!p.wild && p.o === peer.name) { p.mode = 0; petTeleport(p, net.players.get(peer.id)); } return; }
+    const p = pets.find(q => q.id === m.id);
+    if (!p) return;
+    if (m.a === 'use') { petUse(p, m.h | 0, who); return; }
+    if (p.wild || p.o !== peer.name) return;  // the rest only for their own pets
+    if (m.a === 'mode') { p.mode ^= 1; p.hx = p.x; p.hy = p.y; p.hz = p.z; p.goal = null; }
+    else if (m.a === 'call') { p.mode = 0; petTeleport(p, net.players.get(peer.id)); }
+    else if (m.a === 'name' && m.v) p.name = String(m.v).trim().slice(0, 8) || p.name;
+    else if (m.a === 'free') { p.wild = true; p.name = ''; p.o = ''; p.life = 0; p.aff = 0; p.tries = 0; p.goal = null; }
+    netAll(netPetList());
+  },
+  sleep(peer) {
+    if (tod > .25 && tod < .75) netSend(peer, { t: 'hint', m: '🛏 只有晚上才能睡覺', d: 1.5 });
+    else sleep(peer.name);
+  },
+  chat(peer, m) {
+    const s = String(m.m || '').trim().slice(0, 80);
+    if (!s) return;
+    chatShow(peer.name, peer.col, s);
+    netAll({ t: 'chat', n: peer.name, c: peer.col, m: s }, peer);
+  },
+  dead(peer, m) {
+    const s = m.by ? '💀 ' + String(m.by).slice(0, 10) + ' 打倒了 ' + peer.name : '💀 ' + peer.name + ' 倒下了';
+    chatSys(s); netAll({ t: 'sys', m: s }, peer);
+  },
+};
+const GUEST = {                               // what a guest hears from the host
+  wel(peer, m) {
+    saveGame();                               // our own world, as it is now, before the host's takes its place
+    net.role = 'guest'; net.id = m.id; net.col = m.col; net.name = m.name; net.pvp = !!m.pvp;
+    net.peers = [peer]; net.pending = null; peer.name = m.host || peer.name;
+    net.players.clear();
+    for (const q of m.players || []) net.players.set(q.id, netPlayer(q.id, q.n, q.c, q.x, q.y, q.z));
+    net.spawn = [m.x, m.y, m.z];
+    netOverlay('load', 0); mpDraw();
+  },
+  wbeg(peer, m) { net.loading = { n: m.n, got: 0, parts: [], f: m.f, queue: [] }; },
+  wend() {
+    const L = net.loading;
+    if (!L) return;
+    const all = new Uint8Array(L.got);
+    let o = 0;
+    for (const p of L.parts) { all.set(p, o); o += p.length; }
+    if (L.got !== L.n || !unpackWorldBytes(all)) { netOverlay('lost', '世界資料傳到一半壞掉了,請重新連一次。'); return; }
+    netWorldArrived();
+  },
+  ed(peer, m) {
+    if (net.loading) { net.loading.queue.push(m); return; }
+    if (peer.ready && Array.isArray(m.e)) netApplyEdits(m.e, null, null);
+  },
+  env(peer, m) { if (peer.ready) { tod = m.tod; day = m.day; weather = m.wx; } },
+  farm(peer, m) {                             // how far along the crops and eggs are, and which crops the world knows
+    if (!peer.ready) return;
+    const g = new Map();
+    for (let k = 0; k + 1 < m.g.length; k += 2) g.set(m.g[k], m.g[k + 1] / 1000);
+    for (const i of farmCells()) if (world[i] >= CROP0 || isEgg(world[i])) grow[i] = g.get(i) || 0;
+    for (const c of m.disc || []) if (CROPS[c]) discovered.add(c);
+  },
+  ent(peer, m) {                              // monsters, animals, arrows and players, ten times a second
+    if (!peer.ready) return;
+    const om = new Map(mobs.map(o => [o.id, o]));
+    mobs.length = 0;
+    for (const [id, x, y, z, ht, hp] of m.m) {
+      const o = om.get(id) || { id, x, y, z, vy: 0, hp, gr: 1, ht: 0, ck: 0, jc: 0, bn: 0 };
+      o.tx = x; o.ty = y; o.tz = z; o.hp = hp; if (ht) o.ht = Math.max(o.ht, .2);
+      mobs.push(o);
+    }
+    const op = new Map(pets.map(o => [o.id, o]));
+    pets.length = 0;
+    for (const [id, s, x, y, z, a, amp, g, wild] of m.p) {
+      if (!PETS[s]) continue;
+      let o = op.get(id);
+      if (!o) { o = newPet(s, x, y, z, !!wild); o.id = id; o.a = a; }
+      o.tx = x; o.ty = y; o.tz = z; o.ta = a; o.amp = amp; o.grown = g; o.wild = !!wild;
+      const inf = net.petInfo.get(id);
+      if (inf && !o.wild) Object.assign(o, inf);
+      pets.push(o);
+    }
+    arrows.length = 0;
+    for (const [x, y, z, vx, vy, vz] of m.ar) arrows.push({ x, y, z, vx, vy, vz, life: 1 });
+    for (const [id, x, y, z, a, b, f, d, h, hu, cr] of m.pl) {
+      const q = net.players.get(id);
+      if (!q) continue;
+      q.tx = x; q.ty = y; q.tz = z; q.ta = a; q.tb = b; q.fly = f; q.dead = d; q.held = h; q.cr = cr;
+      if (hu) q.ht = .25;
+    }
+  },
+  pets(peer, m) {                             // the tamed pets' details, for tips, name tags and the pets page
+    net.petInfo.clear();
+    for (const [id, s, name, aff, fed, pat, mode, hx, hz, grown, o] of m.l)
+      net.petInfo.set(id, { id, s, name, aff, fed, pat, mode, hx, hz, grown, o });
+    for (const p of pets) { const inf = net.petInfo.get(p.id); if (inf && !p.wild) Object.assign(p, inf); }
+    if (invOpen && panelTab === 'pets') drawPets();
+  },
+  join(peer, m) { net.players.set(m.id, netPlayer(m.id, m.n, m.c, m.x, m.y, m.z)); chatSys('👋 ' + m.n + ' 加入了'); mpDraw(); },
+  left(peer, m) { const q = net.players.get(m.id); net.players.delete(m.id); if (q) chatSys('👋 ' + q.name + ' 離開了'); mpDraw(); },
+  chat(peer, m) { chatShow(m.n, m.c, m.m); },
+  sys(peer, m) { chatSys(m.m); },
+  hurt(peer, m) { hurtPlayer(Math.max(1, Math.min(20, m.d | 0)), m.fx, m.fz, m.by); },
+  give(peer, m) {                             // what our pets brought
+    for (const [id, n] of m.l || []) if (IT[id]) give(id, Math.min(64, n | 0));
+    if (m.c > 0) { coins += m.c | 0; drawCoins(); }
+    for (const [s, k] of m.ts || []) toast(s, k);
+  },
+  take(peer, m) {                             // a pet ate what we held
+    if (creative) return;
+    if (heldItem() === m.h) takeHeld(); else if (take(m.h, 1)) { drawBar(); if (invOpen) drawInv(); }
+  },
+  toast(peer, m) { toast(String(m.m), m.k); },
+  hint(peer, m) { showHint(String(m.m), m.d || 1.5); },
+  set(peer, m) { if (net.pvp !== !!m.pvp) { net.pvp = !!m.pvp; chatSys(net.pvp ? '⚔ 房主打開了玩家互打' : '🕊 房主關掉了玩家互打'); } },
+  slept(peer, m) { fadeSleep(); hp = maxHp(); toast('☀ 早安!' + m.n + ' 睡了一覺,天亮了', 'big'); },
+  bye(peer, m) { peer.why = m.why === 'ver' ? 'ver' : 'bye'; netGone(peer); },
+};
+function netActor(peer, m) {                  // a guest, as petUse sees them: their name, what they hold, where the words go
+  return { name: peer.name, creative: !!m.cr, take: () => netSend(peer, { t: 'take', h: m.h | 0 }),
+           hint: (s, t) => netSend(peer, { t: 'hint', m: s, d: t }), toast: (s, k) => netSend(peer, { t: 'toast', m: s, k: k || '' }) };
+}
+const netPeerNamed = name => net.peers.find(p => p.ready && p.name === name) || null;
+function netPlayerNamed(name) { for (const q of net.players.values()) if (q.name === name) return q; return null; }
+function netPlayer(id, name, col, x, y, z) {
+  return { id, name, col, x, y, z, a: 0, b: 0, tx: x, ty: y, tz: z, ta: 0, tb: 0, amp: 0, t: 0, fly: 0, cr: 0, dead: 0, held: 0, ht: 0 };
+}
+function netHurt(id, d, fx, fz, by) {         // host: someone gets hurt — the host itself, or a guest (their health lives with them)
+  if (id === 1) { hurtPlayer(d, fx, fz, by); return; }
+  const p = net.peers.find(q => q.id === id && q.ready);
+  if (p) netSend(p, { t: 'hurt', d, fx: r2(fx), fz: r2(fz), by: by || '' });
+  const q = net.players.get(id);
+  if (q) q.ht = .25;
+}
+function netDied(by) {                        // our own death, told to everyone
+  const s = by ? '💀 ' + by + ' 打倒了 ' + net.name : '💀 ' + net.name + ' 倒下了';
+  chatSys(s);
+  if (net.role === 'host') netAll({ t: 'sys', m: s }); else netSend(netHost(), { t: 'dead', by: by || '' });
+}
+
+// ---- keeping the world the same everywhere: every so often the cells that differ from the shadow copy are sent.
+//      The host sends all changes (its own, the crops', and what guests did) to everyone; a guest sends only its own. ----
+function netScan() {
+  const out = [], S = net.shadow, S32 = net.shadow32;
+  for (let k = 0; k < W32.length; k++) if (W32[k] !== S32[k]) {
+    for (let i = k * 4, e = i + 4; i < e; i++) if (world[i] !== S[i]) { out.push(i, world[i]); S[i] = world[i]; }
+  }
+  return out;
+}
+function netApplyEdits(e, g, from) {          // cells someone else changed ([i, id, i, id…]; g: growth of crops they touched)
+  for (let k = 0; k + 1 < e.length; k += 2) {
+    const i = e[k], id = e[k + 1];
+    if (!(i >= 0 && i < VOL) || !(id >= 0 && id < 256)) continue;
+    if (net.role === 'guest') net.shadow[i] = id;
+    const old = world[i];
+    if (old === id) continue;
+    const keep = old >= CROP0 && id >= CROP0 && cropOf(old) === cropOf(id) ? grow[i] : 0;   // a crop growing: keep its progress
+    setBlock(i, id);
+    grow[i] = keep;
+    if (from) {                               // host, from a guest: what setBlock alone would not know
+      if (isWetFarm(id) && !isWetFarm(old)) wetT[i] = 24;                  // they watered it: wet for a day
+      if (isEgg(id)) net.eggOwner.set(i, from.name);                       // their egg: the chick will be theirs
+    }
+  }
+  if (g) for (let k = 0; k + 1 < g.length; k += 2) if (g[k] >= 0 && g[k] < VOL && (world[g[k]] >= CROP0 || isEgg(world[g[k]]))) grow[g[k]] = g[k + 1] / 1000;
+}
+function netEntities(peer) {                  // host: what one guest sees moving within 64 blocks
+  const me = net.players.get(peer.id), px = me ? me.x : P.x, pz = me ? me.z : P.z;
+  const near = (x, z) => (x - px) * (x - px) + (z - pz) * (z - pz) < 4096;
+  const m = [], p = [], ar = [], pl = [];
+  for (const o of mobs) if (near(o.x, o.z)) m.push([o.id, r2(o.x), r2(o.y), r2(o.z), o.ht > 0 ? 1 : 0, o.hp]);
+  for (const o of pets) if (near(o.x, o.z)) p.push([o.id, o.s, r2(o.x), r2(o.y), r2(o.z), r2(o.a), r2(o.amp), r2(o.grown), o.wild ? 1 : 0]);
+  for (const a of arrows) if (near(a.x, a.z)) ar.push([r2(a.x), r2(a.y), r2(a.z), r2(a.vx), r2(a.vy), r2(a.vz)]);
+  pl.push([1, r2(P.x), r2(P.y), r2(P.z), r2(P.a), r2(P.b), flying ? 1 : 0, dead ? 1 : 0, heldItem(), hurtT > 0 ? 1 : 0, creative ? 1 : 0]);
+  for (const q of net.players.values())
+    if (q.id !== peer.id) pl.push([q.id, r2(q.x), r2(q.y), r2(q.z), r2(q.a), r2(q.b), q.fly, q.dead, q.held, q.ht > 0 ? 1 : 0, q.cr]);
+  return { t: 'ent', m, p, ar, pl };
+}
+function netPetList() {                       // host: details of every tamed pet
+  return { t: 'pets', l: tamedPets().map(p => [p.id, p.s, p.name, p.aff, p.fed, p.pat, p.mode, r2(p.hx), r2(p.hz), p.grown, p.o || '']) };
+}
+function netTick(dt) {                        // once a frame
+  if (!net.role) return;
+  netSmooth(dt);
+  if (net.role === 'host') {
+    const now = performance.now();
+    for (const p of net.peers.slice()) if (!p.open && now - p.t0 > 25000) { netDrop(p); mpStatus(netFail(p.name), 'bad'); }
+    if (!netLive()) return;
+    if ((net.tick += dt) >= .1) {             // ten times a second: changed blocks, and what moves
+      net.tick = 0;
+      if (worldVer !== net.scanVer) {
+        net.scanVer = worldVer;
+        const e = netScan();
+        for (let k = 0; k < e.length; k += 8000) netAll({ t: 'ed', e: e.slice(k, k + 8000) });
+      }
+      for (const p of net.peers) if (p.ready) netSend(p, netEntities(p), true);
+    }
+    if ((net.envT += dt) >= 1) { net.envT = 0; netAll({ t: 'env', tod, day, wx: weather }); netAll(netPetList()); }
+    if ((net.farmT += dt) >= 2) { net.farmT = 0; const f = netFarmState(); netAll({ t: 'farm', g: f.g, disc: f.disc }); }
+  } else {
+    const host = netHost();
+    if (!host || !host.ready) return;
+    if ((net.meT += dt) >= .066) {
+      net.meT = 0;
+      netSend(host, { t: 'me', x: r2(P.x), y: r2(P.y), z: r2(P.z), a: r2(P.a), b: r2(P.b), f: flying ? 1 : 0, d: dead ? 1 : 0,
+                      h: heldItem(), cr: creative ? 1 : 0, hu: hurtT > 0 ? 1 : 0 }, true);
+    }
+    if ((net.tick += dt) >= .1) {
+      net.tick = 0;
+      if (worldVer !== net.scanVer) {
+        net.scanVer = worldVer;
+        const e = netScan();
+        if (e.length) {
+          const g = [];
+          for (let k = 0; k < e.length; k += 2) if (e[k + 1] >= CROP0 || isEgg(e[k + 1])) g.push(e[k], Math.round(grow[e[k]] * 1000));
+          netSend(host, { t: 'ed', e, g });
+        }
+      }
+    }
+  }
+}
+// ---- a host whose page is hidden (another tab, or on a phone another app, e.g. to send a friend the code) gets no frames.
+//      The friends' world keeps going anyway: time, crops, monsters and animals, and the updates, about once a second.
+//      Monsters leave the host alone meanwhile. ----
+function netBackground(dt) {
+  updateSky(dt, performance.now());
+  if ((farmAcc += dt) >= .25) {
+    tickFarm(farmHours); farmHours = 0;
+    for (const k in buffs) if ((buffs[k] -= farmAcc) <= 0) delete buffs[k];
+    farmAcc = 0;
+  }
+  const steps = Math.ceil(dt / .02), h = dt / steps;
+  for (let i = 0; i < steps; i++) { movePlayer(h, 0, 0, 5, 0); tickEntities(h); tickPets(h); }
+  tickGrass(dt);
+  netTick(dt);
+}
+setInterval(() => {
+  if (!document.hidden || net.role !== 'host' || !net.peers.some(p => p.ready)) return;
+  const now = performance.now();
+  if (now - net.frameAt < 400) return;        // frames are still coming: nothing to do
+  const dt = Math.min(2, (now - Math.max(net.frameAt, net.bgAt)) / 1000);
+  net.bgAt = now;
+  if (dt > 0) netBackground(dt);
+}, 250);
+function netSmooth(dt) {                      // the others glide to where they were last seen; arrows keep flying between updates
+  const k = Math.min(1, dt * 12), ang = (a, b) => a + (((b - a) % 6.28319 + 9.42478) % 6.28319 - 3.14159) * k;
+  for (const q of net.players.values()) {
+    const ox = q.x, oz = q.z;
+    if (Math.hypot(q.tx - q.x, q.tz - q.z) > 8) { q.x = q.tx; q.y = q.ty; q.z = q.tz; }   // too far: teleported, respawned
+    else { q.x += (q.tx - q.x) * k; q.y += (q.ty - q.y) * k; q.z += (q.tz - q.z) * k; }
+    q.a = ang(q.a, q.ta); q.b += (q.tb - q.b) * k;
+    const mv = Math.hypot(q.x - ox, q.z - oz);
+    q.amp += ((mv > dt * .6 && !q.fly ? 1 : 0) - q.amp) * Math.min(1, dt * 8);
+    q.t = (q.t + mv * 4.5) % 6283.185307; q.ht = Math.max(0, q.ht - dt);
+  }
+  if (net.role !== 'guest') return;
+  for (const m of mobs) {
+    if (m.tx === undefined) continue;
+    m.x += (m.tx - m.x) * k; m.y += (m.ty - m.y) * k; m.z += (m.tz - m.z) * k; m.ht = Math.max(0, m.ht - dt);
+  }
+  for (const p of pets) {
+    if (p.tx === undefined) continue;
+    const ox = p.x, oz = p.z;
+    p.x += (p.tx - p.x) * k; p.y += (p.ty - p.y) * k; p.z += (p.tz - p.z) * k; p.a = ang(p.a, p.ta);
+    p.t = (p.t + Math.hypot(p.x - ox, p.z - oz) * 4.5 / Math.max(.45, petH(p)) + dt * (PETS[p.s].fly ? 9 : 1.2)) % 6283.185307;
+  }
+  for (const a of arrows) { a.x += a.vx * dt; a.y += a.vy * dt; a.z += a.vz * dt; a.vy -= 16 * dt; }
+}
+
+// ---- players against players, monsters against players ----
+function playerUnderAim() {                   // another player within reach under the crosshair (or finger), when hurting each other is on
+  if (!net.role || !net.pvp) return null;
+  const [lx, ly, lz] = lookDir(), ey = P.y + EYE;
+  let best = null, bd = 3.3;
+  for (const q of net.players.values()) {
+    if (q.dead) continue;
+    const t = rayBox(P.x, ey, P.z, lx, ly, lz, q.x - .4, q.y, q.z - .4, q.x + .4, q.y + 1.9, q.z + .4);
+    if (t < bd) { bd = t; best = q; }
+  }
+  return best;
+}
+function netHitPlayer(q, d) {                 // our swing lands on another player
+  q.ht = .25;
+  if (net.role === 'host') netHurt(q.id, d, P.x, P.z, net.name);
+  else netSend(netHost(), { t: 'pvp', to: q.id, d });
+}
+function mobTarget(m) {                       // the nearest player a monster goes for: alive, not in creative mode, within 16 blocks
+  let best = null, bd = 16;
+  if (!dead && !creative && !document.hidden) { const d = Math.sqrt((P.x - m.x) * (P.x - m.x) + (P.z - m.z) * (P.z - m.z)); if (d < bd) { bd = d; best = { x: P.x, y: P.y, z: P.z, id: 1, d }; } }
+  for (const q of net.players.values()) {
+    if (q.dead || q.cr) continue;
+    const d = Math.hypot(q.x - m.x, q.z - m.z);
+    if (d < bd) { bd = d; best = { x: q.x, y: q.y, z: q.z, id: q.id, d }; }
+  }
+  return best;
+}
+function farFromAll(x, z, r) {                // no player within r blocks (sideways, square)
+  if (Math.abs(x - P.x) <= r && Math.abs(z - P.z) <= r) return false;
+  for (const q of net.players.values()) if (Math.abs(x - q.x) <= r && Math.abs(z - q.z) <= r) return false;
+  return true;
+}
+function netNearest(x, z, d0) { let d = d0; for (const q of net.players.values()) d = Math.min(d, Math.hypot(q.x - x, q.z - z)); return d; }
+function someone() {                          // a random player (monsters and animals turn up around everyone)
+  const n = net.players.size;
+  if (!n || Math.random() * (n + 1) < 1) return P;
+  return [...net.players.values()][Math.random() * n | 0];
+}
+
+// ---- chat ----
+function chatShow(name, col, msg) {
+  const d = document.createElement('div');
+  d.className = 'cl';
+  if (name) { const b = document.createElement('b'); b.textContent = name; b.style.color = NET_COLS[col] || '#fff'; d.append(b, ' '); }
+  d.append(String(msg));
+  const log = $('chatlog');
+  log.append(d);
+  while (log.children.length > 30) log.firstChild.remove();
+  setTimeout(() => d.classList.add('old'), 12000);
+}
+const chatSys = msg => chatShow('', 0, msg);
+function chatOpen() {
+  if (!net.role || dead) return;
+  document.body.classList.add('chatting');
+  releaseInput(); unlockPointer();            // (the mouse is free while typing; it locks again after)
+  const inp = $('chatin');
+  inp.placeholder = isTouch() ? '說點什麼…(按鍵盤上的「送出」)' : '說點什麼…(Enter 送出,Esc 取消)';
+  inp.value = ''; inp.focus();
+}
+function chatClose() {
+  document.body.classList.remove('chatting');
+  $('chatin').blur();
+  if (!paused && !invOpen && !dead && !isTouch()) lockPointer();
+}
+function chatSend() {
+  const s = $('chatin').value.trim().slice(0, 80);
+  chatClose();
+  if (!s || !net.role) return;
+  chatShow(net.name, net.col, s);
+  if (net.role === 'host') netAll({ t: 'chat', n: net.name, c: 0, m: s }); else netSend(netHost(), { t: 'chat', m: s });
+}
+$('chatin').addEventListener('keydown', e => {
+  if (e.isComposing) return;                  // Enter that picks an IME candidate is not the end of the message
+  if (e.key === 'Enter') chatSend(); else if (e.key === 'Escape') chatClose();
+});
+$('chatin').addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== $('chatin')) document.body.classList.remove('chatting'); }, 0));
+$('bchat').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); chatOpen(); }, { passive: false });
+$('bchat').onclick = () => chatOpen();
+
+// ---- other players on screen: name tags (seen through walls, fainter), and arrows on the farm map ----
+function drawPlayerTags() {
+  if (!net.players.size) return;
+  const fs = GPU.gl ? Math.max(11, Math.round(3.8 * view.ui)) : 7;
+  g2d.font = '600 ' + fs + 'px sans-serif'; g2d.textAlign = 'center';
+  for (const q of net.players.values()) {
+    const d = Math.hypot(q.x - P.x, q.y - P.y, q.z - P.z);
+    if (q.dead || d > 64) continue;
+    const s = project(q.x, q.y + 2.05, q.z);
+    if (!s) continue;
+    const w = g2d.measureText(q.name).width + fs * .8;
+    g2d.globalAlpha = lineBlocked(q.x, q.y + 1.5, q.z, d) ? .45 : 1;
+    g2d.fillStyle = 'rgba(0,0,0,.5)'; g2d.fillRect(s[0] - w / 2, s[1] - fs * 1.1, w, fs * 1.4);
+    g2d.fillStyle = NET_COLS[q.col] || '#fff'; g2d.fillText(q.name, s[0], s[1]);
+  }
+  g2d.globalAlpha = 1; g2d.textAlign = 'left';
+}
+const plBufA = new Float32Array(8 * 4), plBufB = new Float32Array(8 * 4);
+function netGLPlayers(far) {                  // the nearest eight others within the view distance, for the shader
+  const l = [];
+  for (const q of net.players.values()) {
+    const d2 = (q.x - P.x) * (q.x - P.x) + (q.z - P.z) * (q.z - P.z);
+    if (!q.dead && d2 < far * far) l.push([d2, q]);
+  }
+  l.sort((a, b) => a[0] - b[0]);
+  const n = Math.min(8, l.length);
+  for (let i = 0; i < n; i++) {
+    const q = l[i][1];
+    plBufA[i * 4] = q.x; plBufA[i * 4 + 1] = q.y; plBufA[i * 4 + 2] = q.z; plBufA[i * 4 + 3] = q.a;
+    plBufB[i * 4] = q.col; plBufB[i * 4 + 1] = q.t; plBufB[i * 4 + 2] = q.amp; plBufB[i * 4 + 3] = q.ht > 0 ? 1 : 0;
+  }
+  return n;
+}
+
+// ---- the 多人連線 card in the menu, and the screen for joining / losing the connection ----
+let mpFromGame = false, mpJoining = false;
+function mpShow(on, fromGame) {
+  menuEl.classList.toggle('mpc', !!on);
+  if (!on) return;
+  mpFromGame = !!fromGame;
+  showSettings(false); showHelp(false);
+  mpDraw();
+}
+function openMP() { if (!paused) setMenu(true); mpShow(true, true); }
+function mpStatus(s, kind) { const el = $('mpstat'); el.textContent = s; el.className = 'mpstat' + (kind ? ' ' + kind : ''); }
+function mpDraw() {
+  const host = net.role === 'host', guest = net.role === 'guest', joining = !net.role && (mpJoining || (net.pending && net.pending.host));
+  $('mp-home').style.display = !host && !guest && !joining ? '' : 'none';
+  $('mp-host').style.display = host ? '' : 'none';
+  $('mp-join').style.display = joining ? '' : 'none';
+  $('mp-in').style.display = guest || host ? '' : 'none';
+  $('mpleave').style.display = host || guest || joining ? '' : 'none';
+  $('mpleave').textContent = host ? '關閉房間' : guest ? '離開房間' : '取消';
+  $('mppvp').textContent = net.pvp ? '開' : '關'; $('mppvp').classList.toggle('on', net.pvp); $('mppvp').disabled = !host;
+  $('mpinv').disabled = host && net.peers.length >= NET_MAX - 1;
+  const all = [{ n: net.name, c: net.col, me: true, host }];
+  if (guest) { const h = netHost(); all.unshift({ n: h ? h.name : '房主', c: 0, host: true }); }
+  for (const q of net.players.values()) if (!guest || q.id !== 1) all.push({ n: q.name, c: q.col });
+  $('mplist').innerHTML = '<b>玩家 ' + all.length + ' / ' + NET_MAX + '</b>' + all.map(p => '<span class="mpp"><i style="background:' + NET_COLS[p.c] + '"></i>' +
+    escHTML(p.n) + (p.host ? '(房主)' : '') + (p.me ? '(你)' : '') + '</span>').join('');
+  $('bmp').textContent = '👥' + (net.role ? all.length : '');
+  if (document.activeElement !== $('mpname')) $('mpname').value = net.name;
+  $('mpname').disabled = host || guest || !!joining;   // (the name is fixed while in a room: it says whose pets are whose)
+}
+function mpName() {                           // my name from the box (remembered), or a nudge to type one
+  const v = $('mpname').value.trim().slice(0, 10);
+  if (!v) { mpStatus('先取個名字吧', 'bad'); $('mpname').focus(); return false; }
+  net.name = v;
+  try { localStorage.voxelName = v; } catch (e) {}
+  return true;
+}
+const NET_ERR = { code: '代碼不完整或打錯了:請整段複製,再貼一次。', type: '這段代碼放錯格子了:邀請碼是房主給的,回覆碼是加入的人給的。',
+                  rtc: '這個瀏覽器不能連線(沒有 WebRTC),請用新版的 Chrome、Edge、Safari 或 Firefox。', full: '房間滿了(最多 8 人)。',
+                  noinv: '請先按「產生邀請碼」。' };
+const netErr = e => NET_ERR[e && e.message] || ('出了點問題:' + (e && e.message || e));
+const netFail = n => '✗ 和 ' + n + ' 連不上。請重新產生一組邀請碼再試;還是不行的話,換個網路(例如一邊改用手機熱點),或兩邊都開 Radmin VPN 這類虛擬區網。';
+async function mpCopy(id) {
+  const t = $(id);
+  if (!t.value) return;
+  let ok = false;
+  try { await navigator.clipboard.writeText(t.value); ok = true; } catch (e) {}
+  if (!ok) { t.focus(); t.select(); try { ok = document.execCommand('copy'); } catch (e) {} }
+  mpStatus(ok ? '📋 已複製,貼給對方吧' : '請長按(或 Ctrl+C)複製上面的代碼', ok ? 'good' : '');
+}
+$('bmp2').onclick = () => mpShow(true, false);
+$('bmp').onclick = openMP;
+$('bmp').addEventListener('touchstart', e => { e.preventDefault(); e.stopPropagation(); openMP(); }, { passive: false });
+$('mpback').onclick = () => { mpShow(false); if (mpFromGame) closeMenuAndPlay(); };
+$('mphost').onclick = () => {
+  if (!mpName()) return;
+  if (typeof RTCPeerConnection !== 'function') { mpStatus(NET_ERR.rtc, 'bad'); return; }
+  netOpenRoom(); mpStatus('房間開好了!按「產生邀請碼」邀請朋友。'); mpDraw();
+};
+$('mpjoin').onclick = () => {
+  if (!mpName()) return;
+  if (typeof RTCPeerConnection !== 'function') { mpStatus(NET_ERR.rtc, 'bad'); return; }
+  mpJoining = true; $('mpoff').value = ''; $('mpcode2').value = ''; mpStatus('把房主給你的邀請碼貼在上面,再按「下一步」。'); mpDraw();
+};
+$('mpinv').onclick = async () => {
+  $('mpcode1').value = ''; $('mpans').value = '';
+  mpStatus('產生邀請碼中…(幾秒鐘)');
+  try {
+    const code = await netInvite();
+    if (!code) return;
+    $('mpcode1').value = code;
+    mpStatus('邀請碼好了!複製後用 LINE、Discord 傳給朋友,再把他傳回來的回覆碼貼到上面,按「連線」。一組邀請碼只給一個人用。');
+  } catch (e) { mpStatus(netErr(e), 'bad'); }
+};
+$('mpcopy1').onclick = () => mpCopy('mpcode1');
+$('mpaccept').onclick = async () => {
+  try {
+    const p = await netAccept($('mpans').value);
+    mpStatus('連線中…(最多等 25 秒)');
+    const t0 = performance.now(), wait = setInterval(() => {
+      if (p.ready) { clearInterval(wait); $('mpcode1').value = ''; $('mpans').value = ''; mpStatus('✓ ' + p.name + ' 加入了!要再邀請別人,再按一次「產生邀請碼」。', 'good'); mpDraw(); }
+      else if (p.gone || performance.now() - t0 > 26000) { clearInterval(wait); mpStatus(netFail(p.name), 'bad'); }
+    }, 250);
+  } catch (e) { mpStatus(netErr(e), 'bad'); }
+};
+$('mpnext').onclick = async () => {
+  $('mpcode2').value = '';
+  mpStatus('產生回覆碼中…(幾秒鐘)');
+  try {
+    const code = await netJoin($('mpoff').value);
+    if (!code) return;
+    $('mpcode2').value = code;
+    mpStatus('把回覆碼傳回給房主。房主貼上後,就會自動連線並進入他的世界…');
+  } catch (e) { mpStatus(netErr(e), 'bad'); }
+};
+$('mpcopy2').onclick = () => mpCopy('mpcode2');
+$('mppvp').onclick = () => { if (net.role !== 'host') return; net.pvp = !net.pvp; netAll({ t: 'set', pvp: net.pvp }); chatSys(net.pvp ? '⚔ 玩家互打:開' : '🕊 玩家互打:關'); mpDraw(); };
+$('mpleave').onclick = () => {
+  if (net.role === 'guest') { netLeave(); return; }
+  if (net.role === 'host') { netCloseRoom(); mpStatus('房間關閉了。'); }
+  else { if (net.pending) netDrop(net.pending); mpJoining = false; mpStatus(''); }
+  mpDraw();
+};
+function netCloseRoom() {                     // host: everyone is sent home; the world goes on as a single-player one
+  netAll({ t: 'bye' });
+  for (const p of net.peers.slice()) { p.gone = true; netDrop(p); }
+  if (net.pending) netDrop(net.pending);
+  net.role = ''; net.players.clear(); net.eggOwner.clear();
+  document.body.classList.remove('mp');
+}
+function netLeave() {                         // guest: back to our own world (it is reloaded exactly as it was saved)
+  savePockets();
+  for (const p of net.peers.slice()) { p.gone = true; netDrop(p); }
+  location.reload();
+}
+function netOverlay(kind, v) {                // guest: the world arriving (a progress bar), or the connection lost
+  const el = $('netov');
+  el.classList.toggle('on', !!kind);
+  if (!kind) return;
+  const h = net.peers[0];
+  $('nvt').textContent = kind === 'load' ? '正在進入 ' + (h ? h.name : '房主') + ' 的世界…' : '連線中斷了';
+  $('nvp').textContent = kind === 'load' ? Math.round((v || 0) * 100) + '%' : v || '';
+  $('nvbar').style.display = kind === 'load' ? '' : 'none';
+  $('nvbar').firstChild.style.width = Math.round((v || 0) * 100) + '%';
+  $('nvb').style.display = kind === 'load' ? 'none' : '';
+}
+$('nvb').onclick = () => { savePockets(); location.reload(); };
+addEventListener('pagehide', () => { if (net.role === 'host') netAll({ t: 'bye' }); });
+try { net.name = String(localStorage.voxelName || '').slice(0, 10); } catch (e) {}
+if (!net.name) net.name = '玩家' + (100 + Date.now() % 900);          // (not Math.random: the world's dice stay untouched)
+
 // ---- input -----------------------------------------------------------------------
 // keys go by physical position (e.code), so WASD works with any layout or IME
 const KEYMAP = { Space: ' ', Tab: 'tab', Escape: 'escape', ArrowUp: 'w', ArrowDown: 's', ArrowLeft: 'a', ArrowRight: 'd',
@@ -4921,7 +5989,8 @@ function keyOf(e) {
 }
 let autoMenuAt = -1e9;
 addEventListener('keydown', e => {
-  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') {         // typing: a pet's name, or a search
+  if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.id === 'mpname')) return;   // typing a connection code or a name
+  if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') {         // typing: a pet's name, a search, or chat
     if (e.target.id === 'catq' && (e.key === 'Escape' || e.key === 'Enter')) e.target.blur();
     return;
   }
@@ -4955,8 +6024,10 @@ addEventListener('keydown', e => {
   else if (k === 'p') { if (!invOpen) { panelTab = 'pets'; toggleInv(true); } else if (panelTab === 'pets') toggleInv(false); else showTab('pets'); }
   else if (k === 'c') setCreative(!creative);
   else if (k === 'g') { settings.shadows ^= 1; applySettings(); saveSettings(); }
-  else if (k === 'r') weather = (weather + 1) % 3;
+  else if (k === 'r') { if (net.role === 'guest') showHint('天氣跟著房主的世界', 1.5); else weather = (weather + 1) % 3; }
+  else if (k === 't' && net.role === 'guest') showHint('時間跟著房主的世界,只有房主能快轉', 1.8);
   else if (k === 'x') confirmReset();
+  else if (k === 'enter' && net.role) chatOpen();
 });
 addEventListener('keyup', e => { const k = keyOf(e); K[k] = 0; if (k === 'w') sprintLatch = false; });
 function spaceTap() {                         // double-tap Space (or ⤒) in creative: take off / land
@@ -5096,7 +6167,7 @@ wrapEl.addEventListener('touchcancel', touchEnd, { passive: false });
 function tapAt(x, y) {                        // 點畫面: a quick tap hits the monster under the finger, else uses what you hold there
   if (dead || paused || invOpen) return;
   aimDir = screenRay(x, y);
-  if (mobUnderAim() >= 0) melee(); else use2();
+  if (mobUnderAim() >= 0 || playerUnderAim()) melee(); else use2();
   tipAim = aimDir; tipAimT = 1.6; aimXY[0] = x; aimXY[1] = y;
   aimDir = null;
 }
@@ -5111,7 +6182,7 @@ function touchAimTick(dt, handsOff) {
   if (look.id >= 0 && look.mode === 2 && !handsOff) {
     aimDir = screenRay(look.x, look.y); aimXY[0] = look.x; aimXY[1] = look.y;
     tipAim = aimDir; tipAimT = .8;
-    if (mobUnderAim() >= 0) { holdMine = false; mineProg = 0; if ((holdAtkT -= dt) <= 0) { melee(); holdAtkT = .45; } }
+    if (mobUnderAim() >= 0 || playerUnderAim()) { holdMine = false; mineProg = 0; if ((holdAtkT -= dt) <= 0) { melee(); holdAtkT = .45; } }
     else if (pickPet(target())) { holdMine = false; mineProg = 0; }   // a pet is not dug through
     else holdMine = true;
   } else if (tipAimT > 0 && tipAim && !handsOff) aimDir = tipAim;
@@ -5257,11 +6328,12 @@ function autoQuality(dt) {                    // auto 畫質: step down when fra
 function frame(tm) {
   requestAnimationFrame(frame);               // schedule first: one bad frame won't freeze the game
   const t0 = performance.now();
+  net.frameAt = t0;
   let dt = lastT < 0 ? 0 : (tm - lastT) / 1000;
   if (!paused && dt > 0 && dt < .25) frameMs = frameMs ? frameMs * .95 + dt * 50 : dt * 1000;
   lastT = tm;
   dt = dt > 0 ? Math.min(dt, .1) : 0;
-  if (paused) dt = 0;                         // menu open: nothing advances
+  if (paused && !netLive()) dt = 0;           // menu open: nothing advances (unless friends are playing in this world)
   fpsN++;
   if (t0 - fpsT0 >= 500) {
     if (settings.fps) fpsEl.textContent = Math.round(fpsN * 1000 / (t0 - fpsT0)) + ' fps · ' +
@@ -5270,7 +6342,7 @@ function frame(tm) {
     fpsN = 0; fpsT0 = t0;
   }
   if (viewDirty) { viewDirty = false; fitView(); }
-  if (paused && !needRender) return;          // …and nothing needs redrawing either
+  if (paused && !needRender && !net.role) return;   // …and nothing needs redrawing either
   needRender = false;
 
   // ---- input ----
@@ -5302,8 +6374,10 @@ function frame(tm) {
   look.dx = look.dy = 0;
 
   updateSky(dt, tm);
+  const guest = net.role === 'guest';        // a guest's world is run by the host: crops, weeds, monsters and animals come from there
   if ((farmAcc += dt) >= .25) {               // crops, farmland and food effects: four times a second
-    tickFarm(farmHours); farmHours = 0;
+    if (!guest) tickFarm(farmHours);
+    farmHours = 0;
     for (const k in buffs) if ((buffs[k] -= farmAcc) <= 0) delete buffs[k];
     if (hp > maxHp()) hp = maxHp();
     drawBuffs(); farmAcc = 0;
@@ -5315,8 +6389,9 @@ function frame(tm) {
   const spd = (flying ? (sprinting ? 14 : 8) : (sprinting ? 7 : 5)) * (buffs.run > 0 ? 1.35 : 1);
   const lift = flying && !handsOff ? (K[' '] || upHold ? 1 : 0) - (K.shift || downHold ? 1 : 0) : 0;
   const px0 = P.x, pz0 = P.z;
-  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); tickEntities(h); tickPets(h); }
-  tickGrass(dt);
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); if (guest) tickSelf(h); else { tickEntities(h); tickPets(h); } }
+  if (!guest) tickGrass(dt);
+  netTick(dt);
   if (P.y < -10) { placeAtSpawn(); hurtPlayer(4); }
   touchAimTick(dt, handsOff);                 // 點畫面: the finger aims; held still, it digs (or fights)
   if ((holdMine || K.f) && !handsOff) mine(dt); else { mineProg = 0; mineIdx = -1; }
