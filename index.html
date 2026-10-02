@@ -1965,6 +1965,11 @@ const MODEL_BOXES = {
   [LANTERN]: [[4, 3, 4, 12, 13, 12], [5, 13, 5, 11, 16, 11], [5, 1, 5, 11, 3, 11]],                       // body, hanger, bottom ring
   [TOURO]: [[3, 0, 3, 13, 3, 13], [6, 3, 6, 10, 8, 10], [4, 8, 4, 12, 12, 12], [2, 12, 2, 14, 14, 14], [7, 14, 7, 9, 16, 9]],   // base, post, fire box, roof, jewel
 };
+const MODEL_TABLE = [[0, 0, 0, 16, 9, 16],                                                                   // bed (shader: modelBox)
+  [6, 0, 6, 10, 9, 10], [4, 9, 4, 12, 12, 12], [7, 12, 7, 9, 14, 9],                                      // sprinkler: post, head, nozzle
+  [6, 0, 6, 10, 9, 10], [3, 9, 3, 13, 12, 13], [7, 12, 7, 9, 15, 9],                                      // big sprinkler
+  [5, 0, 5, 11, 2, 11], [4, 2, 4, 12, 7, 12], [5, 7, 5, 11, 10, 11],                                      // egg: three stacked boxes
+  ...MODEL_BOXES[LANTERN], ...MODEL_BOXES[TOURO]];
 // a cell's texture coordinates on a face: u across, v down (0 at the top of side faces); slope faces run down the slope
 function faceUVjs(nx, ny, nz, fx, fy, fz) {
   if (Math.abs(ny) > .99) return [fx, ny > 0 ? fz : 1 - fz];
@@ -4133,21 +4138,27 @@ const vec3 SHIRT[8] = vec3[8](vec3(.31, .56, .97), vec3(.94, .33, .31), vec3(.26
                               vec3(.67, .37, .91), vec3(.94, .42, .66), vec3(.15, .71, .66), vec3(.96, .49, .2));
 vec3 plOff(int p, float ph, float amp) {        // a walking player's arms and legs swing, opposite each other
   float s = sin(ph) * .1 * amp;
-  return vec3(0., 0., p == 0 || p == 4 ? s : p == 1 || p == 3 ? -s : 0.);
+  return vec3(0., 0., mix(mix(0., -s, any(bvec2(p == 1, p == 3))), s, any(bvec2(p == 0, p == 4))));
 }
 const vec3 PCOL[6] = vec3[6](vec3(.2, .15, .3), vec3(.2, .15, .3), vec3(.26, .19, .38),
                              vec3(.3, .22, .44), vec3(.3, .22, .44), vec3(.33, .25, .47));
 
+// On Windows, Chrome and Edge turn every && || ?: here into an if (Direct3D's HLSL can't short-circuit), then Direct3D's
+// compiler copies each function into every place that calls it, and its time grows much faster than the code. So the code
+// says it with all() / any() / mix(a, b, bool) / isel() where it can (same results, one line each): on a first load with
+// an RTX 4070 the shader took 8.0 s to compile, now 5.9 s (after that the browser keeps it, and the page opens in a second).
+int isel(bool c, int a, int b) { return b + (a - b) * int(c); }   // c ? a : b, without an if
+bool outside(ivec3 c) { return any(lessThan(min(c, WDIM - 1 - c), ivec3(0))); }
 int cellId(ivec3 c) {
-  if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, WDIM - 1))) return AIR;
+  if (outside(c)) return AIR;
   return int(texelFetch(uWorld, c.xzy, 0).r * 255.0 + 0.5);
 }
 bool solidB(int b) {                            // full, opaque cubes
-  return (b > AIR && b < WATER && b != GLASS && b != TORCH) || b == PLANK || (b >= ROOF && b <= PAVING && b != SHOJI);
+  return any(bvec3(all(bvec4(b > AIR, b < WATER, b != GLASS, b != TORCH)), b == PLANK, all(bvec3(b >= ROOF, b <= PAVING, b != SHOJI))));
 }
 bool occludes(ivec3 c) { return solidB(cellId(c)); }
 float cornerAO(ivec3 a, int axis, float fu, float fv) {   // ambient occlusion on a face: the 8 cells around the air in front (a)
-  ivec3 U = axis == 0 ? ivec3(0, 0, 1) : ivec3(1, 0, 0), V = axis == 1 ? ivec3(0, 0, 1) : ivec3(0, 1, 0);
+  ivec3 U = ivec3(int(axis != 0), 0, int(axis == 0)), V = ivec3(0, int(axis != 1), int(axis == 1));
   float s0 = float(occludes(a - U)), s1 = float(occludes(a + U)), s2 = float(occludes(a - V)), s3 = float(occludes(a + V));
   float v00 = s0 * s2 > .5 ? 0. : 3. - s0 - s2 - float(occludes(a - U - V));
   float v10 = s1 * s2 > .5 ? 0. : 3. - s1 - s2 - float(occludes(a + U - V));
@@ -4155,8 +4166,8 @@ float cornerAO(ivec3 a, int axis, float fu, float fv) {   // ambient occlusion o
   float v11 = s1 * s3 > .5 ? 0. : 3. - s1 - s3 - float(occludes(a + U + V));
   return .42 + .58 * mix(mix(v00, v10, fu), mix(v01, v11, fu), fv) / 3.;
 }
-bool isPlant(int b) { return b == TALL || b >= CROP0; }
-bool isShape(int b) { return b >= SLAB_ROOF && b < SLOPE_END; }   // half slabs and roof slopes
+bool isPlant(int b) { return any(bvec2(b == TALL, b >= CROP0)); }
+bool isShape(int b) { return all(bvec2(b >= SLAB_ROOF, b < SLOPE_END)); }   // half slabs and roof slopes
 // in an empty 4×4×4 brick, set the march up so that its next step lands on the first cell past the brick
 bool skipBrick(inout ivec3 c, inout vec3 tM, float t, vec3 ro, vec3 rd, vec3 r, vec3 inv, ivec3 st) {
   int sz = 16;                                  // an empty 16³ block first, else an empty 4³ brick
@@ -4173,79 +4184,71 @@ bool skipBrick(inout ivec3 c, inout vec3 tM, float t, vec3 ro, vec3 rd, vec3 r, 
   c = nc;
   return true;
 }
-bool isModel(int b) { return b == SPRINK || b == SPRINK2 || b == BED || (b >= EGG && b <= EGG3) || b == LANTERN || b == TOURO; }
+bool isModel(int b) { return any(bvec3(any(bvec4(b == SPRINK, b == SPRINK2, b == BED, b == LANTERN)), b == TOURO, all(bvec2(b >= EGG, b <= EGG3)))); }
 float hash3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
 float torchAt(vec3 p) { return texture(uLight, p.xzy / vec3(WDIM.xzy)).r * (255.0 / 14.0); }
 vec2 faceUV(vec3 f, int axis, vec3 n) {         // f = point inside the cell; v = 0 at the top of side faces
-  if (axis == 1) return vec2(f.x, n.y > 0.0 ? f.z : 1.0 - f.z);
-  if (axis == 0) return vec2(n.x > 0.0 ? f.z : 1.0 - f.z, 1.0 - f.y);
-  return vec2(n.z > 0.0 ? 1.0 - f.x : f.x, 1.0 - f.y);
+  vec2 ux = vec2(mix(1.0 - f.z, f.z, n.x > 0.0), 1.0 - f.y), uy = vec2(f.x, mix(1.0 - f.z, f.z, n.y > 0.0)),
+       uz = vec2(mix(f.x, 1.0 - f.x, n.z > 0.0), 1.0 - f.y);
+  return mix(mix(uz, ux, bvec2(axis == 0)), uy, bvec2(axis == 1));
 }
 int texBase(int b) {                            // see texBase() in the textures section
-  return b < 32 ? b * 3 : b < SLAB_ROOF ? 244 + (b - 32) * 3 : b == SLAB_WOOD || b == SLAB_WOOD + 1 ? PLANK * 3 : ROOF * 3;
+  return isel(b < 32, b * 3, isel(b < SLAB_ROOF, 244 + (b - 32) * 3, isel(any(bvec2(b == SLAB_WOOD, b == SLAB_WOOD + 1)), PLANK * 3, ROOF * 3)));
 }
-float layerOf(int id, vec3 n) { return float(texBase(id) + (n.y > 0.5 ? 0 : n.y < -0.5 ? 2 : 1)); }
+float layerOf(int id, vec3 n) { return float(texBase(id) + isel(n.y > 0.5, 0, isel(n.y < -0.5, 2, 1))); }
 float texLod(float dist, vec3 n, vec3 rd) {     // mip level from distance and viewing angle
   return max(0.0, log2(16.0 * dist / (uFocal * sqrt(max(abs(dot(n, rd)), 0.06)))));
 }
 vec3 axisN(int axis, ivec3 st) {
-  return axis == 0 ? vec3(-float(st.x), 0., 0.) : axis == 1 ? vec3(0., -float(st.y), 0.) : vec3(0., 0., -float(st.z));
+  vec3 s = -vec3(st);
+  return mix(mix(vec3(0., 0., s.z), vec3(0., s.y, 0.), bvec3(axis == 1)), vec3(s.x, 0., 0.), bvec3(axis == 0));
 }
+// leaving(): keep the && || here. Written with ivec3(bvec3) products it came out wrong on Direct3D (rays passed through the ground)
 bool leaving(ivec3 c, ivec3 st) {               // outside the world and moving away from it
   return (c.x < 0 && st.x < 0) || (c.x >= WDIM.x && st.x > 0) || (c.y < 0 && st.y < 0) ||
          (c.y >= WDIM.y && st.y > 0) || (c.z < 0 && st.z < 0) || (c.z >= WDIM.z && st.z > 0);
 }
 vec2 boxT(vec3 o, vec3 inv, vec3 mn, vec3 mx, out vec3 n) {   // slab test: (t near, t far) and entry normal
-  vec3 a = (mn - o) * inv, b = (mx - o) * inv, tn = min(a, b), tf = max(a, b);
+  vec3 a = (mn - o) * inv, b = (mx - o) * inv, tn = min(a, b), tf = max(a, b), s = -sign(inv);
   float t0 = max(max(tn.x, tn.y), tn.z);
-  n = t0 == tn.x ? vec3(-sign(inv.x), 0., 0.) : t0 == tn.y ? vec3(0., -sign(inv.y), 0.) : vec3(0., 0., -sign(inv.z));
+  n = mix(mix(vec3(0., 0., s.z), vec3(0., s.y, 0.), bvec3(t0 == tn.y)), vec3(s.x, 0., 0.), bvec3(t0 == tn.x));
   return vec2(t0, min(min(tf.x, tf.y), tf.z));
 }
 // half slabs and roof slopes (see shapeRay): the ray crosses the cell for t in [t0, t1], entering through normal n0.
 // Each piece is the cell cut by planes n·l ≤ c (l = point - cell); returns the first t inside it (or -1), its unit normal in nh
 vec4 slopePlane(int d, float k, float base) {   // y ≤ base + k·(how far across the cell toward d)
-  vec2 e = d == 0 ? vec2(1., 0.) : d == 1 ? vec2(0., 1.) : d == 2 ? vec2(-1., 0.) : vec2(0., -1.);
-  return vec4(-k * e.x, 1., -k * e.y, base + (d >= 2 ? k : 0.));
+  vec2 e = vec2(float(d == 0) - float(d == 2), float(d == 1) - float(d == 3));
+  return vec4(-k * e.x, 1., -k * e.y, base + mix(0., k, d >= 2));
 }
-bool clipPlane(vec3 l, vec3 rd, vec4 p, inout float a, inout float z, inout vec3 na) {
-  float dn = dot(p.xyz, rd), f = dot(p.xyz, l) - p.w;
-  if (abs(dn) < 1e-7) return f <= 0.;
-  float tc = -f / dn;
-  if (dn > 0.) z = min(z, tc); else if (tc > a) { a = tc; na = p.xyz; }
-  return a <= z;
+bool clipPlane(vec3 l, vec3 rd, vec4 p, inout float a, inout float z, inout vec3 na) {   // keep the part of [a, z] under the plane
+  float dn = dot(p.xyz, rd), f = dot(p.xyz, l) - p.w, tc = -f / dn;
+  bool par = abs(dn) < 1e-7, enter = all(bvec3(!par, dn <= 0., tc > a));   // parallel: all in or all out
+  z = mix(z, min(z, tc), all(bvec2(!par, dn > 0.)));
+  na = mix(na, p.xyz, bvec3(enter)); a = mix(a, tc, enter);
+  return any(bvec2(all(bvec2(par, f <= 0.)), all(bvec2(!par, a <= z))));
 }
 float shapeHit(int b, ivec3 c, vec3 ro, vec3 rd, float t0, float t1, vec3 n0, out vec3 nh) {
   vec3 l = ro - vec3(c), na = n0;
   float a = t0, z = t1;
-  nh = n0;
-  if (b < SLOPE0) {                             // a slab: the bottom or the top half of the cell
-    bool ok = (b & 1) == 0 ? clipPlane(l, rd, vec4(0., 1., 0., .5), a, z, na) : clipPlane(l, rd, vec4(0., -1., 0., -.5), a, z, na);
-    nh = na;
-    return ok ? a : -1.;
-  }
-  int k = b - SLOPE0, fam = (k >> 2) / 3, kind = (k >> 2) - fam * 3, d = k & 3;
-  float kk = fam == 0 ? 1. : .5, base = fam == 2 ? .5 : 0.;
-  vec4 p1 = slopePlane(d, kk, base);
-  if (kind == 0) {
-    if (!clipPlane(l, rd, p1, a, z, na)) return -1.;
-    nh = normalize(na); return a;
-  }
-  vec4 p2 = slopePlane((d + 1) & 3, kk, base);
-  if (kind == 1) {                              // hip corner: under both planes
-    if (!clipPlane(l, rd, p1, a, z, na) || !clipPlane(l, rd, p2, a, z, na)) return -1.;
-    nh = normalize(na); return a;
-  }
-  float a2 = t0, z2 = t1; vec3 nb = n0;         // valley corner: under either plane, whichever the ray meets first
-  bool h1 = clipPlane(l, rd, p1, a, z, na), h2 = clipPlane(l, rd, p2, a2, z2, nb);
-  if (h1 && (!h2 || a <= a2)) { nh = normalize(na); return a; }
-  if (h2) { nh = normalize(nb); return a2; }
-  return -1.;
+  bool slab = b < SLOPE0;                       // a slab: the bottom or the top half of the cell (one plane, like a plain slope)
+  int k = max(b - SLOPE0, 0), fam = (k >> 2) / 3, kind = (k >> 2) - fam * 3, d = k & 3;
+  float kk = mix(.5, 1., fam == 0), base = mix(0., .5, fam == 2);
+  vec4 p1 = mix(slopePlane(d, kk, base), mix(vec4(0., -1., 0., -.5), vec4(0., 1., 0., .5), bvec4((b & 1) == 0)), bvec4(slab));
+  bool h1 = clipPlane(l, rd, p1, a, z, na), hip = kind == 1;   // hip corner: under both planes, the second cuts what the first left
+  float a2 = mix(t0, a, hip), z2 = mix(t1, z, hip); vec3 nb = mix(n0, na, bvec3(hip));   // valley corner: under either plane
+  bool h2 = clipPlane(l, rd, slopePlane((d + 1) & 3, kk, base), a2, z2, nb);
+  bool pick1 = any(bvec2(all(bvec2(kind == 0, h1)), all(bvec3(kind == 2, h1, any(bvec2(!h2, a <= a2))))));   // valley: the nearer
+  bool pick2 = any(bvec2(all(bvec3(hip, h1, h2)), all(bvec3(kind == 2, h2, !pick1))));
+  vec3 n = mix(nb, na, bvec3(pick1));
+  bool hit = any(bvec2(pick1, pick2));
+  nh = mix(mix(n0, na, bvec3(slab)), mix(normalize(n), n, bvec3(slab)), bvec3(hit));
+  return mix(-1., mix(a2, a, pick1), hit);
 }
 
 // plant sprites: a crop is a # of four planes, a weed an X of two; their tops sway in the wind.
 // returns the nearest opaque texel's t in [t0, t1] (or -1), its colour and its height in the cell
 float plantHit(int b, ivec3 c, vec3 o, vec3 d, float t0, float t1, out vec4 tx, out float pv) {
-  float layer = b == TALL ? TALL_L : PLANT0 + float(b - CROP0), best = -1.;
+  float layer = mix(PLANT0 + float(b - CROP0), TALL_L, b == TALL), best = -1.;
   vec3 l = o - vec3(c);
   float sw = .06 * sin(uTime * 1.7 + float(c.x) * 1.3 + float(c.z) * .9);
   tx = vec4(0.); pv = 0.;
@@ -4253,53 +4256,36 @@ float plantHit(int b, ivec3 c, vec3 o, vec3 d, float t0, float t1, out vec4 tx, 
     float t, u; vec3 p;
     if (b == TALL) {
       if (k > 1) break;
-      float den = k == 0 ? d.x - d.z : d.x + d.z;
+      float den = mix(d.x + d.z, d.x - d.z, k == 0);
       if (abs(den) < 1e-5) continue;
-      t = k == 0 ? (l.z - l.x) / den : (1. - l.x - l.z) / den;
+      t = mix((1. - l.x - l.z) / den, (l.z - l.x) / den, k == 0);
       p = l + d * t; u = p.x;
     } else {
-      float q = (k & 1) == 0 ? .25 : .75;
+      float q = mix(.75, .25, (k & 1) == 0);
       if (k < 2) { if (abs(d.x) < 1e-5) continue; t = (q - l.x) / d.x; p = l + d * t; u = p.z; }
       else { if (abs(d.z) < 1e-5) continue; t = (q - l.z) / d.z; p = l + d * t; u = p.x; }
     }
-    if (t < t0 || t > t1 || (best >= 0. && t >= best)) continue;
+    if (any(bvec3(t < t0, t > t1, all(bvec2(best >= 0., t >= best))))) continue;
     u -= sw * p.y;
-    if (u < 0. || u >= 1. || p.y < 0. || p.y >= 1.) continue;
+    if (any(bvec4(u < 0., u >= 1., p.y < 0., p.y >= 1.))) continue;
     vec4 sm = textureLod(uTex, vec3(u, 1. - p.y, layer), 0.);
     if (sm.a < .5) continue;
     best = t; tx = sm; pv = p.y;
   }
   return best;
 }
-bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed, sprinklers, eggs and lanterns are a few boxes, in 1/16ths
+const vec3 MB_MN[${MODEL_TABLE.length}] = vec3[${MODEL_TABLE.length}](${MODEL_TABLE.map(q => `vec3(${q.slice(0, 3).join('., ')}.)`).join(', ')});
+const vec3 MB_MX[${MODEL_TABLE.length}] = vec3[${MODEL_TABLE.length}](${MODEL_TABLE.map(q => `vec3(${q.slice(3).join('., ')}.)`).join(', ')});
+bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed, sprinklers, eggs and lanterns are a few boxes, in 1/16ths (MODEL_TABLE)
   mn = vec3(0.); mx = vec3(16., 9., 16.);
-  if (b == BED) return k == 0;
-  if (b == LANTERN) {
-    ${MODEL_BOXES[LANTERN].map((q, k) => `if (k == ${k}) { mn = vec3(${q.slice(0, 3).join('., ')}.); mx = vec3(${q.slice(3).join('., ')}.); return true; }`).join('\n    ')}
-    return false;
-  }
-  if (b == TOURO) {
-    ${MODEL_BOXES[TOURO].map((q, k) => `if (k == ${k}) { mn = vec3(${q.slice(0, 3).join('., ')}.); mx = vec3(${q.slice(3).join('., ')}.); return true; }`).join('\n    ')}
-    return false;
-  }
-  if (k > 2) return false;
-  if (b >= EGG) {                               // an egg: three stacked boxes, widest a third of the way up
-    mn = k == 0 ? vec3(5., 0., 5.) : k == 1 ? vec3(4., 2., 4.) : vec3(5., 7., 5.);
-    mx = k == 0 ? vec3(11., 2., 11.) : k == 1 ? vec3(12., 7., 12.) : vec3(11., 10., 11.);
-    return true;
-  }
-  float h = b == SPRINK2 ? 5. : 4.;
-  if (k == 0) { mn = vec3(6., 0., 6.); mx = vec3(10., 9., 10.); }             // post
-  else if (k == 1) { mn = vec3(8. - h, 9., 8. - h); mx = vec3(8. + h, 12., 8. + h); }   // head
-  else { mn = vec3(7., 12., 7.); mx = vec3(9., b == SPRINK2 ? 15. : 14., 9.); }        // nozzle
+  int at = isel(b == BED, 0, isel(b == SPRINK, 1, isel(b == SPRINK2, 4, isel(b == LANTERN, 10, isel(b == TOURO, ${10 + MODEL_BOXES[LANTERN].length}, 7)))));   // 7: eggs
+  if (k >= isel(b == BED, 1, isel(b == LANTERN, ${MODEL_BOXES[LANTERN].length}, isel(b == TOURO, ${MODEL_BOXES[TOURO].length}, 3)))) return false;
+  mn = MB_MN[at + k]; mx = MB_MX[at + k];
   return true;
 }
 vec3 petOff(int fl, float ph, float amp) {      // pet animation: legs step in diagonal pairs, wings flap, tails wag
-  vec3 o = vec3(0.);
-  if ((fl & 1) != 0) o.z = sin(ph) * .07 * amp * ((fl & 32) != 0 ? -1. : 1.);
-  if ((fl & 4) != 0) o.y = sin(ph * 2.3) * .035;
-  if ((fl & 8) != 0) o.x = sin(ph * .9 + 1.) * .03;
-  return o;
+  return vec3(mix(0., sin(ph * .9 + 1.) * .03, (fl & 8) != 0), mix(0., sin(ph * 2.3) * .035, (fl & 4) != 0),
+              mix(0., sin(ph) * .07 * amp * mix(1., -1., (fl & 32) != 0), (fl & 1) != 0));
 }
 
 bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves and plants let light through their gaps
@@ -4311,15 +4297,15 @@ bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves 
   bool look = false;
   for (int i = 0; i < 96; i++) {
     if (++steps > 96) return false;
-    if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; c.x += st.x; axis = 0; }
+    if (all(bvec2(tM.x < tM.y, tM.x < tM.z))) { t = tM.x; tM.x += tD.x; c.x += st.x; axis = 0; }
     else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; c.y += st.y; axis = 1; }
     else { t = tM.z; tM.z += tD.z; c.z += st.z; axis = 2; }
     if (t > 40.) return false;                  // shadows are cast by things within 40 blocks
-    if (any(lessThan(c, ivec3(0))) || any(greaterThan(c, WDIM - 1))) { if (leaving(c, st)) return false; continue; }
+    if (outside(c)) { if (leaving(c, st)) return false; continue; }
     if (skipBrick(c, tM, t, p, d, r, 1. / r, st)) continue;
     int b = cellId(c);
-    if (b == AIR || b == GLASS || b == TORCH || b == WATER || b == SPRINK || b == SPRINK2 || (b >= EGG && b <= EGG3) ||
-        b == LANTERN || b == TOURO) continue;
+    if (any(bvec3(any(bvec4(b == AIR, b == GLASS, b == TORCH, b == WATER)), any(bvec4(b == SPRINK, b == SPRINK2, b == LANTERN, b == TOURO)),
+                  all(bvec2(b >= EGG, b <= EGG3))))) continue;
     if (b == LEAF) {
       vec3 n = axisN(axis, st);
       if (textureLod(uTex, vec3(faceUV(p + d * t - vec3(c), axis, n), layerOf(LEAF, n)), 0.).a < .5) continue;
@@ -4329,7 +4315,7 @@ bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves 
     } else if (isShape(b)) { look = true; break; }
     else if (b == BED) {
       vec3 bn; vec2 tt = boxT(p, 1. / r, vec3(c), vec3(c) + vec3(1., .5625, 1.), bn);
-      if (tt.x >= tt.y || tt.y < 0.) continue;
+      if (any(bvec2(tt.x >= tt.y, tt.y < 0.))) continue;
     }
     return true;
   }
@@ -4341,12 +4327,14 @@ bool shadowed(vec3 p, vec3 d) {                 // march toward the sun; leaves 
 }
 
 vec3 light(vec3 base, vec3 n, vec3 hp, float ao, float shade, bool plant, float dist) {   // sky + sun (+ shadow) + torches
-  float diff = plant ? (uSunEl > 0. ? .35 + .65 * max(uSun.y, 0.) : 0.) : max(dot(n, uSun), 0.);   // sprites: lit from any side
-  if (uShadows == 1 && uDayf > .02 && diff > 0. && dist < uFog.x + .4 / uFog.y && shadowed(hp + n * .003, uSun)) diff = 0.;   // no shadows deep in the fog
-  vec3 c = plant ? base * (uAmb * .8 * ao + diff * uDayf * .5 * (.6 + .4 * ao))
-                 : base * (uAmb * (.64 + .1 * max(n.y, 0.)) * shade * ao + diff * uDayf * .46 * (.55 + .45 * ao));
+  float diff = mix(max(dot(n, uSun), 0.), mix(0., .35 + .65 * max(uSun.y, 0.), uSunEl > 0.), plant);   // sprites: lit from any side
+  if (all(bvec4(uShadows == 1, uDayf > .02, diff > 0., dist < uFog.x + .4 / uFog.y))) {   // no shadows deep in the fog
+    if (shadowed(hp + n * .003, uSun)) diff = 0.;
+  }
+  vec3 c = mix(base * (uAmb * (.64 + .1 * max(n.y, 0.)) * shade * ao + diff * uDayf * .46 * (.55 + .45 * ao)),
+               base * (uAmb * .8 * ao + diff * uDayf * .5 * (.6 + .4 * ao)), bvec3(plant));
   float tl = torchAt(hp + n * .5); tl = tl * tl * uFlk;
-  return c + base * tl * vec3(1.3, .82, .42) * (plant ? .85 : .5 + .5 * ao);
+  return c + base * tl * vec3(1.3, .82, .42) * mix(.5 + .5 * ao, .85, plant);
 }
 
 vec3 horizon(vec3 rd) { return mix(uHor, uZen, clamp(rd.y * 1.6 + .25, 0., 1.)); }   // plain sky colour: what fog turns into
@@ -4354,19 +4342,19 @@ vec3 skyColor(vec3 rd) {
   vec3 c = horizon(rd);
   float dts = dot(rd, uSun);
   vec3 sr = normalize(cross(uSun, vec3(0., 0., 1.))), su = cross(sr, uSun);
-  if (uSunEl > -.06 && dts > 0.) {              // square sun with a soft glow
+  if (all(bvec2(uSunEl > -.06, dts > 0.))) {    // square sun with a soft glow
     vec2 q = vec2(dot(rd, sr), dot(rd, su)) / dts;
     if (max(abs(q.x), abs(q.y)) < .075) c = vec3(1., .98, .86);
     else if (dts > .9) { float gl = (dts - .9) / .1; gl *= gl; c += (vec3(1., .933, .706) - c) * gl * vec3(.5, .5, .4); }
   }
-  if (uSunEl < .12 && dts < 0.) {               // square moon with a few darker patches
+  if (all(bvec2(uSunEl < .12, dts < 0.))) {     // square moon with a few darker patches
     vec2 q = vec2(dot(rd, sr), dot(rd, su)) / -dts;
     if (max(abs(q.x), abs(q.y)) < .06) {
       vec2 mq = floor((q / .12 + .5) * 8.);
-      c = vec3(.92, .94, .98) * (fract(sin(dot(mq, vec2(12.9898, 78.233))) * 43758.5453) < .2 ? .78 : 1.);
+      c = vec3(.92, .94, .98) * mix(1., .78, fract(sin(dot(mq, vec2(12.9898, 78.233))) * 43758.5453) < .2);
     }
   }
-  if (uSunEl < .06 && rd.y > .03) {             // stars
+  if (all(bvec2(uSunEl < .06, rd.y > .03))) {   // stars
     ivec3 q = ivec3(rd * 300.);
     int h = (q.x * 1836311903 ^ q.y * 2109839 ^ q.z * 971) & 65535;
     if (h < 9) c += .82 * clamp(-uSunEl * 4., 0., 1.) * (.6 + .4 * sin(float(h) * 3. + uTod * 60.));
@@ -4393,10 +4381,10 @@ void main() {
     vec3 lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);        // into the mob's frame (it faces +z)
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), li = 1.0 / ld, n;
     vec2 bb = boxT(lo, li, vec3(-.5, 0., -.26), vec3(.5, 1.84, .66), n);
-    if (bb.x > bb.y || bb.y < 0. || bb.x > tMob) continue;
+    if (any(bvec3(bb.x > bb.y, bb.y < 0., bb.x > tMob))) continue;
     for (int p = 0; p < 6; p++) {
       vec2 tt = boxT(lo, li, PMIN[p], PMAX[p], n);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < tMob) { tMob = tt.x; mob = i; part = p; }
+      if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < tMob))) { tMob = tt.x; mob = i; part = p; }
     }
   }
   // ---- other players: box figures like the monsters but upright, arms swinging, shirts in their colour ----
@@ -4408,10 +4396,10 @@ void main() {
     vec3 lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), li = 1.0 / ld, n;
     vec2 bb = boxT(lo, li, vec3(-.5, 0., -.4), vec3(.5, 1.84, .4), n);
-    if (bb.x > bb.y || bb.y < 0. || bb.x > min(tPl, tMob)) continue;
+    if (any(bvec3(bb.x > bb.y, bb.y < 0., bb.x > min(tPl, tMob)))) continue;
     for (int p = 0; p < 6; p++) {
       vec2 tt = boxT(lo - plOff(p, uPlB[i].y, uPlB[i].z), li, QMIN[p], QMAX[p], n);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < tPl) { tPl = tt.x; pl = i; plPart = p; }
+      if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < tPl))) { tPl = tt.x; pl = i; plPart = p; }
     }
   }
   // ---- pets: boxes from uAnimal in each pet's own frame (it faces +z, feet at 0), animated. The frame is
@@ -4421,7 +4409,7 @@ void main() {
     if (i >= uPetN) break;
     vec3 oc = ro - uPetC[i].xyz;                  // the bounding sphere first: most rays miss every pet
     float bq = dot(oc, rd), cq = dot(oc, oc) - uPetC[i].w * uPetC[i].w;
-    if (cq > 0. && (bq > 0. || bq * bq < cq)) continue;
+    if (all(bvec2(cq > 0., any(bvec2(bq > 0., bq * bq < cq))))) continue;
     if (-bq - sqrt(max(bq * bq - cq, 0.)) > min(tPet, tMob)) continue;
     vec4 pb = uPetB[i];
     vec3 o = ro - uPetA[i].xyz;
@@ -4433,7 +4421,7 @@ void main() {
       if (k >= kn) break;
       vec4 a = texelFetch(uAnimal, ivec2(k0 + k, 0), 0);
       vec2 tt = boxT(lo - petOff(int(a.w + .5), pb.w, uPetD[i].x), li, a.xyz, texelFetch(uAnimal, ivec2(k0 + k, 1), 0).xyz, n);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < tPet) { tPet = tt.x; pet = i; ppart = k0 + k; }
+      if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < tPet))) { tPet = tt.x; pet = i; ppart = k0 + k; }
     }
   }
   float tEnt = min(min(tMob, tPet), tPl);       // the nearest creature: the march stops there
@@ -4444,7 +4432,7 @@ void main() {
   vec3 tD = abs(inv), tM = (vec3(cell) + max(vec3(st), 0.) - ro) * inv;
   float t = 0., tHit = 1e9, wD = 0., wT = -1.; int axis = 1, id = AIR, hit = 0;   // hit: 1 cube · 2 torch · 3 model · 4 plant
   vec3 acc = vec3(0.); float tr = 1.; bool border = false;
-  if (ro.y > float(WDIM.y) && r.y < 0.) {       // flying above the world: straight down to its ceiling
+  if (all(bvec2(ro.y > float(WDIM.y), r.y < 0.))) {   // flying above the world: straight down to its ceiling
     float t0 = (float(WDIM.y) - ro.y) * inv.y;
     vec3 p = ro + rd * t0;
     cell = ivec3(int(floor(p.x)), WDIM.y, int(floor(p.z)));
@@ -4453,18 +4441,19 @@ void main() {
   }
   if (uUnder == 1) {                            // eye under water: the stretch to the first cell wall is water too
     float te = min(min(tM.x, tM.y), tM.z);
-    if (rd.y > 0. && cellId(cell + ivec3(0, 1, 0)) != WATER) te = min(te, (float(cell.y) + WATER_Y - ro.y) / rd.y);
+    if (all(bvec2(rd.y > 0., cellId(cell + ivec3(0, 1, 0)) != WATER))) te = min(te, (float(cell.y) + WATER_Y - ro.y) / rd.y);
     wD = max(te, 0.);
   }
   int steps = 0;
+  vec3 shapeN = vec3(0.); vec4 plantTx = vec4(0.); float plantV = 0.;   // what the closer look found, for the shading
   for (int pass = 0; pass < 8; pass++) {        // the march stops at slabs, slopes and models for a closer look (outside the
   for (int i = 0; i < 200; i++) {               // hot loop, which stays small); one the ray passes by sends it marching on
     if (++steps > 200) break;
-    if (tM.x < tM.y && tM.x < tM.z) { t = tM.x; tM.x += tD.x; cell.x += st.x; axis = 0; }
+    if (all(bvec2(tM.x < tM.y, tM.x < tM.z))) { t = tM.x; tM.x += tD.x; cell.x += st.x; axis = 0; }
     else if (tM.y < tM.z) { t = tM.y; tM.y += tD.y; cell.y += st.y; axis = 1; }
     else { t = tM.z; tM.z += tD.z; cell.z += st.z; axis = 2; }
-    if (t > tEnt || t > uFar) break;           // past the view distance the fog has become the sky
-    if (any(lessThan(cell, ivec3(0))) || any(greaterThan(cell, WDIM - 1))) { if (leaving(cell, st)) break; continue; }
+    if (any(bvec2(t > tEnt, t > uFar))) break;  // past the view distance the fog has become the sky
+    if (outside(cell)) { if (leaving(cell, st)) break; continue; }
     if (skipBrick(cell, tM, t, ro, rd, r, inv, st)) continue;
     int b = cellId(cell);
     if (b == AIR) continue;
@@ -4484,8 +4473,8 @@ void main() {
       continue;
     }
     vec3 n = axisN(axis, st);
-    if (b == GLASS || b == SHOJI) {             // glass, and the half see-through paper of 紙拉門 (lit from either side)
-      if (b == GLASS && (cell.x == 0 || cell.x == WDIM.x - 1 || cell.z == 0 || cell.z == WDIM.z - 1)) {   // world border: one faint haze, no grid
+    if (any(bvec2(b == GLASS, b == SHOJI))) {    // glass, and the half see-through paper of 紙拉門 (lit from either side)
+      if (all(bvec2(b == GLASS, any(bvec4(cell.x == 0, cell.x == WDIM.x - 1, cell.z == 0, cell.z == WDIM.z - 1))))) {   // world border: one faint haze, no grid
         if (!border) { float h = .14 * (1. - clamp((t - uFog.x) * uFog.y, 0., 1.) * uFog.z); acc += tr * h * uHor; tr *= 1. - h; border = true; }
         continue;
       }
@@ -4494,23 +4483,25 @@ void main() {
       tr *= 1. - g.a;
       continue;
     }
-    if (b == LEAF && t < uFog.x && textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(LEAF, n)), texLod(t, n, rd)).a < .5) continue;
-    if (b == TALL && t > uFog.x * .9) continue; // in the fog: leaves count as solid, weeds are gone
+    if (all(bvec2(b == LEAF, t < uFog.x))) {
+      if (textureLod(uTex, vec3(faceUV(ro + rd * t - vec3(cell), axis, n), layerOf(LEAF, n)), texLod(t, n, rd)).a < .5) continue;
+    }
+    if (all(bvec2(b == TALL, t > uFog.x * .9))) continue;   // in the fog: leaves count as solid, weeds are gone
     if (b == TORCH) {                           // a 2×10 px stick in the middle of the cell, with a glow
       vec3 c0 = vec3(cell), fc = c0 + vec3(.5, .62, .5), tn;
       vec3 dv = ro + rd * max(dot(fc - ro, rd), 0.) - fc;
       acc += tr * vec3(1., .62, .28) * (.5 - .32 * uDayf) * uFlk * exp(-dot(dv, dv) * 22.);
       vec2 tt = boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < tEnt) { hit = 2; tHit = tt.x; id = b; break; }
+      if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < tEnt))) { hit = 2; tHit = tt.x; id = b; break; }
       continue;
     }
     if (isPlant(b)) {
       vec4 tx; float pv;
       float th = plantHit(b, cell, ro, rd, t, min(min(tM.x, tM.y), tM.z), tx, pv);
-      if (th >= 0. && th < tEnt) { hit = 4; tHit = th; id = b; break; }
+      if (all(bvec2(th >= 0., th < tEnt))) { hit = 4; tHit = th; id = b; plantTx = tx; plantV = pv; break; }
       continue;
     }
-    if (isShape(b) || isModel(b)) { hit = 9; id = b; break; }
+    if (any(bvec2(isShape(b), isModel(b)))) { hit = 9; id = b; break; }
     hit = 1; tHit = t; id = b; break;
   }
   if (hit != 9) break;
@@ -4518,10 +4509,10 @@ void main() {
   if (isShape(id)) {
     vec3 sn;
     float th = shapeHit(id, cell, ro, rd, t, min(min(tM.x, tM.y), tM.z), axisN(axis, st), sn);
-    if (th >= 0. && th < tEnt) { hit = 5; tHit = th; break; }
+    if (all(bvec2(th >= 0., th < tEnt))) { hit = 5; tHit = th; shapeN = sn; break; }
   } else {                                      // …or a model: a bed, sprinkler, egg or lantern (lanterns glow softly)
-    if (id == LANTERN || id == TOURO) {
-      vec3 fc = vec3(cell) + vec3(.5, id == LANTERN ? .5 : .62, .5), dv = ro + rd * max(dot(fc - ro, rd), 0.) - fc;
+    if (any(bvec2(id == LANTERN, id == TOURO))) {
+      vec3 fc = vec3(cell) + vec3(.5, mix(.62, .5, id == LANTERN), .5), dv = ro + rd * max(dot(fc - ro, rd), 0.) - fc;
       acc += tr * vec3(1., .56, .3) * (.42 - .3 * uDayf) * uFlk * exp(-dot(dv, dv) * 12.);
     }
     float best = 1e9;
@@ -4529,7 +4520,7 @@ void main() {
       vec3 mn, mx, bn;
       if (!modelBox(id, k, mn, mx)) continue;
       vec2 tt = boxT(ro, inv, vec3(cell) + mn / 16., vec3(cell) + mx / 16., bn);
-      if (tt.x < tt.y && tt.x > 0.) best = min(best, tt.x);
+      if (all(bvec2(tt.x < tt.y, tt.x > 0.))) best = min(best, tt.x);
     }
     if (best < tEnt) { hit = 3; tHit = best; break; }
   }
@@ -4539,22 +4530,22 @@ void main() {
   // ---- shade what was hit ----
   vec3 col = vec3(0.), base = vec3(0.), N = vec3(0.), HP = ro + rd * tHit, c0 = vec3(cell);
   float AO = 1., SH = 1., dist = tHit, mark = 1.;
-  bool lit = true, plant = false, aimed = uTarget.w == 1 && cell == uTarget.xyz;
-  if (pl >= 0 && tPl < tHit && tPl <= tMob && tPl <= tPet) {   // ---- another player ----
+  bool lit = true, plant = false, aimed = all(bvec2(uTarget.w == 1, cell == uTarget.xyz));
+  if (all(bvec4(pl >= 0, tPl < tHit, tPl <= tMob, tPl <= tPet))) {   // ---- another player ----
     float cy = cos(uPl[pl].w), sy = sin(uPl[pl].w);
     vec3 o = ro - uPl[pl].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy) - plOff(plPart, uPlB[pl].y, uPlB[pl].z);
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
     boxT(lo, 1.0 / ld, QMIN[plPart], QMAX[plPart], ln);
     vec3 lp = lo + ld * tPl, skin = vec3(.93, .76, .6);
     N = vec3(ln.x * cy + ln.z * sy, ln.y, -ln.x * sy + ln.z * cy);
-    base = plPart <= 1 ? (lp.y < .1 ? vec3(.2, .15, .12) : vec3(.22, .27, .42)) : plPart == 5 ? skin : SHIRT[int(uPlB[pl].x + .5) & 7];
-    if ((plPart == 3 || plPart == 4) && lp.y < .86) base = skin;                                             // hands
-    if (plPart == 5 && (lp.y > 1.73 || ln.z < -.5 || (abs(ln.x) > .5 && lp.y > 1.6))) base = vec3(.3, .2, .12);   // hair
-    if (plPart == 5 && ln.z > .5 && abs(abs(lp.x) - .1) < .035 && abs(lp.y - 1.57) < .035) base = vec3(.08, .08, .12);   // eyes
+    base = mix(mix(SHIRT[int(uPlB[pl].x + .5) & 7], skin, bvec3(plPart == 5)), mix(vec3(.22, .27, .42), vec3(.2, .15, .12), bvec3(lp.y < .1)), bvec3(plPart <= 1));
+    if (all(bvec2(any(bvec2(plPart == 3, plPart == 4)), lp.y < .86))) base = skin;                                          // hands
+    if (all(bvec2(plPart == 5, any(bvec3(lp.y > 1.73, ln.z < -.5, all(bvec2(abs(ln.x) > .5, lp.y > 1.6))))))) base = vec3(.3, .2, .12);   // hair
+    if (all(bvec4(plPart == 5, ln.z > .5, abs(abs(lp.x) - .1) < .035, abs(lp.y - 1.57) < .035))) base = vec3(.08, .08, .12);   // eyes
     base *= .94 + .1 * hash3(floor(lp * 16.));
     if (uPlB[pl].w > 0.) base = mix(base, vec3(1., .45, .45), .6);                                           // just got hit
-    HP = ro + rd * tPl; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tPl; aimed = false;
-  } else if (mob >= 0 && tMob < tHit && tMob <= tPet) {   // ---- mob ----
+    HP = ro + rd * tPl; SH = mix(mix(uShade.z, uShade.y, abs(N.y) > .5), uShade.x, abs(N.x) > .5); dist = tPl; aimed = false;
+  } else if (all(bvec3(mob >= 0, tMob < tHit, tMob <= tPet))) {   // ---- mob ----
     float cy = cos(uMob[mob].w), sy = sin(uMob[mob].w);
     vec3 o = ro - uMob[mob].xyz, lo = vec3(o.x * cy - o.z * sy, o.y, o.x * sy + o.z * cy);
     vec3 ld = vec3(r.x * cy - r.z * sy, r.y, r.x * sy + r.z * cy), ln;
@@ -4563,12 +4554,12 @@ void main() {
     N = vec3(ln.x * cy + ln.z * sy, ln.y, -ln.x * sy + ln.z * cy);
     base = PCOL[part] * (.92 + .16 * hash3(floor(lp * 16.)));
     if (uMobHurt[mob] > 0.) base = mix(base, vec3(1., .5, .5), .6);
-    HP = ro + rd * tMob; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tMob; aimed = false;
+    HP = ro + rd * tMob; SH = mix(mix(uShade.z, uShade.y, abs(N.y) > .5), uShade.x, abs(N.x) > .5); dist = tMob; aimed = false;
     vec2 e = vec2((lp.x + .23) / .46, (1.82 - lp.y) / .46);             // eyes on the front of the head glow
-    if (part == 5 && ln.z > .5 && e.y > .36 && e.y < .5 && ((e.x > .18 && e.x < .4) || (e.x > .6 && e.x < .82))) {
+    if (all(bvec2(all(bvec4(part == 5, ln.z > .5, e.y > .36, e.y < .5)), any(bvec2(all(bvec2(e.x > .18, e.x < .4)), all(bvec2(e.x > .6, e.x < .82))))))) {
       col = vec3(1., .38, .2) * (1.1 + .2 * uFlk); lit = false;
     }
-  } else if (pet >= 0 && tPet < tHit) {         // ---- pet: its colours, a pattern, eyes; glowing parts shine ----
+  } else if (all(bvec2(pet >= 0, tPet < tHit))) {   // ---- pet: its colours, a pattern, eyes; glowing parts shine ----
     vec4 pb = uPetB[pet];
     int s = int(uPetA[pet].w);
     vec3 o = ro - uPetA[pet].xyz, lo = vec3(o.x * pb.x - o.z * pb.y, o.y * pb.z, o.x * pb.y + o.z * pb.x);
@@ -4580,33 +4571,33 @@ void main() {
     vec3 lp = lq + ld * tPet;                     // the hit point in the pet's frame
     N = normalize(vec3(ln.x * pb.x + ln.z * pb.y, ln.y * pb.z, -ln.x * pb.y + ln.z * pb.x));
     if (slot == 0) {                              // patterns on the main colour
-      if (pat == 1 && hash3(floor(lp * 7.)) < .32) slot = 1;                             // cow spots
-      else if (pat == 2 && fract(lp.z * 9.) < .45) slot = 1;                             // bee stripes
-      else if (pat == 3 && fract(lp.z * 10. + lp.y * 4.) < .3) slot = 1;                 // tabby stripes
-      else if (pat == 4 && (fract(lp.x * 7.) < .16 || fract(lp.z * 7.) < .16)) slot = 1; // shell plates
-      else if (pat == 5 && ln.y < -.5) slot = 2;                                         // dragon: pale belly
+      if (all(bvec2(pat == 1, hash3(floor(lp * 7.)) < .32))) slot = 1;                   // cow spots
+      else if (all(bvec2(pat == 2, fract(lp.z * 9.) < .45))) slot = 1;                   // bee stripes
+      else if (all(bvec2(pat == 3, fract(lp.z * 10. + lp.y * 4.) < .3))) slot = 1;       // tabby stripes
+      else if (all(bvec2(pat == 4, any(bvec2(fract(lp.x * 7.) < .16, fract(lp.z * 7.) < .16))))) slot = 1;   // shell plates
+      else if (all(bvec2(pat == 5, ln.y < -.5))) slot = 2;                               // dragon: pale belly
     }
-    if (pat == 6 && (fl & 8) != 0 && lp.z < a.z + (b.z - a.z) * .3) slot = 1;           // fox: a white tip on the tail
+    if (all(bvec3(pat == 6, (fl & 8) != 0, lp.z < a.z + (b.z - a.z) * .3))) slot = 1;   // fox: a white tip on the tail
     vec4 pc = texelFetch(uAnimal, ivec2(s * 4 + slot, 3), 0);
     base = pc.rgb * (.94 + .1 * hash3(floor(lp * 24.)));
-    if (pat == 5 && slot == 0 && mod(floor(lp.x * 14.) + floor(lp.y * 14.) + floor(lp.z * 14.), 2.) < .5) base *= .88;   // scales
+    if (all(bvec3(pat == 5, slot == 0, mod(floor(lp.x * 14.) + floor(lp.y * 14.) + floor(lp.z * 14.), 2.) < .5))) base *= .88;   // scales
     if (pc.a > .5) mark = -1.;                    // glowing parts: the dragon's wings
-    if ((fl & 16) != 0 && ln.z > .5) {            // eyes on the front of the face
-      float w = b.x - a.x, hh = b.y - a.y, er = min(w, hh) * (pat == 7 ? .17 : .09);
+    if (all(bvec2((fl & 16) != 0, ln.z > .5))) {   // eyes on the front of the face
+      float w = b.x - a.x, hh = b.y - a.y, er = min(w, hh) * mix(.09, .17, pat == 7);
       vec2 e = vec2(abs(lp.x - (a.x + b.x) * .5) - w * .27, lp.y - a.y - hh * .62);
       if (max(abs(e.x), abs(e.y)) < er) {
-        if (pat == 7) base = max(abs(e.x), abs(e.y)) < er * .45 ? vec3(.05) : vec3(.98, .82, .25);   // owl: big yellow eyes
+        if (pat == 7) base = mix(vec3(.98, .82, .25), vec3(.05), bvec3(max(abs(e.x), abs(e.y)) < er * .45));   // owl: big yellow eyes
         else if (pat == 5) { col = vec3(1., .85, .3) * (1.1 + .2 * uFlk); lit = false; }               // dragon: glowing eyes
         else base = vec3(.06, .05, .05);
       }
     }
-    AO = ln.y < -.5 ? .7 : 1.;
-    HP = ro + rd * tPet; SH = abs(N.x) > .5 ? uShade.x : abs(N.y) > .5 ? uShade.y : uShade.z; dist = tPet; aimed = false;
+    AO = mix(1., .7, ln.y < -.5);
+    HP = ro + rd * tPet; SH = mix(mix(uShade.z, uShade.y, abs(N.y) > .5), uShade.x, abs(N.x) > .5); dist = tPet; aimed = false;
   } else if (hit == 2) {                        // ---- torch stick and flame ----
     vec3 tn; boxT(ro, inv, c0 + vec3(7., 0., 7.) / 16., c0 + vec3(9., 10., 9.) / 16., tn);
     vec3 tp = HP - c0;
-    vec2 uv = abs(tn.y) > .5 ? vec2(7.5 + (tp.x - .4375) * 8., 6.5) / 16.
-            : vec2(7. + (abs(tn.x) > .5 ? tp.z : tp.x) * 16. - 7., 16. - tp.y * 16.) / 16.;
+    vec2 uv = mix(vec2(7. + mix(tp.x, tp.z, abs(tn.x) > .5) * 16. - 7., 16. - tp.y * 16.) / 16.,
+                  vec2(7.5 + (tp.x - .4375) * 8., 6.5) / 16., bvec2(abs(tn.y) > .5));
     base = textureLod(uTex, vec3(uv, float(TORCH * 3 + 1)), 0.).rgb; N = tn; aimed = false;
     if (uv.y < .5) { col = base * (1.15 + .25 * uFlk); lit = false; }
   } else if (hit == 3) {                        // ---- bed, sprinkler, egg or lantern model ----
@@ -4615,56 +4606,53 @@ void main() {
       vec3 mn, mx, bn;
       if (!modelBox(id, k, mn, mx)) continue;
       vec2 tt = boxT(ro, inv, c0 + mn / 16., c0 + mx / 16., bn);
-      if (tt.x < tt.y && tt.x > 0. && tt.x < best) { best = tt.x; N = bn; }
+      if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < best))) { best = tt.x; N = bn; }
     }
     vec3 f = HP - c0;
-    int ax = abs(N.x) > .5 ? 0 : abs(N.y) > .5 ? 1 : 2;
+    int ax = isel(abs(N.x) > .5, 0, isel(abs(N.y) > .5, 1, 2));
     vec2 uv = faceUV(f, ax, N);
-    if (id == BED && ax != 1) uv.y = .5625 - f.y;   // a bed's sides: blanket, sheet, then the frame
+    if (all(bvec2(id == BED, ax != 1))) uv.y = .5625 - f.y;   // a bed's sides: blanket, sheet, then the frame
     vec4 mt = textureLod(uTex, vec3(uv, layerOf(id, N)), texLod(tHit, N, rd));
     base = mt.rgb;
-    if ((id == EGG3 || id == LANTERN || id == TOURO) && mt.a < .97) mark = -1.;   // the dragon egg's marks and the lanterns' lights glow
-    SH = ax == 0 ? uShade.x : ax == 1 ? uShade.y : uShade.z;
+    if (all(bvec2(any(bvec3(id == EGG3, id == LANTERN, id == TOURO)), mt.a < .97))) mark = -1.;   // the dragon egg's marks and the lanterns' lights glow
+    SH = mix(mix(uShade.z, uShade.y, ax == 1), uShade.x, ax == 0);
   } else if (hit == 4) {                        // ---- crop or weed sprite: soft light, darker toward the ground ----
-    vec3 bn; vec2 span = boxT(ro, inv, c0, c0 + 1., bn);
-    vec4 tx; float pv;
-    plantHit(id, cell, ro, rd, span.x, span.y, tx, pv);
-    base = id == TALL ? tx.rgb * uGrass : tx.rgb; AO = .45 + .55 * pv; plant = true;
+    vec4 tx = plantTx; float pv = plantV;         // what the march found
+    base = mix(tx.rgb, tx.rgb * uGrass, bvec3(id == TALL)); AO = .45 + .55 * pv; plant = true;
     if (tx.a < .97) mark = -1.;                  // glowing fruit: shines at night
-  } else if (hit == 1 || hit == 5) {           // ---- textured block, or a slab or roof slope (its slope faces run down the roof) ----
+  } else if (any(bvec2(hit == 1, hit == 5))) {   // ---- textured block, or a slab or roof slope (its slope faces run down the roof) ----
     vec3 n = axisN(axis, st), f = HP - c0;
     int ax = axis;
     bool slope = false, inside = false;         // inside: a face within the cell (a slope, a slab's middle), not on its edge
     if (hit == 5) {
-      shapeHit(id, cell, ro, rd, t, min(min(tM.x, tM.y), tM.z), n, n);
+      n = shapeN;                               // the march's closer look found it
       f = clamp(f, 0., 1.);
       vec3 an = abs(n);
       slope = max(max(an.x, an.y), an.z) < .99;
-      ax = an.x > .99 ? 0 : an.y > .99 ? 1 : 2;
-      inside = slope || (ax == 1 && abs(f.y - .5) < .01);
+      ax = isel(an.x > .99, 0, isel(an.y > .99, 1, 2));
+      inside = any(bvec2(slope, all(bvec2(ax == 1, abs(f.y - .5) < .01))));
     }
-    vec2 uv;
-    if (slope) {
-      int d = abs(n.x) > abs(n.z) ? (n.x < 0. ? 0 : 2) : (n.z < 0. ? 1 : 3);   // it rises against its normal
-      uv = vec2(d == 0 ? f.z : d == 1 ? 1. - f.x : d == 2 ? 1. - f.z : f.x, d == 0 ? 1. - f.x : d == 1 ? 1. - f.z : d == 2 ? f.x : f.z);
-    } else uv = faceUV(f, ax, n);
+    int d = isel(abs(n.x) > abs(n.z), isel(n.x < 0., 0, 2), isel(n.z < 0., 1, 3));   // a slope rises against its normal
+    vec2 uv = mix(faceUV(f, ax, n), mix(mix(mix(vec2(f.x, f.z), vec2(1. - f.z, f.x), bvec2(d == 2)), vec2(1. - f.x, 1. - f.z), bvec2(d == 1)),
+                                        vec2(f.z, 1. - f.x), bvec2(d == 0)), bvec2(slope));
     vec3 tex = textureLod(uTex, vec3(uv, layerOf(id, n)), texLod(tHit, n, rd)).rgb;
-    bool grassy = id == GRASS && (n.y > .5 || tex.g > tex.r * 1.15);   // grass top, or the green fringe on its sides
+    bool grassy = all(bvec2(id == GRASS, any(bvec2(n.y > .5, tex.g > tex.r * 1.15))));   // grass top, or the green fringe on its sides
+    vec2 hc = texelFetch(uHeight, cell.xz, 0).rg;
     if (grassy) tex *= uGrass;
-    else if (id == LEAF) tex *= texelFetch(uHeight, cell.xz, 0).g < uLeafMix ? uLeaf2 : uLeaf;
-    if (uSnow > 0. && id != GLASS && (id < FARM || id > FARM_FW) &&
-        texelFetch(uHeight, cell.xz, 0).r * 255. < float(cell.y) + .5) {   // snow on the top block of each column (roofs too)
+    else if (id == LEAF) tex *= mix(uLeaf, uLeaf2, bvec3(hc.g < uLeafMix));
+    if (all(bvec4(uSnow > 0., id != GLASS, any(bvec2(id < FARM, id > FARM_FW)), hc.r * 255. < float(cell.y) + .5))) {   // snow on the top block of each column (roofs too)
       vec3 snow = vec3(.9, .93, .97) * (.95 + .08 * hash3(vec3(floor(uv * 16.), float(id))));
-      if (n.y > .5 || grassy) tex = mix(tex, snow, uSnow);
+      if (any(bvec2(n.y > .5, grassy))) tex = mix(tex, snow, uSnow);
       else if (id == LEAF) tex = mix(tex, snow, uSnow * .3);
     }
-    float fu = slope ? uv.x : ax == 0 ? f.z : f.x, fv = slope ? uv.y : ax == 1 ? f.z : f.y;
-    AO = tHit < uFog.x + 8. ? (inside ? cornerAO(cell, 1, f.x, f.z) : cornerAO(cell + ivec3(n), ax, fu, fv)) : .85;
-    if (n.y > .5 && tHit < uFog.x) for (int i = 0; i < 12; i++) {   // a soft dark patch under each pet
+    float fu = mix(mix(f.x, f.z, ax == 0), uv.x, slope), fv = mix(mix(f.y, f.z, ax == 1), uv.y, slope);
+    AO = .85;                                   // inside: a face within the cell, lit by the cells around it
+    if (tHit < uFog.x + 8.) AO = cornerAO(cell + ivec3(n) * int(!inside), isel(inside, 1, ax), mix(fu, f.x, inside), mix(fv, f.z, inside));
+    if (all(bvec2(n.y > .5, tHit < uFog.x))) for (int i = 0; i < 12; i++) {   // a soft dark patch under each pet
       if (i >= uPetN) break;
       vec3 q = HP - uPetA[i].xyz;
       float rad = uPetD[i].y, up = -q.y, dd = length(q.xz);
-      if (up > -.05 && up < 3. && dd < rad) AO *= 1. - .45 * (1. - dd / rad) * (1. - up / 3.);
+      if (all(bvec3(up > -.05, up < 3., dd < rad))) AO *= 1. - .45 * (1. - dd / rad) * (1. - up / 3.);
     }
     vec3 an = abs(n);
     base = tex; N = n; SH = dot(an, uShade) / (an.x + an.y + an.z);
@@ -4675,8 +4663,8 @@ void main() {
     }
   } else { col = skyColor(rd); lit = false; dist = -1.; }                  // ---- sky ----
   if (lit) col = light(base, N, HP, AO, SH, plant, dist);
-  if (mark < 0.) col = max(col, base * (1.05 + .15 * uFlk)); else col *= mark;
-  if (aimed) col = col * 1.22 + .03;            // the plant or model under the crosshair lights up a little
+  col = mix(col * mark, max(col, base * (1.05 + .15 * uFlk)), bvec3(mark < 0.));
+  col = mix(col, col * 1.22 + .03, bvec3(aimed));   // the plant or model under the crosshair lights up a little
   if (dist > 0.) col = mix(col, horizon(rd), clamp((dist - uFog.x) * uFog.y, 0., 1.) * uFog.z);
   if (wD > 0.) col = mix(vec3(.06, .2, .32) * (uAmb * .9 + .1), col, exp(-wD * 1.15));   // water swallows what lies behind
   if (wT >= 0.) {                               // the water surface: rippled sky reflection (Fresnel) and a sun glint
@@ -4686,13 +4674,13 @@ void main() {
     vec3 rr = reflect(rd, n);
     float F = .04 + .96 * pow(1. - max(dot(-rd, n), 0.), 5.);
     vec3 refl = mix(skyColor(rr) * .92, horizon(rd), clamp((wT - uFog.x) * uFog.y, 0., 1.) * uFog.z);
-    col = mix(col, refl, F) + (uSunEl > 0. ? pow(max(dot(rr, uSun), 0.), 150.) * uDayf * 2. : 0.);
+    col = mix(col, refl, F) + mix(0., pow(max(dot(rr, uSun), 0.), 150.) * uDayf * 2., uSunEl > 0.);
   }
   outColor = vec4(acc + tr * col, 1.);
 }`;
 
 const glCanvas = $('gl');
-const GPU = { gl: null, u: {}, tWorld: null, tLight: null, ver: -1, f: 1 };
+const GPU = { gl: null, u: {}, tWorld: null, tLight: null, ver: -1, f: 1, wait: null };   // wait: shaders still compiling
 const heightBuf = new Uint8Array(LAYER * 2);  // per column: top solid block, tree id (for snow and tree colours)
 // The GPU keeps a copy of the world and the torch light. After an edit, only the 16×16-column tiles that
 // differ from what it has are uploaded again (16 KB each instead of the whole megabyte).
@@ -4787,21 +4775,34 @@ function animalTexture() {
   }
   return a;
 }
-function initGL() {
-  if (FORCE_CPU) return false;
-  let gl;
+// The GPU renderer starts in two steps, so the game shows up at once. initGL() hands the shaders to the browser and
+// returns; until they are compiled the CPU renderer draws the world. That compile is the slow part of loading on
+// Windows (Direct3D): 5–6 s with an RTX 4070 the first time a version of the game is opened; after that the
+// browser keeps the result and it takes about 0.3 s. frame() asks each frame whether they are ready
+// (KHR_parallel_shader_compile: asking doesn't wait) and finishGL() switches to the GPU. A browser without that
+// extension (Firefox) can't ask without waiting, so it waits in the first frame, as before.
+function initGL(grace = 0) {                  // grace: ms the CPU waits before drawing, in case the shaders are cached
+  if (FORCE_CPU) return;
   try {
-    gl = glCanvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false,
-                                         preserveDrawingBuffer: false, powerPreference: 'high-performance' });
-    if (!gl) return false;
-    const shader = (type, src) => {
-      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-      return s;
-    };
-    const prog = gl.createProgram();
-    gl.attachShader(prog, shader(gl.VERTEX_SHADER, GL_VS)); gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, GL_FS));
-    gl.linkProgram(prog);
+    const gl = glCanvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, stencil: false,
+                                               preserveDrawingBuffer: false, powerPreference: 'high-performance' });
+    if (!gl) return;
+    const ext = gl.getExtension('KHR_parallel_shader_compile');
+    const shader = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+    const vs = shader(gl.VERTEX_SHADER, GL_VS), fs = shader(gl.FRAGMENT_SHADER, GL_FS), prog = gl.createProgram();
+    gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+    gl.flush();                                 // send it off now, not at the first call that has to wait
+    GPU.wait = { gl, prog, vs, fs, cpuAt: performance.now() + grace,
+                 ready: ext ? () => gl.getProgramParameter(prog, ext.COMPLETION_STATUS_KHR) : () => true };
+  } catch (e) {
+    console.warn('WebGL2 unavailable, using the CPU renderer:', e.message);
+  }
+}
+function finishGL() {                         // the shaders are compiled: check them, set up the textures, switch
+  const { gl, prog, vs, fs } = GPU.wait;
+  GPU.wait = null;
+  try {
+    for (const s of [vs, fs]) if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
     gl.useProgram(prog);
     for (const n of ['uWorld', 'uLight', 'uTex', 'uRes', 'uEye', 'uFwd', 'uRight', 'uUp', 'uFocal', 'uSun', 'uZen', 'uHor',
@@ -4854,10 +4855,12 @@ function initGL() {
     gl.bindVertexArray(gl.createVertexArray());
   } catch (e) {
     console.warn('WebGL2 unavailable, using the CPU renderer:', e.message);
-    return false;
+    return;
   }
   GPU.gl = gl; GPU.ver = -1;
-  return true;
+  glCanvas.style.display = 'block';
+  autoLevel = 2; autoPrevMs = 0; autoDone = autoLocked = false; autoT = workMs = frameMs = 0;   // GPU starts at 高, CPU at 中
+  applySettings();                            // 自動(高) in the menu, and the view refitted for the GPU
 }
 function renderGL(tg) {
   const gl = GPU.gl, u = GPU.u, s = sky;
@@ -4925,8 +4928,8 @@ function renderGL(tg) {
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
-glCanvas.addEventListener('webglcontextlost', e => { e.preventDefault(); GPU.gl = null; glCanvas.style.display = 'none'; viewDirty = true; });
-glCanvas.addEventListener('webglcontextrestored', () => { if (initGL()) { glCanvas.style.display = 'block'; viewDirty = true; } });
+glCanvas.addEventListener('webglcontextlost', e => { e.preventDefault(); GPU.gl = GPU.wait = null; glCanvas.style.display = 'none'; viewDirty = true; });
+glCanvas.addEventListener('webglcontextrestored', () => initGL());   // the CPU goes on drawing until finishGL()
 
 // ---- overlays drawn with the 2D API on top of the voxel pass ----
 const cam = { sx: 0, cx: 1, sp: 0, cp: 1 };   // camera basis for project(), set once per frame
@@ -7142,6 +7145,10 @@ function frame(tm) {
               : workMs.toFixed(1) + ' ms · ' + QUALITY[qualityLevel()].n + ' ' + view.w + '×' + view.h);
     fpsN = 0; fpsT0 = t0;
   }
+  if (GPU.wait) {                             // the GPU's shaders are compiling: it takes over as soon as they are ready
+    if (GPU.wait.ready()) finishGL();
+    else if (performance.now() < GPU.wait.cpuAt) { needRender = true; return; }   // cached ones are ready in a moment: no flash of the CPU picture
+  }
   if (viewDirty) { viewDirty = false; fitView(); }
   if (paused && !needRender && !net.role) return;   // …and nothing needs redrawing either
   needRender = false;
@@ -7255,7 +7262,7 @@ loadSettings();
 if (window.matchMedia && matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch', 'coarse');   // phones and tablets
 const tutSeen = tutLoad();
 makeTextures(); makeIcons(); makeIconCSS(); loadCreative();
-if (initGL()) { glCanvas.style.display = 'block'; autoLevel = 2; }   // GPU starts at 高, CPU at 中
+initGL(1000);                                 // for a second nothing draws (cached shaders are ready by then), then the CPU until the GPU can
 newKit();
 let jpNews = false;                           // this browser hasn't been told about the Japanese buildings yet
 try { jpNews = !localStorage.voxelJP; localStorage.voxelJP = '1'; } catch (e) {}
