@@ -217,6 +217,25 @@
   .rc button:disabled{opacity:.3;cursor:default}
   body.touch .rc button{padding:9px 14px}
   #invx{grid-column:1/-1;font-size:11px;opacity:.55;text-align:center}
+  #iinfo .ib{display:flex;flex-wrap:wrap;gap:0 6px;align-items:center}
+  #iinfo .ib .dim{margin-top:6px}
+  #iinfo button.toss{background:rgba(255,255,255,.08);border-color:var(--line2)}
+  /* the chest page (its tab shows only while a chest is open): the chest and the bag side by side, or one over the other */
+  #ptabs .tab[data-p=chest]{display:none}
+  body.chest #ptabs .tab[data-p=chest]{display:block}
+  #pg-chest.on{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .chw{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:12px 28px}
+  .chcol{display:flex;flex-direction:column;gap:6px}
+  #inv .chcol h3{margin:0}
+  .cgrid{display:grid;grid-template-columns:repeat(6,50px);gap:6px;touch-action:none}
+  .cgrid .slot{width:46px;height:46px}
+  .cgrid .slot.hb{border-color:rgba(255,215,120,.75)}
+  .cgrid .slot.on{border-color:#fff}
+  .cgrid .slot.src{opacity:.35}
+  #chbtns{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+  #chbtns button{font-size:12px;color:#fff;background:rgba(127,196,255,.18);border:1px solid rgba(127,196,255,.6);border-radius:8px;padding:5px 12px;cursor:pointer}
+  body.touch #chbtns button{padding:8px 14px;font-size:13px}
+  #chesthint{text-align:center;margin:0}
   /* creative: the bag becomes a catalog of every item, picked into the creative hotbar */
   #chead,#cat{display:none}
   body.creative #bagl,body.creative #craft{display:none}
@@ -492,6 +511,7 @@
 <div id="dmg"></div>
 <div id="inv"><div class="pw">
   <div id="ptabs">
+    <button class="tab" data-p="chest">📦<span> 箱子</span></button>
     <button class="tab on" data-p="bag">🎒<span> 背包</span></button>
     <button class="tab" data-p="shop">🏪<span> 市集</span></button>
     <button class="tab" data-p="cook">🍳<span> 料理</span></button>
@@ -512,7 +532,15 @@
       <div id="chead"><div id="chot"></div>
         <input id="catq" type="text" placeholder="🔍 搜尋物品(例如:鑽石、種子、蛋糕)" autocomplete="off" spellcheck="false"></div>
       <div id="cat"></div>
-      <div id="invx"><span class="kb">拖曳搬移 · I / Tab / Esc 關閉 · C 切換生存↔創造</span><span class="tc">拖曳搬移 · 點 ✕ 或旁邊的暗處關閉</span></div>
+      <div id="invx"><span class="kb">拖曳搬移 · 拖到面板外面丟出去 · Q 丟出滑鼠指著的東西 · I / Tab / Esc 關閉 · C 切換生存↔創造</span><span class="tc">拖曳搬移 · 點 ✕ 或旁邊的暗處關閉</span></div>
+    </div>
+    <div class="pg" id="pg-chest">
+      <div class="chw">
+        <div class="chcol"><h3>📦 箱子 <span class="dim" id="chestn"></span></h3><div id="chestg" class="cgrid"></div></div>
+        <div class="chcol"><h3 id="chbagh">🎒 背包</h3><div id="chestb" class="cgrid"></div></div>
+      </div>
+      <div id="chbtns"><button id="chout">📤 全部拿出來</button><button id="chin">📥 全部放進箱子(快捷欄除外)</button></div>
+      <p class="dim" id="chesthint"></p>
     </div>
     <div class="pg" id="pg-shop"><div class="cols"><div id="sell"></div><div id="buy"></div></div></div>
     <div class="pg" id="pg-cook">
@@ -632,13 +660,14 @@
           <div class="keys">
             <kbd>左下搖桿</kbd><span>走路;推到外圈會奔跑</span>
             <kbd>拖曳畫面</kbd><span>轉頭看四周</span>
-            <kbd class="tap">點一下</kbd><span class="tap">放方塊、用手上的東西(翻土、播種、澆水、吃、射箭)、收成、餵寵物、打怪</span>
+            <kbd class="tap">點一下</kbd><span class="tap">放方塊、用手上的東西(翻土、播種、澆水、吃、射箭)、收成、餵寵物、打開箱子、打怪</span>
             <kbd class="tap">按住不放</kbd><span class="tap">挖手指下的方塊、連續打怪</span>
             <kbd class="xh">⛏</kbd><span class="xh">按住挖準心對著的方塊、打怪</span>
-            <kbd class="xh">＋</kbd><span class="xh">放方塊、用手上的東西、收成、餵寵物</span>
+            <kbd class="xh">＋</kbd><span class="xh">放方塊、用手上的東西、收成、餵寵物、打開箱子</span>
             <kbd>⤒</kbd><span>跳(走向一格高的方塊會自動跳上去)</span>
             <kbd>快捷欄</kbd><span>點一格,換手上拿的東西</span>
             <kbd>🎒</kbd><span>背包:合成、市集、料理、培育圖、農場圖、寵物</span>
+            <kbd>丟東西</kbd><span>在 🎒 裡點物品,按「丟出 1 個」或「整組丟出」;走過去就撿回來</span>
             <kbd>🕊 ⤓</kbd><span>創造模式:🕊 飛起來/落地,按住 ⤒ 上升、⤓ 下降</span>
             <kbd>⚙ ❔</kbd><span>選單與設定 · 這個說明</span>
           </div>
@@ -651,7 +680,8 @@
             <kbd>空白鍵</kbd><span>跳</span>
             <kbd>滑鼠</kbd><span>先點一下畫面鎖定滑鼠,再移動滑鼠看四周</span>
             <kbd>左鍵 / F</kbd><span>挖方塊(按住)、打怪</span>
-            <kbd>右鍵 / E</kbd><span>放方塊、用手上的東西、收成、餵寵物、睡覺</span>
+            <kbd>右鍵 / E</kbd><span>放方塊、用手上的東西、收成、餵寵物、睡覺、打開箱子</span>
+            <kbd>Q</kbd><span>丟出手上的東西(Shift+Q 整組);背包裡是丟出滑鼠指著的東西</span>
             <kbd>1–6 / 滾輪</kbd><span>換快捷欄</span>
             <kbd>I / Tab</kbd><span>背包與合成</span>
             <kbd>M · P</kbd><span>農場平面圖 · 寵物</span>
@@ -723,6 +753,13 @@
           <li>🎒 背包右邊是合成清單,材料夠了按「做」</li>
           <li>在背包裡點一下物品,就能看它的用途</li>
         </ul>
+        <h4>箱子與丟東西</h4>
+        <ul>
+          <li><b>箱子</b>:木板×8 合成(市集也買得到),放下後右鍵打開,可以放 24 格東西;打破箱子時,裡面的東西會掉出來</li>
+          <li>在箱子裡點一下物品就整組搬到另一邊;拖曳可以放到指定的格子,拖到面板外面就丟出去</li>
+          <li>在背包點物品按「丟出」(鍵盤按 Q)把東西丟到地上,走過去就會撿起來</li>
+          <li>背包滿的時候,放不下的東西會留在腳邊,空出位子後走過去就撿得起來</li>
+        </ul>
         <h4>日式建築</h4>
         <ul>
           <li>屋瓦、白灰牆、木柱、燒杉板、紙拉門、榻榻米、朱紅木、石板、白碎石、紙燈籠、石燈籠:合成清單做得出來,市集也買得到一部分</li>
@@ -735,6 +772,7 @@
         <ul>
           <li>選單的「👥 多人連線」:房主按「開房間」再「產生邀請碼」,把代碼傳給朋友;朋友按「加入」貼上,把產生的回覆碼傳回來,房主貼上就連上了</li>
           <li>最多 8 人。大家在房主的世界裡一起蓋房子、種田、打怪、養寵物;時間和天氣跟著房主,背包、金幣和生命是各自的</li>
+          <li>箱子大家共用;地上的東西誰先走過去就是誰的</li>
           <li>Enter(手機按 💬)聊天;房主可以決定要不要開「玩家互打」</li>
           <li>加入別人的世界不會動到你自己的世界,離開後就回到自己的世界</li>
         </ul>
@@ -800,6 +838,9 @@ const isSlope = b => b >= SLOPE0 && b < SLOPE_END;
 const slopeFam = b => (b - SLOPE0 >> 2) / 3 | 0, slopeKind = b => (b - SLOPE0 >> 2) % 3, slopeDir = b => b - SLOPE0 & 3;
 const STEEP = slopeId(0, 0, 0), GENTLE = slopeId(1, 0, 0);     // the two slope items: placing one picks the actual piece
 const DX = [1, 0, -1, 0], DZ = [0, 1, 0, -1];                   // dir → step
+// chests (ids 76–79): CHEST0 + the way the front with the latch faces (a dir, as above). The item is CHEST0; what is
+// inside lives in `chests` (see the chests section), not in the block
+const CHEST0 = 76, isChest = b => b >= CHEST0 && b < CHEST0 + 4;
 const CROP0 = 128;                                              // crop cells: 128 + crop*4 + stage
 const isFarm = b => b >= FARM && b <= FARM_FW, isWetFarm = b => b === FARM_W || b === FARM_FW;
 const isFarmCell = b => (b >= FARM && b <= FARM_FW) || b >= CROP0 || (b >= EGG && b <= EGG3);   // ticked by tickFarm
@@ -834,6 +875,7 @@ function grassEdit() {                        // grass and weeds changed: the fa
 
 function setBlock(i, id) {
   const old = world[i];
+  if (isChest(old) && !isChest(id)) chestGone(i);                    // a chest broken: what was in it spills out
   world[i] = id; worldVer++; geomVer++; worldDirty = true;
   if (old === WATER || id === WATER || old === SPRINK || id === SPRINK || old === SPRINK2 || id === SPRINK2) waterVer++;
   grow[i] = 0;
@@ -1372,6 +1414,7 @@ for (let b = SLOPE0; b < SLOPE_END; b++) {
   const item = slopeFam(b) ? GENTLE : STEEP;
   IT[b] = { c: '#5C626E', n: item === STEEP ? '屋瓦斜坡(陡)' : '屋瓦斜坡(緩)', hd: .9, tl: 'p', sell: 1, dp: item };
 }
+for (let d = 0; d < 4; d++) IT[CHEST0 + d] = { c: '#9C6B36', n: '箱子', hd: 1.4, tl: 'a', sell: 8, dp: CHEST0 };   // any facing → the one item
 const BP0 = 700;                              // blueprints: BP0 + k puts up BUILDS[k] in one go (see the buildings section)
 const BP_LIST = [['鳥居', 250], ['枯山水庭園', 400], ['民家', 900], ['神社', 1600], ['五重塔', 4200]];   // name, market price
 BP_LIST.forEach(([n], k) => { IT[BP0 + k] = { c: '#3D6FA8', n: n + '藍圖', bp: k, st: 16 }; });
@@ -1379,7 +1422,7 @@ BP_LIST.forEach(([n], k) => { IT[BP0 + k] = { c: '#3D6FA8', n: n + '藍圖', bp:
 // market: things to buy (seeds of every crop you have discovered are added on top of these)
 const SHOP = [
   [150, 20], [152, 150], [160, 30], [161, 40], [163, 12], [SPRINK, 160], [SPRINK2, 480],
-  [BED, 80], [GLASS, 3], [PLANK, 2], [TORCH, 3],
+  [BED, 80], [CHEST0, 20], [GLASS, 3], [PLANK, 2], [TORCH, 3],
   [ROOF, 3], [PLASTER, 2], [SHOJI, 4], [TATAMI, 4], [LANTERN, 12],
   ...BP_LIST.map(([, p], k) => [BP0 + k, p]),
 ];
@@ -1412,6 +1455,7 @@ RCP.push(
   [[[105, 2], [GLASS, 1]], [SPRINK, 1], '鐵錠×2+玻璃×1 → 灑水器'],
   [[[105, 2], [106, 1]], [SPRINK2, 1], '鐵錠×2+鑽石×1 → 高級灑水器'],
   [[[PLANK, 3], [CROP_ITEM0, 3]], [BED, 1], '木板×3+小麥×3 → 床'],
+  [[[PLANK, 8]], [CHEST0, 1], '木板×8 → 箱子'],
   [[[102, 1]], [163, 4], '暗核×1 → 肥料×4'],
   [[[CROP_ITEM0, 4]], [163, 2], '小麥×4 → 肥料×2'],
   [[[DIRT, 2], [104, 1]], [ROOF, 4], '泥土×2+煤炭×1 → 屋瓦×4'],
@@ -1436,7 +1480,9 @@ RCP.push(
 // the spare layers 244–255, and slabs and slopes share their material's (屋瓦 or 木板). Mining cracks at CRACK0..CRACK0+9
 const TEX = 16, TEX_LAYERS = 256, CRACK0 = 96, PLANT0 = 112, TALL_L = 240;   // PLANT0 + crop*4 + stage
 const EGG_L = 241;                            // egg sprites for the CPU renderer: EGG_L + (egg - EGG)
-const texBase = b => b < 32 ? b * 3 : b < SLAB_ROOF ? 244 + (b - 32) * 3 : b === SLAB_WOOD || b === SLAB_WOOD_T ? PLANK * 3 : ROOF * 3;
+const CHEST_L = 106;                          // chests, in the spare layers after the cracks: top · side · bottom, then their front
+const texBase = b => b < 32 ? b * 3 : b < SLAB_ROOF ? 244 + (b - 32) * 3 : isChest(b) ? CHEST_L :
+                     b === SLAB_WOOD || b === SLAB_WOOD_T ? PLANK * 3 : ROOF * 3;
 const texData = new Uint8Array(TEX * TEX * 4 * TEX_LAYERS);
 function seeded(s) {                          // tiny deterministic PRNG, so textures look the same every run
   return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -1531,6 +1577,38 @@ function makeTextures() {
   }
   makeFarmTextures();
   makeJapanTextures();
+  makeChestTextures();
+}
+
+// ---- chest textures (CHEST_L + 0 top · 1 side · 2 bottom · 3 front) ----
+// The body is the cell less a pixel all round and two off the top (MODEL_BOXES), so its faces show columns 1–14 and rows
+// 1–14 (top) or 2–15 (sides): the border pixels only ever show on the latch, which sticks out a pixel and so takes its
+// texture from there. They are iron where its faces land.
+function makeChestTextures() {
+  const r = seeded(401), lay = (f, fn) => paintLayer(CHEST_L + f, fn);
+  const W = [164, 112, 58], WL = [188, 134, 74], WD = [136, 90, 45], E = [84, 53, 26], S = [50, 31, 15];
+  const I = [206, 210, 216], ID = [128, 132, 140];
+  const wood = (c, x, y) => shadeC(c, (1 + (r() - .5) * .1) * ((x * 5 + y * 11) % 13 === 0 ? .88 : 1));
+  const latchEdge = (x, y) => (x === 7 || x === 8) && (y === 0 || y === 15) || (x === 0 || x === 15) && (y === 7 || y === 8);
+  const side = front => (x, y) => {
+    if (x === 0 || x === 15) return y >= 5 && y <= 8 ? (y === 5 ? I : ID) : E;        // the latch's own sides
+    if (front && (x === 7 || x === 8) && y >= 5 && y <= 8) return y === 5 || y === 8 ? ID : x === 7 ? I : [96, 98, 104];   // its face
+    if (y < 2 || x === 1 || x === 14 || y === 2 || y === 15) return E;                 // a dark frame round the edge
+    if (y === 7) return S;                                                             // the gap under the lid
+    if (y === 3) return wood(WL, x, y);
+    if (y === 6 || y === 11) return wood(WD, x, y);                                    // the lid's lower edge, a seam between boards
+    return wood(W, x, y);
+  };
+  lay(1, side(false)); lay(3, side(true));
+  lay(0, (x, y) => {                                                                   // the lid: three boards in a frame
+    if (x === 0 || x === 15 || y === 0 || y === 15) return latchEdge(x, y) ? I : E;
+    if (x === 1 || x === 14 || y === 1 || y === 14) return E;
+    return wood(y === 5 || y === 9 ? WD : y === 2 || y === 6 || y === 10 ? WL : W, x, y);
+  });
+  lay(2, (x, y) => {                                                                   // underneath: darker boards
+    if (x === 0 || x === 15 || y === 0 || y === 15) return latchEdge(x, y) ? ID : E;
+    return x === 1 || x === 14 || y === 1 || y === 14 ? E : wood(shadeC(W, .72), x, y);
+  });
 }
 
 // ---- Japanese building textures ----
@@ -1965,11 +2043,15 @@ const MODEL_BOXES = {
   [LANTERN]: [[4, 3, 4, 12, 13, 12], [5, 13, 5, 11, 16, 11], [5, 1, 5, 11, 3, 11]],                       // body, hanger, bottom ring
   [TOURO]: [[3, 0, 3, 13, 3, 13], [6, 3, 6, 10, 8, 10], [4, 8, 4, 12, 12, 12], [2, 12, 2, 14, 14, 14], [7, 14, 7, 9, 16, 9]],   // base, post, fire box, roof, jewel
 };
+for (let d = 0; d < 4; d++)                   // chests: the body, and the latch sticking out of its front (toward dir d)
+  MODEL_BOXES[CHEST0 + d] = [[1, 0, 1, 15, 14, 15], [[15, 7, 7, 16, 11, 9], [7, 7, 15, 9, 11, 16], [0, 7, 7, 1, 11, 9], [7, 7, 0, 9, 11, 1]][d]];
 const MODEL_TABLE = [[0, 0, 0, 16, 9, 16],                                                                   // bed (shader: modelBox)
   [6, 0, 6, 10, 9, 10], [4, 9, 4, 12, 12, 12], [7, 12, 7, 9, 14, 9],                                      // sprinkler: post, head, nozzle
   [6, 0, 6, 10, 9, 10], [3, 9, 3, 13, 12, 13], [7, 12, 7, 9, 15, 9],                                      // big sprinkler
   [5, 0, 5, 11, 2, 11], [4, 2, 4, 12, 7, 12], [5, 7, 5, 11, 10, 11],                                      // egg: three stacked boxes
-  ...MODEL_BOXES[LANTERN], ...MODEL_BOXES[TOURO]];
+  ...MODEL_BOXES[LANTERN], ...MODEL_BOXES[TOURO],
+  ...[0, 1, 2, 3].flatMap(d => MODEL_BOXES[CHEST0 + d])];
+const CHEST_MB = MODEL_TABLE.length - 8;      // the chests' boxes, two per facing, come last
 // a cell's texture coordinates on a face: u across, v down (0 at the top of side faces); slope faces run down the slope
 function faceUVjs(nx, ny, nz, fx, fy, fz) {
   if (Math.abs(ny) > .99) return [fx, ny > 0 ? fz : 1 - fz];
@@ -2000,7 +2082,8 @@ function shapeIcon(id) {                      // a slab, slope or lantern, drawn
     }
     if (best === Infinity) continue;
     const fx = ox - best, fy = oy - best, fz = oz - best, [tu, tv] = faceUVjs(nx, ny, nz, fx, fy, fz);
-    const layer = base + (ny > .5 ? 0 : ny < -.5 ? 2 : 1), k = layer * 1024 + ((Math.min(15, tv * 16 | 0)) * 16 + Math.min(15, tu * 16 | 0)) * 4;
+    const front = isChest(id) && nx * DX[id - CHEST0] + nz * DZ[id - CHEST0] > .5 ? 2 : 0;   // a chest's front: its own layer
+    const layer = base + (ny > .5 ? 0 : ny < -.5 ? 2 : 1) + front, k = layer * 1024 + ((Math.min(15, tv * 16 | 0)) * 16 + Math.min(15, tu * 16 | 0)) * 4;
     const dark = 1 - .22 * Math.max(nz, 0) - .4 * Math.max(nx, 0);
     img.data.set([texData[k] * dark, texData[k + 1] * dark, texData[k + 2] * dark, 255], (py * 32 + px) * 4);
   }
@@ -2084,7 +2167,7 @@ function makeIcons() {
   for (const id of [SAND, DIRT, WOOD, LEAF, GLASS, STONE, COAL, IRON, DIAMOND, GRASS]) ICON_CANVAS[id] = cubeIcon(id);
   for (const id of [ROOF, PLASTER, TIMBER, CEDAR, SHOJI, TATAMI, LACQUER, GRAVEL, PAVING]) ICON_CANVAS[id] = cubeIcon(id);
   for (const [item, id] of [[SLAB_ROOF, SLAB_ROOF], [SLAB_WOOD, SLAB_WOOD], [STEEP, slopeId(0, 0, 2)], [GENTLE, slopeId(1, 0, 2)],
-                            [LANTERN, LANTERN], [TOURO, TOURO]]) ICON_CANVAS[item] = shapeIcon(id);
+                            [LANTERN, LANTERN], [TOURO, TOURO], [CHEST0, CHEST0 + 1]]) ICON_CANVAS[item] = shapeIcon(id);   // (a chest: latch on the lit left face)
   BP_LIST.forEach((_, k) => { ICON_CANVAS[BP0 + k] = blueprintIcon(k); });
   ICON_CANVAS[TORCH] = sprite(set => {
     for (let y = 6; y < 15; y++) { set(7, y, [138, 104, 60]); set(8, y, [104, 76, 42]); }
@@ -2132,11 +2215,12 @@ function newKit() {
   INV[2] = { id: 150, n: 1 }; INV[3] = { id: 160, n: 1 }; INV[4] = { id: SEED0, n: 8 }; INV[5] = { id: SEED0 + 1, n: 4 };
   INV[6] = { id: SEED0 + 2, n: 4 }; INV[7] = { id: DISH0, n: 2 };
 }
-function give(id, n) {                        // leftovers when the bag is full are lost
+function give(id, n) {                        // what a full bag has no room for is left at your feet
   if (!id) return;
   const m = maxStack(id);
   for (let i = 0; i < 24 && n; i++) if (INV[i].id === id && INV[i].n < m) { const k = Math.min(m - INV[i].n, n); INV[i].n += k; n -= k; }
   for (let i = 0; i < 24 && n; i++) if (!INV[i].id) { const k = Math.min(m, n); INV[i] = { id, n: k }; n -= k; }
+  if (n > 0) { dropAtFeet(id, n); showHint('背包滿了:' + nameOf(id) + ' ×' + n + ' 掉在腳邊', 1.8); }
   drawBar(); if (invOpen) drawInv();
 }
 function has(id, n) { let c = 0; for (const s of INV) if (s.id === id) c += s.n; return c >= n; }
@@ -2146,7 +2230,7 @@ const CAT = [
   ['方塊', [GRASS, DIRT, SAND, STONE, WOOD, PLANK, LEAF, GLASS, TORCH, COAL, IRON, DIAMOND]],
   ['建築', [ROOF, STEEP, GENTLE, SLAB_ROOF, PLASTER, TIMBER, CEDAR, SHOJI, TATAMI, LACQUER, PAVING, GRAVEL, SLAB_WOOD, LANTERN, TOURO]],
   ['藍圖', BP_LIST.map((_, k) => BP0 + k)],
-  ['裝置', [SPRINK, SPRINK2, BED]],
+  ['裝置', [SPRINK, SPRINK2, BED, CHEST0]],
   ['工具', [110, 111, 112, 113, 130, 131, 132, 140, 141, 142]],
   ['武器', [120, 121, 122, 123, 100, 101]],
   ['農具', [150, 151, 152, 153, 160, 161, 162, 163]],
@@ -2440,6 +2524,7 @@ function place() {
   if (!placeable(sel)) return;                                       // empty hand, or holding a tool
   if (sel === SLAB_ROOF || sel === SLAB_WOOD) placeSlab(o, sel);
   else if (sel === STEEP || sel === GENTLE) placeSlope(o, sel);
+  else if (sel === CHEST0) putBlock(o[3], o[4], o[5], CHEST0 + (facingDir() + 2 & 3));   // a chest turns its latch toward you
   else putBlock(o[3], o[4], o[5], sel);
 }
 function putBlock(x, y, z, b) {               // into an empty cell (water and weeds give way), not inside the player
@@ -2551,6 +2636,7 @@ function use2() {                             // right click / E: pets, sleep, h
   } else if (pet && petUse(pet, held)) return;
   const i = o ? idx(o[0], o[1], o[2]) : -1, b = o ? world[i] : AIR;
   if (b === BED) { if (net.role === 'guest') netSend(netHost(), { t: 'sleep' }); else sleep(); return; }
+  if (isChest(b)) { chestOpen(i); swingT = .18; return; }
   if (b >= CROP0 && stageOf(b) === 3) return harvest(i, true);
   if (it.dish !== undefined) return eat(held);
   if (it.bow) return shoot();
@@ -2969,6 +3055,255 @@ function tickEntities(h) {                    // one sub-step of h seconds (need
   if (dayf > .6 && mobs.length && Math.random() < h * .15) mobs.pop();
 }
 
+// ---- things on the ground, and chests ----
+// An item lies in the world until someone walks over it: thrown out of the bag (Q, 丟出, or dragged out of the bag),
+// spilled from a broken chest, or what did not fit in a full bag. The host (or a player alone) runs them; guests see
+// them in the host's updates and ask it for the ones they walk up to.
+// drop: id · it item · n how many · x, y, z its bottom middle · vx, vy, vz · pick: seconds before it can be picked up ·
+//       rest: lying still (looked at again after mt seconds) · mag: flying into your bag · t: its own clock (bobbing) ·
+//       ask: (a guest) when it may ask the host for it again
+const drops = [], DROP_MAX = 512, DROP_R = .125, DROP_H = .25;   // half its width, its height
+let dropSeq = 0, dropMergeT = 0;
+function newDrop(it, n, x, y, z, vx = 0, vy = 0, vz = 0, pick = 0) {
+  return { id: ++dropSeq, it, n, x, y, z, vx, vy, vz, pick, rest: false, mt: 0, mag: false, t: fxRand() * 6.283, ask: 0 };
+}
+function spawnDrop(it, n, x, y, z, vx, vy, vz, pick) {   // host / alone: one more item in the world (past DROP_MAX the oldest goes)
+  if (!IT[it] || !(n > 0)) return null;
+  if (drops.length >= DROP_MAX) drops.shift();
+  const d = newDrop(it, n, Math.max(1 + DROP_R, Math.min(SX - 1 - DROP_R, x)), Math.max(0, y),
+                    Math.max(1 + DROP_R, Math.min(SZ - 1 - DROP_R, z)), vx, vy, vz, pick);
+  drops.push(d);
+  return d;
+}
+const dropHits = (x, y, z) => !boxFree(x - DROP_R, x + DROP_R, y, y + DROP_H, z - DROP_R, z + DROP_R);
+// out of the hands of someone standing at (x, y, z) and looking a / b: from just in front of the eyes, forward and up a little.
+// Looking steeply down (or up) it would land within reach and come straight back, so it goes 2–3 blocks whatever the angle.
+function tossFrom(x, y, z, a, b, it, n) {
+  b = Math.max(-.35, Math.min(.8, b));
+  const cp = Math.cos(b), lx = Math.sin(a) * cp, ly = Math.sin(b), lz = Math.cos(a) * cp, s = 4 + fxRand() * .5;
+  let px = x + lx * .3, py = y + EYE - .45 + ly * .3, pz = z + lz * .3;
+  if (dropHits(px, py, pz)) { px = x; py = y + .9; pz = z; }         // nose against a wall: from the middle of you
+  return spawnDrop(it, n, px, py, pz, lx * s, ly * s + 1.6, lz * s, 1.5);
+}
+const mySpot = () => ({ px: r2(P.x), py: r2(P.y), pz: r2(P.z), pa: r2(P.a), pb: r2(P.b) });   // where you stand and look, for the host
+                                                                                              // (p…: a chest op's own a is its kind)
+function throwItem(it, n) {                   // n of something leave your hands (a guest's are made by the host)
+  if (net.role === 'guest') netSend(netHost(), Object.assign({ t: 'toss', it, n }, mySpot()));
+  else tossFrom(P.x, P.y, P.z, P.a, P.b, it, n);
+  swingT = .18;
+}
+function dropAtFeet(it, n) {                  // what a full bag had no room for waits at your feet
+  if (net.role === 'guest') netSend(netHost(), Object.assign({ t: 'toss', it, n, feet: 1 }, mySpot()));
+  else spawnDrop(it, n, P.x, P.y + .2, P.z, 0, 1.2, 0, 2);
+}
+function throwHeld(all) {                     // Q: one of what you hold · Shift+Q: all of them (creative: out of thin air)
+  if (dead) return;
+  const it = heldItem();
+  if (!it) { showHint('手上沒有東西可以丟', 1.2); return; }
+  if (creative) { throwItem(it, all ? maxStack(it) : 1); return; }
+  const s = INV[selI], n = all ? s.n : 1;
+  s.n -= n; if (!s.n) INV[selI] = { id: 0, n: 0 };
+  throwItem(it, n);
+  drawBar(); if (invOpen) drawInv();
+}
+function throwSlot(i, all) {                  // out of the bag: 丟出, or the stack dragged out of the panel
+  const s = INV[i];
+  if (!s || !s.id) return;
+  const it = s.id, n = all ? s.n : 1;
+  s.n -= n; if (!s.n) INV[i] = { id: 0, n: 0 };
+  throwItem(it, n);
+  toast('丟出了 ' + nameOf(it) + (n > 1 ? ' ×' + n : '') + '(走過去就能撿回來)');
+  drawBar(); if (invOpen) drawInv();
+}
+let pickNote = { it: 0, n: 0, t: 0 };
+function pickedUp(it, n) {                    // "撿到 …" under the crosshair (several in a row add up)
+  const now = performance.now();
+  if (pickNote.it !== it || now - pickNote.t > 1500) pickNote = { it, n: 0, t: now };
+  pickNote.n += n; pickNote.t = now;
+  showHint('撿到 ' + nameOf(it) + ' ×' + pickNote.n, 1.2);
+}
+function tickDrops(h) {                       // host / alone, with the physics sub-steps
+  const me = !dead && !creative;              // (creative: you walk past them, they stay for whoever wants them)
+  for (let k = drops.length - 1; k >= 0; k--) {
+    const d = drops[k];
+    d.t += h;
+    if (d.pick > 0) d.pick -= h;
+    if (me && d.pick <= 0 && !d.mag) {        // you walk up to it: it flies into your bag, if there is room
+      const dx = P.x - d.x, dy = P.y + .6 - d.y, dz = P.z - d.z;
+      if (dx * dx + dz * dz < 2.5 && dy > -1 && dy < 2 && roomFor(d.it, d.n) > 0) { d.mag = true; d.rest = false; }
+    }
+    if (d.mag) {
+      const dx = P.x - d.x, dy = P.y + .7 - d.y, dz = P.z - d.z, dl = Math.hypot(dx, dy, dz);
+      if (!me || dl > 3) d.mag = false;       // you got away from it: it falls again
+      else if (dl < .5) {
+        const n = roomFor(d.it, d.n);
+        if (n) { give(d.it, n); pickedUp(d.it, n); d.n -= n; }
+        if (!d.n) { drops.splice(k, 1); continue; }
+        d.mag = false; d.pick = 1;            // no room for the rest
+      } else { const q = Math.min(1, h * 12); d.x += dx * q; d.y += dy * q; d.z += dz * q; d.vx = d.vy = d.vz = 0; continue; }
+    }
+    if (d.rest) {                             // lying still: every so often, see that nothing changed under it or over it
+      if ((d.mt -= h) > 0) continue;
+      d.mt = .25;
+      if (!dropHits(d.x, d.y, d.z) && dropHits(d.x, d.y - .04, d.z)) continue;
+      d.rest = false;
+    }
+    if (dropHits(d.x, d.y, d.z)) {            // a block went in where it lies (or a building over it): out on top, or to a side
+      const cx = Math.floor(d.x) + .5, cz = Math.floor(d.z) + .5, Y = Math.floor(d.y) + 1;
+      let out = false;
+      for (const [ax, ay, az] of [[d.x, Y, d.z], [cx + 1, d.y, cz], [cx - 1, d.y, cz], [cx, d.y, cz + 1], [cx, d.y, cz - 1]])
+        if (!dropHits(ax, ay, az)) { d.x = ax; d.y = ay; d.z = az; out = true; break; }
+      d.vx = d.vy = d.vz = 0;
+      if (!out) { d.rest = true; d.mt = 1; }  // walled in: it waits
+      continue;
+    }
+    const wet = blockAt(d.x | 0, d.y + .1 | 0, d.z | 0) === WATER;
+    if (wet) { d.vy += (1.2 - d.vy) * Math.min(1, h * 3); const f = Math.exp(-h * 2.5); d.vx *= f; d.vz *= f; }   // floats up
+    else d.vy = Math.max(d.vy - 18 * h, -30);
+    const x = d.x + d.vx * h;
+    if (dropHits(x, d.y, d.z)) d.vx *= -.3; else d.x = x;             // bounces a little off walls
+    const z = d.z + d.vz * h;
+    if (dropHits(d.x, d.y, z)) d.vz *= -.3; else d.z = z;
+    const y = d.y + d.vy * h;
+    let ground = false;
+    if (dropHits(d.x, y, d.z)) {
+      if (d.vy < 0) {                         // landed: on the highest thing under it (a slab or a slope too)
+        let top = -1;
+        forOverlaps(d.x - DROP_R, d.x + DROP_R, y, d.y + DROP_H, d.z - DROP_R, d.z + DROP_R, (X, Y, Z, lo, hi) => { if (hi <= d.y + 1e-3) top = Math.max(top, hi); });
+        if (top >= 0) d.y = top;
+        ground = true;
+      }
+      d.vy = 0;
+    } else d.y = y;
+    if (d.y < 0) { d.y = 0; d.vy = 0; ground = true; }               // the bottom of the world holds it
+    if (ground) {
+      const f = Math.exp(-h * 10); d.vx *= f; d.vz *= f;
+      if (d.vx * d.vx + d.vz * d.vz < .004 && !wet) { d.vx = d.vz = 0; d.rest = true; d.mt = .25; }
+    }
+  }
+  if ((dropMergeT -= h) <= 0) { dropMergeT = .5; mergeDrops(); }
+}
+function mergeDrops() {                       // the same things lying side by side become one stack
+  for (let a = 0; a < drops.length; a++) {
+    const A = drops[a];
+    if (!A.rest) continue;
+    for (let b = drops.length - 1; b > a; b--) {
+      const B = drops[b];
+      if (B.rest && B.it === A.it && A.n + B.n <= maxStack(A.it) && Math.abs(A.x - B.x) < .7 && Math.abs(A.z - B.z) < .7 && Math.abs(A.y - B.y) < .4) {
+        A.n += B.n; A.pick = Math.max(A.pick, B.pick); drops.splice(b, 1);
+      }
+    }
+  }
+}
+function guestPicks() {                       // a guest walking up to an item asks the host for it (if two try, the first gets it)
+  const host = netHost();
+  if (dead || creative || !drops.length || !host || !host.ready) return;
+  const now = performance.now();
+  for (const d of drops) {
+    if (d.ask > now) continue;
+    const dx = P.x - d.x, dy = P.y + .6 - d.y, dz = P.z - d.z;
+    if (dx * dx + dz * dz > 2.5 || dy < -1 || dy > 2) continue;
+    const n = roomFor(d.it, d.n);
+    if (!n) continue;
+    d.ask = now + 700;
+    netSend(host, { t: 'pick', id: d.id, n });
+  }
+}
+
+// chests: 24 slots each, kept by cell. The host (or a player alone) has them; a guest sees the one it opened as the host
+// sends it, and asks the host for every change. Breaking a chest (by anyone) spills what is in it.
+const CHEST_SLOTS = 24, chests = new Map();   // cell → [{id, n}…]
+const emptySlots = () => Array.from({ length: CHEST_SLOTS }, () => ({ id: 0, n: 0 }));
+function chestAt(i) {                         // a chest's slots (empty until something goes in)
+  let s = chests.get(i);
+  if (!s && isChest(world[i])) chests.set(i, s = emptySlots());
+  return s || null;
+}
+function chestGone(i) {                       // the chest at i is no more: what was in it spills out
+  const s = chests.get(i);
+  chests.delete(i);
+  for (const p of net.peers) if (p.chestI === i) p.chestI = -1;
+  if (!s) return;
+  const x = ixOf(i) + .5, y = iyOf(i) + .3, z = izOf(i) + .5;
+  for (const q of s) if (q.id) spawnDrop(q.id, q.n, x + (fxRand() - .5) * .4, y, z + (fxRand() - .5) * .4,
+                                         (fxRand() - .5) * 2.4, 2 + fxRand() * 2, (fxRand() - .5) * 2.4, .6);
+}
+// What can be done to a chest, as ops on its slots. got(it, n, to): items going from the chest to the player (to: the bag
+// slot they were dragged to, -1: wherever they fit). Put and swap carry items the player has already let go of. The host
+// runs every op on the real chest; a guest runs it on its copy as well (got does nothing there), so the page answers at
+// once, and the host's copy comes back a moment later.
+//   take {k, it, n, to}         up to n from slot k, if it still holds that item
+//   put  {k, it, n, to}         into slot k only (k = -1: wherever it fits, same items first); what doesn't fit goes back
+//   swap {k, it, n, to, w, wn}  slot k, if it still holds wn of w, for these; else as put anywhere
+//   move {k, j}                 slot k onto slot j: merged if the same item, else swapped
+//   toss {k, it, n}             up to n from slot k, thrown out in front of the player: returns [it, n]
+function chestApply(s, op, got) {
+  const ok = k => Number.isInteger(k) && k >= 0 && k < CHEST_SLOTS, it = op.it | 0, n = op.n | 0, to = Number.isInteger(op.to) ? op.to : -1;
+  const item = it > 0 && !!IT[it] && n > 0 && n <= maxStack(it);
+  const fill = (k, left) => {                 // as many as fit into slot k
+    const q = s[k];
+    if (q.id && q.id !== it) return left;
+    const c = Math.min(left, maxStack(it) - q.n);
+    if (c > 0) { s[k] = { id: it, n: q.n + c }; left -= c; }
+    return left;
+  };
+  if (op.a === 'take' || op.a === 'toss') {
+    if (!ok(op.k) || !item || s[op.k].id !== it) return null;
+    const c = Math.min(n, s[op.k].n), left = s[op.k].n - c;
+    s[op.k] = left ? { id: it, n: left } : { id: 0, n: 0 };
+    if (op.a === 'toss') return [it, c];
+    got(it, c, to);
+  } else if (op.a === 'put' || op.a === 'swap') {
+    if (!item) return null;
+    let left = n;
+    if (op.a === 'swap' && ok(op.k) && s[op.k].id && s[op.k].id === (op.w | 0) && s[op.k].n === (op.wn | 0)) {
+      const w = s[op.k];
+      s[op.k] = { id: it, n };
+      got(w.id, w.n, to);
+      return null;
+    }
+    if (op.a === 'put' && ok(op.k)) left = fill(op.k, left);
+    else {
+      for (let k = 0; k < CHEST_SLOTS && left; k++) if (s[k].id === it) left = fill(k, left);
+      for (let k = 0; k < CHEST_SLOTS && left; k++) if (!s[k].id) left = fill(k, left);
+    }
+    if (left) got(it, left, to);
+  } else if (op.a === 'move') {
+    if (!ok(op.k) || !ok(op.j) || op.k === op.j) return null;
+    const a = s[op.k], b = s[op.j];
+    if (a.id && a.id === b.id) {
+      const c = Math.min(a.n, maxStack(a.id) - b.n);
+      s[op.j] = { id: b.id, n: b.n + c }; s[op.k] = a.n - c ? { id: a.id, n: a.n - c } : { id: 0, n: 0 };
+    } else { s[op.k] = b; s[op.j] = a; }
+  }
+  return null;
+}
+function gotItems(it, n, to) {                // items out of a chest for us: into the slot they were dragged to, else anywhere
+  if (creative) { if (to >= 0 && to < 6) setCreativeSlot(to, it); return; }   // creative: that hotbar slot holds the kind
+  if (to >= 0 && to < 24) {
+    const s = INV[to], c = Math.min(n, maxStack(it) - (s.id === it ? s.n : s.id ? maxStack(it) : 0));
+    if (c > 0) { INV[to] = { id: it, n: (s.id === it ? s.n : 0) + c }; n -= c; }
+  }
+  if (n > 0) give(it, n);                     // (whatever a full bag can't hold waits at your feet)
+  drawBar(); if (invOpen) drawInv();
+}
+const packSlots = s => s.flatMap(q => [q.id, q.n]);
+function unpackSlots(a) {                     // a chest as the host sent it, checked
+  const s = emptySlots();
+  if (Array.isArray(a)) for (let k = 0; k < CHEST_SLOTS; k++) {
+    const id = a[k * 2], n = a[k * 2 + 1];
+    if (Number.isInteger(id) && IT[id] && Number.isInteger(n) && n > 0) s[k] = { id, n: Math.min(n, maxStack(id)) };
+  }
+  return s;
+}
+function simGive(slots, it, n) {              // how many of n would fit into these slots (and put them there), the way give() fills a bag
+  const m = maxStack(it);
+  let left = n;
+  for (const q of slots) if (left && q.id === it && q.n < m) { const c = Math.min(m - q.n, left); q.n += c; left -= c; }
+  for (const q of slots) if (left && !q.id) { const c = Math.min(m, left); q.id = it; q.n = c; left -= c; }
+  return n - left;
+}
+
 // ---- farming: growth, water, hybrids, seasons, and what the player can do with it ----
 const grow = new Float32Array(VOL);           // crop cells: progress 0..1 (1 = ripe)
 const wetT = new Float32Array(VOL);           // farmland: game hours it stays wet
@@ -2985,6 +3320,7 @@ function resetFarm() {
   discovered.clear(); for (let i = 0; i < 8; i++) discovered.add(i);
   harvested.fill(0); for (const k in buffs) delete buffs[k];
   pets.length = 0; petSeen.clear(); petTamed.clear();
+  chests.clear(); drops.length = 0;
   waterVer++;
 }
 // farmland and crop cells, found by one sweep of the world after any edit made outside the farm code
@@ -3293,8 +3629,11 @@ function saveFarm() {
   const f2 = v => Math.round(v * 100) / 100;
   const pp = tamedPets().map(p => ({ s: p.s, x: f2(p.x), y: f2(p.y), z: f2(p.z), n: p.name, a: p.aff, f: p.fed, p: p.pat, m: p.mode,
                                      hx: f2(p.hx), hy: f2(p.hy), hz: f2(p.hz), g: Math.round(p.grown * 1000) / 1000, tr: p.tr, o: p.o || undefined }));
+  const ch = [];                              // chests with something in them: [cell, [slot, item, count, …]]
+  for (const [i, s] of chests) { const l = s.flatMap((q, k) => q.id ? [k, q.id, q.n] : []); if (l.length) ch.push([i, l]); }
   localStorage.voxelF3 = JSON.stringify({ c: coins, d: day, g, w, disc: [...discovered], h: harvested, b: buffs, wx: weather,
-                                          pets: pp, seen: [...petSeen], tamed: [...petTamed] });
+                                          pets: pp, seen: [...petSeen], tamed: [...petTamed],
+                                          ch, dr: drops.map(d => [d.it, d.n, f2(d.x), f2(d.y), f2(d.z)]) });   // dr: things on the ground
 }
 function loadFarm(json, at = i => i) {        // false: no farm saved yet · at: turns a saved cell index into this world's
   const f = JSON.parse(json || 'null');
@@ -3320,6 +3659,16 @@ function loadFarm(json, at = i => i) {        // false: no farm saved yet · at:
   for (const k of f.seen || []) if (PETS[k]) petSeen.add(k);
   for (const k of f.tamed || []) if (PETS[k]) { petTamed.add(k); petSeen.add(k); }
   if (Array.isArray(f.pets)) petNews = false;
+  chests.clear(); drops.length = 0;
+  const okItem = (id, n) => Number.isInteger(id) && !!IT[id] && Number.isInteger(n) && n > 0;
+  for (const c of Array.isArray(f.ch) ? f.ch : []) {   // what is in the chests (a chest no longer there is left out)
+    if (!Array.isArray(c) || !Array.isArray(c[1]) || !(c[0] >= 0 && c[0] < VOL) || !isChest(world[at(c[0])])) continue;
+    const s = emptySlots(), l = c[1];
+    for (let k = 0; k + 2 < l.length; k += 3) if (l[k] >= 0 && l[k] < CHEST_SLOTS && okItem(l[k + 1], l[k + 2])) s[l[k]] = { id: l[k + 1], n: Math.min(l[k + 2], maxStack(l[k + 1])) };
+    chests.set(at(c[0]), s);
+  }
+  for (const q of Array.isArray(f.dr) ? f.dr : [])     // things lying on the ground
+    if (Array.isArray(q) && okItem(q[0], q[1]) && [q[2], q[3], q[4]].every(Number.isFinite)) spawnDrop(q[0], Math.min(q[1], maxStack(q[0])), q[2], q[3], q[4], 0, 0, 0, 0);
   return true;
 }
 function starterPack() {                      // farming tools for a save that predates farming
@@ -4123,7 +4472,8 @@ out vec4 outColor;
 const int AIR = 0, LEAF = 4, GLASS = 5, TORCH = 6, GRASS = 11, FARM = 12, FARM_FW = 15, WATER = 16, TALL = 17,
           SPRINK = 18, SPRINK2 = 19, BED = 20, PLANK = 21, EGG = 22, EGG3 = 24, CROP0 = 128,
           ROOF = ${ROOF}, SHOJI = ${SHOJI}, PAVING = ${PAVING}, LANTERN = ${LANTERN}, TOURO = ${TOURO},
-          SLAB_ROOF = ${SLAB_ROOF}, SLAB_WOOD = ${SLAB_WOOD}, SLOPE0 = ${SLOPE0}, SLOPE_END = ${SLOPE_END};
+          SLAB_ROOF = ${SLAB_ROOF}, SLAB_WOOD = ${SLAB_WOOD}, SLOPE0 = ${SLOPE0}, SLOPE_END = ${SLOPE_END},
+          CHEST0 = ${CHEST0}, CHEST_L = ${CHEST_L};
 const float CRACK0 = 96.0, PLANT0 = 112.0, TALL_L = 240.0, WATER_Y = .875;
 const ivec3 WDIM = ivec3(${SX}, ${SY}, ${SZ});    // the world's size in cells
 const vec3 PMIN[6] = vec3[6](vec3(-.24, 0., -.12), vec3(.01, 0., -.12), vec3(-.24, .72, -.13),
@@ -4184,7 +4534,10 @@ bool skipBrick(inout ivec3 c, inout vec3 tM, float t, vec3 ro, vec3 rd, vec3 r, 
   c = nc;
   return true;
 }
-bool isModel(int b) { return any(bvec3(any(bvec4(b == SPRINK, b == SPRINK2, b == BED, b == LANTERN)), b == TOURO, all(bvec2(b >= EGG, b <= EGG3)))); }
+bool isModel(int b) {                           // beds, sprinklers, lanterns, eggs and chests: a few boxes in the cell
+  return any(bvec4(any(bvec4(b == SPRINK, b == SPRINK2, b == BED, b == LANTERN)), b == TOURO, all(bvec2(b >= EGG, b <= EGG3)),
+                   all(bvec2(b >= CHEST0, b < CHEST0 + 4))));
+}
 float hash3(vec3 p) { return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
 float torchAt(vec3 p) { return texture(uLight, p.xzy / vec3(WDIM.xzy)).r * (255.0 / 14.0); }
 vec2 faceUV(vec3 f, int axis, vec3 n) {         // f = point inside the cell; v = 0 at the top of side faces
@@ -4193,7 +4546,8 @@ vec2 faceUV(vec3 f, int axis, vec3 n) {         // f = point inside the cell; v 
   return mix(mix(uz, ux, bvec2(axis == 0)), uy, bvec2(axis == 1));
 }
 int texBase(int b) {                            // see texBase() in the textures section
-  return isel(b < 32, b * 3, isel(b < SLAB_ROOF, 244 + (b - 32) * 3, isel(any(bvec2(b == SLAB_WOOD, b == SLAB_WOOD + 1)), PLANK * 3, ROOF * 3)));
+  return isel(b < 32, b * 3, isel(b < SLAB_ROOF, 244 + (b - 32) * 3, isel(b >= CHEST0, CHEST_L,
+              isel(any(bvec2(b == SLAB_WOOD, b == SLAB_WOOD + 1)), PLANK * 3, ROOF * 3))));
 }
 float layerOf(int id, vec3 n) { return float(texBase(id) + isel(n.y > 0.5, 0, isel(n.y < -0.5, 2, 1))); }
 float texLod(float dist, vec3 n, vec3 rd) {     // mip level from distance and viewing angle
@@ -4276,10 +4630,11 @@ float plantHit(int b, ivec3 c, vec3 o, vec3 d, float t0, float t1, out vec4 tx, 
 }
 const vec3 MB_MN[${MODEL_TABLE.length}] = vec3[${MODEL_TABLE.length}](${MODEL_TABLE.map(q => `vec3(${q.slice(0, 3).join('., ')}.)`).join(', ')});
 const vec3 MB_MX[${MODEL_TABLE.length}] = vec3[${MODEL_TABLE.length}](${MODEL_TABLE.map(q => `vec3(${q.slice(3).join('., ')}.)`).join(', ')});
-bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed, sprinklers, eggs and lanterns are a few boxes, in 1/16ths (MODEL_TABLE)
+bool modelBox(int b, int k, out vec3 mn, out vec3 mx) {   // bed, sprinklers, eggs, lanterns and chests are a few boxes, in 1/16ths (MODEL_TABLE)
   mn = vec3(0.); mx = vec3(16., 9., 16.);
-  int at = isel(b == BED, 0, isel(b == SPRINK, 1, isel(b == SPRINK2, 4, isel(b == LANTERN, 10, isel(b == TOURO, ${10 + MODEL_BOXES[LANTERN].length}, 7)))));   // 7: eggs
-  if (k >= isel(b == BED, 1, isel(b == LANTERN, ${MODEL_BOXES[LANTERN].length}, isel(b == TOURO, ${MODEL_BOXES[TOURO].length}, 3)))) return false;
+  bool ch = b >= CHEST0;                        // (the only models past the slopes)
+  int at = isel(ch, ${CHEST_MB} + (b - CHEST0) * 2, isel(b == BED, 0, isel(b == SPRINK, 1, isel(b == SPRINK2, 4, isel(b == LANTERN, 10, isel(b == TOURO, ${10 + MODEL_BOXES[LANTERN].length}, 7))))));   // 7: eggs
+  if (k >= isel(ch, 2, isel(b == BED, 1, isel(b == LANTERN, ${MODEL_BOXES[LANTERN].length}, isel(b == TOURO, ${MODEL_BOXES[TOURO].length}, 3))))) return false;
   mn = MB_MN[at + k]; mx = MB_MX[at + k];
   return true;
 }
@@ -4600,7 +4955,7 @@ void main() {
                   vec2(7.5 + (tp.x - .4375) * 8., 6.5) / 16., bvec2(abs(tn.y) > .5));
     base = textureLod(uTex, vec3(uv, float(TORCH * 3 + 1)), 0.).rgb; N = tn; aimed = false;
     if (uv.y < .5) { col = base * (1.15 + .25 * uFlk); lit = false; }
-  } else if (hit == 3) {                        // ---- bed, sprinkler, egg or lantern model ----
+  } else if (hit == 3) {                        // ---- bed, sprinkler, egg, lantern or chest model ----
     float best = 1e9;
     for (int k = 0; k < 5; k++) {
       vec3 mn, mx, bn;
@@ -4609,10 +4964,11 @@ void main() {
       if (all(bvec3(tt.x < tt.y, tt.x > 0., tt.x < best))) { best = tt.x; N = bn; }
     }
     vec3 f = HP - c0;
-    int ax = isel(abs(N.x) > .5, 0, isel(abs(N.y) > .5, 1, 2));
+    int ax = isel(abs(N.x) > .5, 0, isel(abs(N.y) > .5, 1, 2)), cd = id - CHEST0;
     vec2 uv = faceUV(f, ax, N);
     if (all(bvec2(id == BED, ax != 1))) uv.y = .5625 - f.y;   // a bed's sides: blanket, sheet, then the frame
-    vec4 mt = textureLod(uTex, vec3(uv, layerOf(id, N)), texLod(tHit, N, rd));
+    bool front = all(bvec2(cd >= 0, dot(N.xz, vec2(float(cd == 0) - float(cd == 2), float(cd == 1) - float(cd == 3))) > .5));
+    vec4 mt = textureLod(uTex, vec3(uv, layerOf(id, N) + mix(0., 2., front)), texLod(tHit, N, rd));   // a chest's front: 2 layers on
     base = mt.rgb;
     if (all(bvec2(any(bvec3(id == EGG3, id == LANTERN, id == TOURO)), mt.a < .97))) mark = -1.;   // the dragon egg's marks and the lanterns' lights glow
     SH = mix(mix(uShade.z, uShade.y, ax == 1), uShade.x, ax == 0);
@@ -5078,6 +5434,69 @@ function drawPetSprites(gpu) {                // CPU: each pet is its portrait, 
     g2d.globalAlpha = 1; g2d.textAlign = 'left';
   }
 }
+// things lying on the ground: their icon, bobbing (a flat thing also turns), lit like a plant there, two or three of them
+// for a stack, a soft shadow under them. Hidden behind blocks, and behind the monsters, animals and players in front of them.
+const dropIcons = new Map();                  // item → its icon at 8 brightness levels, each made the first time it is needed
+function dropIcon(it, lv) {
+  let a = dropIcons.get(it);
+  if (!a) dropIcons.set(it, a = []);
+  if (!a[lv]) {
+    const src = ICON_CANVAS[it], c = document.createElement('canvas');
+    c.width = c.height = src ? src.width : 16;
+    const g = c.getContext('2d');
+    if (src) g.drawImage(src, 0, 0); else { g.fillStyle = info(it).c || '#ccc'; g.fillRect(3, 3, 10, 10); }   // (every item has an icon)
+    if (lv < 7) { g.globalCompositeOperation = 'source-atop'; g.fillStyle = 'rgba(0,0,0,' + (.7 - lv * .1).toFixed(2) + ')'; g.fillRect(0, 0, c.width, c.height); }
+    a[lv] = c;
+  }
+  return a[lv];
+}
+function dropBlocked(px, py, pz, d) {         // lineBlocked, but slabs and slopes only where they are solid: things lie on them
+  const ey = P.y + EYE, ux = (px - P.x) / d, uy = (py - ey) / d, uz = (pz - P.z) / d;
+  for (let l = .5; l < d - .2; l += .3) {
+    const x = P.x + ux * l, y = ey + uy * l, z = P.z + uz * l, b = blockAt(x | 0, y | 0, z | 0);
+    if (!SOLID[b] || b === GLASS) continue;
+    if (SHAPE[b]) { const fx = x % 1, fy = y % 1, fz = z % 1; if (fy < spanLo(b) || fy > spanHi(b, fx, fx, fz, fz)) continue; }
+    return true;
+  }
+  return false;
+}
+function hiddenByCreature(x, y, z, d) {       // a monster, an animal or a player stands between the eye and this point
+  const ey = P.y + EYE, ux = (x - P.x) / d, uy = (y - ey) / d, uz = (z - P.z) / d, far = d - .15;
+  for (const m of mobs) if (rayBox(P.x, ey, P.z, ux, uy, uz, m.x - .3, m.y, m.z - .3, m.x + .3, m.y + 1.8, m.z + .3) < far) return true;
+  for (const p of pets) { const r = petR(p); if (rayBox(P.x, ey, P.z, ux, uy, uz, p.x - r, p.y, p.z - r, p.x + r, p.y + petH(p), p.z + r) < far) return true; }
+  for (const q of net.players.values()) if (!q.dead && rayBox(P.x, ey, P.z, ux, uy, uz, q.x - .3, q.y, q.z - .3, q.x + .3, q.y + 1.8, q.z + .3) < far) return true;
+  return false;
+}
+function drawDrops() {
+  if (!drops.length) return;
+  const f = view.f / fovK, ey = P.y + EYE, list = [];
+  for (const d of drops) { const dx = d.x - P.x, dy = d.y + .15 - ey, dz = d.z - P.z, d2 = dx * dx + dy * dy + dz * dz; if (d2 < 576) list.push([d2, d]); }   // 24 blocks
+  list.sort((a, b) => b[0] - a[0]);
+  g2d.imageSmoothingEnabled = false;
+  for (const [d2, d] of list) {
+    const dist = Math.sqrt(d2), cy = d.y + .16 + (Math.sin(d.t * 2.4) + 1) * .045;   // its middle, bobbing a little
+    const s = project(d.x, cy, d.z);
+    if (!s || dropBlocked(d.x, cy, d.z, dist) || hiddenByCreature(d.x, cy, d.z, dist)) continue;
+    const u = f / Math.max(.3, dist), tl = lightAt(d.x | 0, cy | 0, d.z | 0) / 14;
+    const lv = Math.max(0, Math.min(7, Math.round((Math.min(1, sky.light * .85 + sky.dayf * .3 + tl * tl * sky.flk) - .3) / .1)));
+    const ic = dropIcon(d.it, lv), cube = ic.width === 32, W = u * (cube ? .5 : .4);
+    g2d.globalAlpha = dist > 18 ? (24 - dist) / 6 : 1;
+    if (solidAt(d.x, d.y - .05, d.z)) {       // a shadow on what it lies on, flatter the lower you look across it
+      const g = project(d.x, d.y + .01, d.z);
+      if (g) {
+        g2d.fillStyle = 'rgba(0,0,0,.28)';
+        g2d.beginPath(); g2d.ellipse(g[0], g[1], W * .36, W * .36 * Math.max(.15, Math.min(1, (ey - d.y) / dist)), 0, 0, 6.283); g2d.fill();
+      }
+    }
+    const turn = Math.cos(d.t * 1.6 + d.id), sx = cube ? 1 : (turn < 0 ? -1 : 1) * Math.max(.2, Math.abs(turn));
+    for (let c = d.n >= 16 ? 2 : d.n > 1 ? 1 : 0; c >= 0; c--) {
+      g2d.save(); g2d.translate(s[0] + c * W * .2, s[1] - c * W * .16); g2d.scale(sx, 1);
+      g2d.drawImage(ic, -W / 2, -W / 2, W, W);
+      g2d.restore();
+    }
+  }
+  g2d.globalAlpha = 1;
+}
 function drawBlueprintBox(tg) {               // holding a blueprint: the space the building would take, green if it fits there
   const it = info(heldItem());
   if (it.bp === undefined || !tg || dead) return;
@@ -5102,7 +5521,7 @@ function drawBlueprintBox(tg) {               // holding a blueprint: the space 
 }
 function drawOverlays(dt, tg) {
   const gpu = !!GPU.gl;                       // the GPU draws mobs, pets and the block outline itself
-  drawEntities(gpu); drawPetSprites(gpu); drawPlayerTags();
+  drawEntities(gpu); drawPetSprites(gpu); drawDrops(); drawPlayerTags();
   drawSpray(); drawPuffs(dt); drawBlueprintBox(tg);
   if (!gpu && tg && (tg[0] - tg[3] | tg[1] - tg[4] | tg[2] - tg[5])) {   // outline the face under the crosshair
     const [gx, gy, gz] = tg, fx = gx - tg[3], fy = gy - tg[4], fz = gz - tg[5];
@@ -5174,7 +5593,7 @@ function drawInv() {
   }
   invTitle.textContent = creative ? '創造模式:點一個物品放進選中的快捷欄格子(也可以拖曳),全部無限;生存背包原封不動'
                                   : '背包 · 金框的第一排是快捷欄';
-  if (panelTab === 'shop') drawShop(); else if (panelTab === 'cook') drawCook();   // their lists depend on the bag
+  if (panelTab === 'shop') drawShop(); else if (panelTab === 'cook') drawCook(); else if (panelTab === 'chest') drawChest();   // these show the bag too
 }
 // the creative bag: its hotbar on top, then every item by kind; click one (or drag it onto a slot) to hold it
 let catBuilt = false, catDrag = null, catDragged = false;
@@ -5261,9 +5680,11 @@ function drawItemInfo() {
   const pr = sellPrice(it.id), how = dev(itemHow(it.id));
   el.innerHTML = iconImg(it.id, 'big') + '<div class="ix"><div class="nm">' + nameOf(it.id) + (it.n > 1 ? ' ×' + it.n : '') + '</div>' +
     (how ? '<div class="how">' + how + '</div>' : '') + (pr ? '<div class="dim">市集收購 💰' + pr + '</div>' : '') +
-    (infoI === selI ? '<div class="dim">✋ 正拿在手上</div>' : '<button id="ihold">✋ 拿在手上</button>') + '</div>';
+    '<div class="ib">' + (infoI === selI ? '<span class="dim">✋ 正拿在手上</span>' : '<button id="ihold">✋ 拿在手上</button>') +
+    '<button id="itoss" class="toss">丟出 1 個</button>' + (it.n > 1 ? '<button id="itossall" class="toss">整組丟出</button>' : '') + '</div></div>';
 }
 $('iinfo').onclick = e => {                   // hold it: a hotbar slot is picked, anything else swaps into the held slot
+  if ((e.target.id === 'itoss' || e.target.id === 'itossall') && infoI >= 0) { throwSlot(infoI, e.target.id === 'itossall'); return; }
   if (e.target.id !== 'ihold' || infoI < 0 || !INV[infoI].id) return;
   if (infoI < 6) selI = infoI;
   else { const a = INV[selI]; INV[selI] = INV[infoI]; INV[infoI] = a; infoI = selI; }
@@ -5273,6 +5694,7 @@ $('iinfo').onclick = e => {                   // hold it: a hotbar slot is picke
 function toggleInv(open) {
   invOpen = !!open; invEl.classList.toggle('on', invOpen); document.body.classList.toggle('inv', invOpen);
   dragI = -1; bagPress = null; ghostEl.style.display = 'none';
+  if (!invOpen) chestClose();
   if (invOpen) { resetTouch(); unlockPointer(); drawCoins(); showTab(panelTab); tutMark('bag'); }
   else if (!paused && !dead && !isTouch()) lockPointer();
   drawBar();
@@ -5334,6 +5756,7 @@ function updateTip(tg, pk) {                  // what the crosshair is on: an an
     } else if (isFarm(b)) s = '耕地 · ' + (isWetFarm(b) ? '濕潤' : '乾') + (b >= FARM_F ? ' · 已施肥' : '');
     else if (b === TALL) s = '雜草 · 拔掉有機會掉種子';
     else if (b === BED) s = '床 · 晚上右鍵睡到天亮';
+    else if (isChest(b)) { const c = chests.get(i); s = '箱子 · 右鍵打開' + (c ? ' · 放了 ' + c.filter(q => q.id).length + ' / ' + CHEST_SLOTS + ' 格' : ''); }
     else if (b === SPRINK || b === SPRINK2) s = (b === SPRINK ? '灑水器 · 周圍 3×3' : '高級灑水器 · 周圍 5×5') + '的耕地保持濕潤';
     else if (isEgg(b)) s = nameOf(b) + ' · 孵化 ' + Math.floor(grow[i] * 100) + '%' +
                            (grow[i] >= 1 ? ' · 寵物太多了,孵不出來' : torch[i] >= 12 ? ' · 火把保暖中,孵得快一倍' : ' · 旁邊放火把孵得快一倍');
@@ -5373,6 +5796,7 @@ function itemHow(id) {                        // one line on what a thing is for
   if (id >= ITEM_EGG && id <= ITEM_TRUFFLE) return '料理材料,也可以賣錢';
   if (id === TORCH) return '右鍵放下,照亮四周;亮的地方不會生怪物';
   if (id === BED) return '放下後,晚上對床右鍵睡到天亮';
+  if (id === CHEST0) return '右鍵放下,再對它右鍵打開:可以放 ' + CHEST_SLOTS + ' 格東西;打破箱子時,裡面的東西會掉出來';
   if (id === SPRINK) return '放在田裡,周圍 3×3 的耕地一直保持濕潤';
   if (id === SPRINK2) return '放在田裡,周圍 5×5 的耕地一直保持濕潤';
   if (id === GLASS) return '透明的方塊;玻璃屋頂下的作物不分季節';
@@ -5457,6 +5881,7 @@ function showTab(t) {
   for (const p of document.querySelectorAll('#pbody .pg')) p.classList.toggle('on', p.id === 'pg-' + t);
   if (t === 'bag') drawInv(); else if (t === 'shop') drawShop(); else if (t === 'cook') drawCook();
   else if (t === 'tree') drawTree(); else if (t === 'map') drawMap(); else if (t === 'pets') drawPets();
+  else if (t === 'chest') drawChest();
 }
 for (const b of document.querySelectorAll('#ptabs .tab')) b.onclick = () => showTab(b.dataset.p);
 $('pclose').onclick = () => toggleInv(false);
@@ -5619,6 +6044,7 @@ function mapColour(X, Z, y, b) {              // [r, g, b] of a column's top, a 
   else if (b === BED) c = [192, 57, 43];
   else if (b === SPRINK || b === SPRINK2) c = [154, 160, 166];
   else if (isEgg(b)) c = [240, 226, 190];
+  else if (isChest(b)) c = [156, 107, 54];
   else if (b >= ROOF && b < SLOPE_END) { const q = COL_BASE[b]; c = [q >> 16, q >> 8 & 255, q & 255]; }   // Japanese buildings
   else c = [51, 51, 51];
   if (!relief) return c;
@@ -5818,6 +6244,217 @@ $('pg-pets').onclick = e => {
   drawPets();
 };
 
+// ---- the chest page: the open chest's 24 slots, and your bag (in creative mode, the creative hotbar) ----
+// A tap moves a whole stack across; dragging puts it on the slot it is dropped on (the two trade places if that slot
+// holds something else); dragging it off the panel throws it out. A guest's page shows the chest as the host last sent it.
+const chestUI = { i: -1, s: null };           // the open chest: its cell, and its slots as this page shows them (null: on the way)
+let chPress = null;                           // a press on the page: {src: 'c' chest · 'b' bag · 'h' creative hotbar, k, x, y, moved, id}
+function chestOpen(i) {
+  if (!isChest(world[i]) || invOpen) return;
+  chestUI.i = i;
+  if (net.role === 'guest') { chestUI.s = null; netSend(netHost(), { t: 'chest', a: 'open', i }); }
+  else chestUI.s = chestAt(i);
+  document.body.classList.add('chest');
+  panelTab = 'chest';
+  toggleInv(true);
+}
+function chestClose() {                       // (closing the panel closes the chest)
+  if (chestUI.i < 0) return;
+  if (net.role === 'guest') netSend(netHost(), { t: 'chest', a: 'close', i: chestUI.i });
+  chestUI.i = -1; chestUI.s = null; chPress = null;
+  document.body.classList.remove('chest');
+  if (panelTab === 'chest') panelTab = 'bag';
+}
+function chestTick() {                        // every frame: the open chest broke, or you got too far from it to reach in
+  const i = chestUI.i;
+  if (i < 0) return;
+  const gone = !isChest(world[i]);
+  if (!gone && Math.hypot(ixOf(i) + .5 - P.x, iyOf(i) + .5 - P.y - 1, izOf(i) + .5 - P.z) < 8) return;
+  showHint(gone ? '箱子被打破了' : '離箱子太遠了', 1.5);
+  if (invOpen) toggleInv(false); else chestClose();
+}
+function chReady() {                          // the open chest's slots, if it is still there and has arrived (else null)
+  if (chestUI.i < 0 || !isChest(world[chestUI.i])) { chestTick(); return null; }
+  if (net.role !== 'guest') chestUI.s = chestAt(chestUI.i);
+  return chestUI.s;
+}
+function chestDo(op) {                        // an op on the open chest (see chestApply): here, or (a guest) on the host's
+  const i = chestUI.i, s = chestUI.s;         // (callers check chReady() first: a put's items have already left the bag)
+  if (net.role === 'guest') {
+    chestApply(s, op, () => {});
+    netSend(netHost(), Object.assign({ t: 'chest', i, cr: creative ? 1 : 0 }, op));
+    drawChest();
+    return;
+  }
+  const r = chestApply(s, op, gotItems);
+  if (r) throwItem(r[0], r[1]);
+  chestChanged(i);
+}
+function chestChanged(i) {                    // host / alone: whoever has this chest open sees it as it is now
+  if (chestUI.i === i) drawChest();
+  if (net.role !== 'host') return;
+  const s = chests.get(i), m = JSON.stringify({ t: 'chest', a: 'data', i, s: s ? packSlots(s) : null });
+  for (const p of net.peers) if (p.ready && p.chestI === i) netSend(p, m);
+}
+const cslot = (it, kind, k, cls) => '<div class="slot' + (it.id ? ' i' + it.id : ' e') + cls + '" data-' + kind + '="' + k + '" title="' + nameOf(it.id) + '">' +
+  (it.id ? '<i>' + (it.n < 0 ? '∞' : it.n > 1 ? it.n : '') + '</i>' : '') + '</div>';
+function drawChest() {
+  if (!invOpen || panelTab !== 'chest') return;
+  if (net.role !== 'guest' && chestUI.i >= 0) chestUI.s = chestAt(chestUI.i);
+  const s = chestUI.s, src = chPress && chPress.moved ? chPress.src + chPress.k : '';
+  $('chestn').textContent = s ? '放了 ' + s.filter(q => q.id).length + ' / ' + CHEST_SLOTS + ' 格' : '打開中…';
+  let h = '';
+  for (let k = 0; k < CHEST_SLOTS; k++) h += cslot(s ? s[k] : { id: 0, n: 0 }, 'c', k, src === 'c' + k ? ' src' : '');
+  $('chestg').innerHTML = h;
+  h = '';
+  if (creative) for (let j = 0; j < 6; j++) h += cslot({ id: CINV[j], n: -1 }, 'h', j, ' hb' + (j === selI ? ' on' : '') + (src === 'h' + j ? ' src' : ''));
+  else for (let j = 0; j < 24; j++) h += cslot(INV[j], 'b', j, (j < 6 ? ' hb' : '') + (j === selI ? ' on' : '') + (src === 'b' + j ? ' src' : ''));
+  $('chestb').innerHTML = h;
+  $('chbagh').textContent = creative ? '🎨 創造快捷欄(無限)' : '🎒 背包';
+  $('chbtns').style.display = creative ? 'none' : '';
+  const out = innerWidth > 600 && innerHeight > 480;   // (narrower, the panel fills the screen: there is no "off it")
+  $('chesthint').textContent = (creative ? '點快捷欄的東西:放一組進箱子 · 點箱子裡的東西:放到選中的快捷欄格子 · 拖曳:放到想要的格子'
+                                         : '點一下:整組搬到另一邊 · 拖曳:放到想要的格子') + (out ? ' · 拖到面板外面:丟出去' : '');
+}
+function chSlotAt(el) {                       // the slot an element is part of: ['c' | 'b' | 'h', index], or null
+  const n = el && el.closest && el.closest('#pg-chest .slot');
+  if (!n) return null;
+  const d = n.dataset;
+  return d.c !== undefined ? ['c', +d.c] : d.b !== undefined ? ['b', +d.b] : d.h !== undefined ? ['h', +d.h] : null;
+}
+const chItem = (src, k) => src === 'c' ? (chestUI.s ? chestUI.s[k] : { id: 0, n: 0 }) : src === 'b' ? INV[k] : { id: CINV[k], n: -1 };
+function chTap(src, k) {                      // a whole stack across: out of the chest into the bag, or the other way
+  const s = chReady();
+  if (!s) return;
+  if (src === 'c') {
+    const q = s[k];
+    if (!q.id) return;
+    if (creative) { chestDo({ a: 'take', k, it: q.id, n: q.n, to: selI }); return; }
+    const n = roomFor(q.id, q.n);
+    if (!n) { toast('背包滿了'); return; }
+    chestDo({ a: 'take', k, it: q.id, n, to: -1 });
+  } else if (src === 'b') {
+    const q = INV[k];
+    if (!q.id) return;
+    const it = q.id, n = simGive(s.map(c => ({ id: c.id, n: c.n })), it, q.n);
+    if (!n) { toast('箱子滿了'); return; }
+    q.n -= n; if (!q.n) INV[k] = { id: 0, n: 0 };
+    chestDo({ a: 'put', k: -1, it, n, to: k });
+    drawBar(); drawInv();
+  } else if (CINV[k]) chestDo({ a: 'put', k: -1, it: CINV[k], n: maxStack(CINV[k]), to: -1 });   // creative: a stack out of nowhere
+}
+function chDrop(src, k, dst, j) {             // a stack dragged from one slot onto another
+  const s = chReady();
+  if (!s || (src === dst && k === j)) return;
+  const a = chItem(src, k);
+  if (!a.id) return;
+  if (src === 'c' && dst === 'c') { chestDo({ a: 'move', k, j }); return; }
+  if (src === 'c') {                          // out of the chest, onto that slot of the bag (creative: of the hotbar)
+    if (dst === 'h') { chestDo({ a: 'take', k, it: a.id, n: a.n, to: j }); return; }
+    const b = INV[j];
+    if (!b.id || b.id === a.id) {
+      const n = Math.min(a.n, maxStack(a.id) - (b.id ? b.n : 0));
+      if (n > 0) chestDo({ a: 'take', k, it: a.id, n, to: j });
+    } else {                                  // it holds something else: the two trade places
+      INV[j] = { id: 0, n: 0 };
+      chestDo({ a: 'take', k, it: a.id, n: a.n, to: j });
+      chestDo({ a: 'put', k, it: b.id, n: b.n, to: j });
+    }
+    drawBar(); drawInv();
+  } else if (dst === 'c') {                   // into the chest, onto slot j
+    const c = s[j];
+    if (src === 'h') {
+      const id = a.id, n = maxStack(id) - (c.id === id ? c.n : 0);
+      if (!c.id || c.id === id) { if (n > 0) chestDo({ a: 'put', k: j, it: id, n, to: -1 }); }
+      else chestDo({ a: 'put', k: -1, it: id, n: maxStack(id), to: -1 });
+      return;
+    }
+    if (!c.id || c.id === a.id) {
+      const it = a.id, n = Math.min(a.n, maxStack(it) - (c.id ? c.n : 0));
+      if (n <= 0) return;
+      a.n -= n; if (!a.n) INV[k] = { id: 0, n: 0 };
+      chestDo({ a: 'put', k: j, it, n, to: k });
+    } else {                                  // it holds something else: the two trade places
+      INV[k] = { id: 0, n: 0 };
+      chestDo({ a: 'swap', k: j, it: a.id, n: a.n, to: k, w: c.id, wn: c.n });
+    }
+    drawBar(); drawInv();
+  } else if (src === 'b' && dst === 'b') {    // within the bag, as on the bag page
+    const b = INV[j];
+    if (a.id === b.id && b.n < maxStack(a.id)) { const c = Math.min(maxStack(a.id) - b.n, a.n); b.n += c; a.n -= c; if (!a.n) INV[k] = { id: 0, n: 0 }; }
+    else { INV[k] = b; INV[j] = a; }
+    drawBar(); drawInv();
+  } else if (src === 'h' && dst === 'h') { const t = CINV[k]; CINV[k] = CINV[j]; CINV[j] = t; saveCreative(); drawBar(); drawChest(); }
+}
+function chToss(src, k) {                     // dragged off the panel: thrown out (creative hotbar: that slot is emptied)
+  if (src === 'c') {
+    const s = chReady(), q = s && s[k];
+    if (!q || !q.id) return;
+    toast('丟出了 ' + nameOf(q.id) + (q.n > 1 ? ' ×' + q.n : ''));
+    chestDo(Object.assign({ a: 'toss', k, it: q.id, n: q.n }, mySpot()));   // (a guest's: the host throws it from where we are)
+  } else if (src === 'b') throwSlot(k, true);
+  else setCreativeSlot(k, 0);
+}
+const pgChest = $('pg-chest');
+pgChest.onpointerdown = e => {
+  const t = chSlotAt(e.target);
+  if (!t) return;
+  e.preventDefault();
+  chPress = { src: t[0], k: t[1], x: e.clientX, y: e.clientY, moved: false, id: chItem(t[0], t[1]).id };
+  if (chPress.id) ghostEl.className = 'i' + chPress.id;
+  if (pgChest.setPointerCapture) pgChest.setPointerCapture(e.pointerId);
+};
+pgChest.onpointermove = e => {
+  const p = chPress;
+  if (!p || !p.id) return;
+  if (!p.moved && Math.abs(e.clientX - p.x) + Math.abs(e.clientY - p.y) > 6) { p.moved = true; ghostEl.style.display = 'block'; drawChest(); }
+  if (p.moved) moveGhost(e);
+};
+pgChest.onpointercancel = () => { chPress = null; ghostEl.style.display = 'none'; drawChest(); };
+pgChest.onpointerup = e => {
+  const p = chPress;
+  chPress = null; ghostEl.style.display = 'none';
+  if (!p) return;
+  if (!p.moved) chTap(p.src, p.k);
+  else if (p.id) {
+    const el = document.elementFromPoint(e.clientX, e.clientY), t = chSlotAt(el);
+    if (t) chDrop(p.src, p.k, t[0], t[1]);
+    else if (el === invEl) chToss(p.src, p.k);   // let go over the dim area around the panel
+  }
+  drawChest();
+};
+$('chout').onclick = () => {                  // 全部拿出來: as much as the bag can take
+  const s = chReady();
+  if (!s) return;
+  const sim = INV.map(q => ({ id: q.id, n: q.n }));
+  let short = false;
+  for (let k = 0; k < CHEST_SLOTS; k++) {
+    const q = s[k];
+    if (!q.id) continue;
+    const n = simGive(sim, q.id, q.n);
+    if (n < q.n) short = true;
+    if (n) chestDo({ a: 'take', k, it: q.id, n, to: -1 });
+  }
+  if (short) toast('背包滿了,有些東西拿不出來');
+};
+$('chin').onclick = () => {                   // 全部放進箱子: everything in the bag but the hotbar row
+  const s = chReady();
+  if (!s) return;
+  const sim = s.map(q => ({ id: q.id, n: q.n }));
+  let short = false;
+  for (let j = 6; j < 24; j++) {
+    const q = INV[j];
+    if (!q.id) continue;
+    const it = q.id, n = simGive(sim, it, q.n);
+    if (n < q.n) short = true;
+    if (!n) continue;
+    q.n -= n; if (!q.n) INV[j] = { id: 0, n: 0 };
+    chestDo({ a: 'put', k: -1, it, n, to: j });
+  }
+  if (short) toast('箱子滿了,有些東西放不進去');
+  drawBar(); drawInv();
+};
+
 // ---- menu & settings ----
 function applySettings() {                    // settings → live values and labels
   $('vMs').textContent = settings.ms; $('vTs').textContent = settings.ts;
@@ -5948,7 +6585,7 @@ $('rb').onclick = () => { respawn(); if (!isTouch()) lockPointer(); };
 //      (LINE, Discord…). The host runs the world — crops, monsters, pets, time and weather — and sends it
 //      out; guests send what they change. Everyone keeps their own bag, wallet and health.
 // =============================================================================
-const NET_VER = 2, NET_MAX = 8;               // 2: Japanese building blocks (an older game can't show them)
+const NET_VER = 3, NET_MAX = 8;               // 3: chests and things on the ground · 2: Japanese building blocks (older games can't show them)
 const NET_COLS = ['#4f8ef7', '#ef5350', '#43c465', '#f5a623', '#ab5fe8', '#f06ba8', '#26b5a8', '#f57c33'];   // shirts and name tags
 const ICE_SERVERS = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
 const net = {
@@ -6198,6 +6835,7 @@ function netWorldArrived() {                  // the host's world takes the plac
   (f.h || []).forEach((n, c) => { if (c < harvested.length) harvested[c] = n; });
   day = f.day; tod = f.tod; weather = f.wx;
   mobs.length = 0; arrows.length = 0; pets.length = 0; net.petInfo.clear();
+  chests.clear(); drops.length = 0; chestUI.i = -1; chestUI.s = null;   // the host's chests and things on its ground come from the host
   worldVer++; geomVer++; waterVer++; farmListVer = -1; invalidateShadows(); GPU.ver = -1; needRender = true;
   net.shadow = world.slice(); net.shadow32 = new Uint32Array(net.shadow.buffer); net.scanVer = worldVer;
   setFlying(false); P.x = net.spawn[0]; P.y = net.spawn[1]; P.z = net.spawn[2]; P.g = 0;
@@ -6263,6 +6901,37 @@ const HOST = {                                // what the host hears from a gues
   arrow(peer, m) {
     if ([m.x, m.y, m.z, m.vx, m.vy, m.vz].every(Number.isFinite) && arrows.length < 60)
       arrows.push({ x: m.x, y: m.y, z: m.z, vx: m.vx, vy: m.vy, vz: m.vz, life: 4, by: peer.id });
+  },
+  toss(peer, m) {                             // a guest threw something out (feet: its full bag had no room for it)
+    const q = net.players.get(peer.id), it = m.it | 0, n = m.n | 0;
+    if (!q || !IT[it] || n < 1 || n > maxStack(it)) return;
+    const s = guestSpot(q, m);
+    if (m.feet) spawnDrop(it, n, s.x, s.y + .2, s.z, 0, 1.2, 0, 2);
+    else tossFrom(s.x, s.y, s.z, s.a, s.b, it, n);
+  },
+  pick(peer, m) {                             // a guest walked up to something on the ground: it is theirs, if it is still there
+    const k = drops.findIndex(d => d.id === m.id), q = net.players.get(peer.id);
+    if (k < 0 || !q || q.dead || q.cr) return;
+    const d = drops[k], n = Math.min(d.n, m.n | 0);
+    if (n < 1 || d.pick > 0 || d.mag || (q.x - d.x) ** 2 + (q.z - d.z) ** 2 > 6.25 || Math.abs(q.y + .6 - d.y) > 2.5) return;
+    d.n -= n; d.rest = false;
+    if (!d.n) drops.splice(k, 1);
+    netSend(peer, { t: 'give', l: [[d.it, n]], c: 0, ts: [], pk: 1 });
+  },
+  chest(peer, m) {                            // a guest at a chest: opening it, closing it, or one op on it (see chestApply)
+    const i = m.i | 0, q = net.players.get(peer.id);
+    if (m.a === 'close') { if (peer.chestI === i) peer.chestI = -1; return; }
+    const ok = !!q && i >= 0 && i < VOL && isChest(world[i]) && Math.hypot(ixOf(i) + .5 - q.x, iyOf(i) + .5 - q.y - 1, izOf(i) + .5 - q.z) < 10;
+    if (!ok || m.a === 'open') {
+      if (!ok && (m.a === 'put' || m.a === 'swap') && !m.cr && IT[m.it | 0] && (m.n | 0) > 0)   // no chest there now: what they put in goes back
+        netSend(peer, { t: 'chest', a: 'got', it: m.it | 0, n: Math.min(m.n | 0, maxStack(m.it | 0)), to: Number.isInteger(m.to) ? m.to : -1 });
+      peer.chestI = ok ? i : -1;
+      netSend(peer, { t: 'chest', a: 'data', i, s: ok ? packSlots(chestAt(i)) : null });
+      return;
+    }
+    const r = chestApply(chestAt(i), m, (it, n, to) => netSend(peer, { t: 'chest', a: 'got', it, n, to }));
+    if (r) { const s = guestSpot(q, m); tossFrom(s.x, s.y, s.z, s.a, s.b, r[0], r[1]); }
+    chestChanged(i);
   },
   pet(peer, m) {                              // a guest feeding, patting or taming an animal, or looking after their own pets
     const who = netActor(peer, m);
@@ -6346,6 +7015,14 @@ const GUEST = {                               // what a guest hears from the hos
     }
     arrows.length = 0;
     for (const [x, y, z, vx, vy, vz] of m.ar) arrows.push({ x, y, z, vx, vy, vz, life: 1 });
+    const od = new Map(drops.map(o => [o.id, o]));   // things on the ground near us
+    drops.length = 0;
+    for (const [id, it, n, x, y, z] of m.dr || []) {
+      if (!IT[it]) continue;
+      const o = od.get(id) || Object.assign(newDrop(it, n, x, y, z), { id });
+      o.it = it; o.n = n; o.tx = x; o.ty = y; o.tz = z;
+      drops.push(o);
+    }
     for (const [id, x, y, z, a, b, f, d, h, hu, cr] of m.pl) {
       const q = net.players.get(id);
       if (!q) continue;
@@ -6365,8 +7042,8 @@ const GUEST = {                               // what a guest hears from the hos
   chat(peer, m) { chatShow(m.n, m.c, m.m); },
   sys(peer, m) { chatSys(m.m); },
   hurt(peer, m) { hurtPlayer(Math.max(1, Math.min(20, m.d | 0)), m.fx, m.fz, m.by); },
-  give(peer, m) {                             // what our pets brought
-    for (const [id, n] of m.l || []) if (IT[id]) give(id, Math.min(64, n | 0));
+  give(peer, m) {                             // what our pets brought (pk: something we walked up to on the ground)
+    for (const [id, n] of m.l || []) if (IT[id]) { give(id, Math.min(64, n | 0)); if (m.pk) pickedUp(id, n | 0); }
     if (m.c > 0) { coins += m.c | 0; drawCoins(); }
     for (const [s, k] of m.ts || []) toast(s, k);
   },
@@ -6374,12 +7051,23 @@ const GUEST = {                               // what a guest hears from the hos
     if (creative) return;
     if (heldItem() === m.h) takeHeld(); else if (take(m.h, 1)) { drawBar(); if (invOpen) drawInv(); }
   },
+  chest(peer, m) {                            // the open chest as the host has it, or things out of a chest for us
+    if (m.a === 'got') { const it = m.it | 0, n = m.n | 0; if (IT[it] && n > 0) gotItems(it, Math.min(n, maxStack(it)), Number.isInteger(m.to) ? m.to : -1); return; }
+    if (m.a !== 'data' || m.i !== chestUI.i) return;
+    if (!m.s) { showHint('箱子不見了', 1.5); if (invOpen) toggleInv(false); else chestClose(); return; }
+    chestUI.s = unpackSlots(m.s);
+    drawChest();
+  },
   toast(peer, m) { toast(String(m.m), m.k); },
   hint(peer, m) { showHint(String(m.m), m.d || 1.5); },
   set(peer, m) { if (net.pvp !== !!m.pvp) { net.pvp = !!m.pvp; chatSys(net.pvp ? '⚔ 房主打開了玩家互打' : '🕊 房主關掉了玩家互打'); } },
   slept(peer, m) { fadeSleep(); hp = maxHp(); toast('☀ 早安!' + m.n + ' 睡了一覺,天亮了', 'big'); },
   bye(peer, m) { peer.why = m.why === 'ver' ? 'ver' : 'bye'; netGone(peer); },
 };
+function guestSpot(q, m) {                    // where a guest says it stands and looks (more exact than our smoothed copy), if near that
+  const ok = [m.px, m.py, m.pz, m.pa, m.pb].every(Number.isFinite) && Math.hypot(m.px - q.x, m.py - q.y, m.pz - q.z) < 4;
+  return ok ? { x: m.px, y: m.py, z: m.pz, a: m.pa, b: m.pb } : { x: q.x, y: q.y, z: q.z, a: q.a, b: q.b };
+}
 function netActor(peer, m) {                  // a guest, as petUse sees them: their name, what they hold, where the words go
   return { name: peer.name, creative: !!m.cr, take: () => netSend(peer, { t: 'take', h: m.h | 0 }),
            hint: (s, t) => netSend(peer, { t: 'hint', m: s, d: t }), toast: (s, k) => netSend(peer, { t: 'toast', m: s, k: k || '' }) };
@@ -6420,6 +7108,7 @@ function netApplyEdits(e, g, from) {          // cells someone else changed ([i,
     const old = world[i];
     if (old === id) continue;
     const keep = old >= CROP0 && id >= CROP0 && cropOf(old) === cropOf(id) ? grow[i] : 0;   // a crop growing: keep its progress
+    if (bulk && isChest(old) && !isChest(id)) chestGone(i);          // (setBlock does this itself)
     if (bulk) world[i] = id; else setBlock(i, id);
     grow[i] = keep;
     if (from) {                               // host, from a guest: what setBlock alone would not know
@@ -6440,7 +7129,10 @@ function netEntities(peer) {                  // host: what one guest sees movin
   pl.push([1, r2(P.x), r2(P.y), r2(P.z), r2(P.a), r2(P.b), flying ? 1 : 0, dead ? 1 : 0, heldItem(), hurtT > 0 ? 1 : 0, creative ? 1 : 0]);
   for (const q of net.players.values())
     if (q.id !== peer.id) pl.push([q.id, r2(q.x), r2(q.y), r2(q.z), r2(q.a), r2(q.b), q.fly, q.dead, q.held, q.ht > 0 ? 1 : 0, q.cr]);
-  return { t: 'ent', m, p, ar, pl };
+  const dr = [];                              // things on the ground (the nearest, if there are very many)
+  for (const d of drops) { const dd = (d.x - px) * (d.x - px) + (d.z - pz) * (d.z - pz); if (dd < 2304) dr.push([dd, d]); }   // 48 blocks
+  if (dr.length > 96) { dr.sort((a, b) => a[0] - b[0]); dr.length = 96; }
+  return { t: 'ent', m, p, ar, pl, dr: dr.map(([, d]) => [d.id, d.it, d.n, r2(d.x), r2(d.y), r2(d.z)]) };
 }
 function netPetList() {                       // host: details of every tamed pet
   return { t: 'pets', l: tamedPets().map(p => [p.id, p.s, p.name, p.aff, p.fed, p.pat, p.mode, r2(p.hx), r2(p.hz), p.grown, p.o || '']) };
@@ -6496,7 +7188,7 @@ function netBackground(dt) {
     farmAcc = 0;
   }
   const steps = Math.ceil(dt / .02), h = dt / steps;
-  for (let i = 0; i < steps; i++) { movePlayer(h, 0, 0, 5, 0); tickEntities(h); tickPets(h); }
+  for (let i = 0; i < steps; i++) { movePlayer(h, 0, 0, 5, 0); tickEntities(h); tickPets(h); tickDrops(h); }
   tickGrass(dt);
   netTick(dt);
 }
@@ -6531,6 +7223,7 @@ function netSmooth(dt) {                      // the others glide to where they 
     p.t = (p.t + Math.hypot(p.x - ox, p.z - oz) * 4.5 / Math.max(.45, petH(p)) + dt * (PETS[p.s].fly ? 9 : 1.2)) % 6283.185307;
   }
   for (const a of arrows) { a.x += a.vx * dt; a.y += a.vy * dt; a.z += a.vz * dt; a.vy -= 16 * dt; }
+  for (const d of drops) { if (d.tx !== undefined) { d.x += (d.tx - d.x) * k; d.y += (d.ty - d.y) * k; d.z += (d.tz - d.z) * k; } d.t += dt; }
 }
 
 // ---- players against players, monsters against players ----
@@ -6831,6 +7524,10 @@ addEventListener('keydown', e => {
   else if (k === 't' && net.role === 'guest') showHint('時間跟著房主的世界,只有房主能快轉', 1.8);
   else if (k === 'x') confirmReset();
   else if (k === 'enter' && net.role) chatOpen();
+  else if (k === 'q') {                       // Q: throw one out (Shift+Q: the whole stack) — in the bag, the one under the mouse
+    if (!invOpen) throwHeld(e.shiftKey);
+    else if (panelTab === 'bag' && !creative && infoI >= 0 && INV[infoI].id) throwSlot(infoI, e.shiftKey);
+  }
 });
 addEventListener('keyup', e => { const k = keyOf(e); K[k] = 0; if (k === 'w') sprintLatch = false; });
 function spaceTap() {                         // double-tap Space (or ⤒) in creative: take off / land
@@ -6865,7 +7562,9 @@ document.addEventListener('pointerlockchange', () => {
   if (!locked && wasLocked && !wantUnlock && !paused && !invOpen && !dead) { setMenu(true); autoMenuAt = performance.now(); }  // Esc / alt-tab
   wasLocked = locked; wantUnlock = false;
 });
-canvas.addEventListener('contextmenu', e => e.preventDefault());
+// no browser menu on a right click anywhere in the game: on Windows it comes when the button is let go, and by then a
+// right click on a chest has opened the chest's page over the view. Text boxes keep it (pasting a connection code)
+document.addEventListener('contextmenu', e => { if (!(e.target.closest && e.target.closest('input, textarea'))) e.preventDefault(); });
 canvas.addEventListener('mousedown', e => {
   if (paused) return;
   if (isTouch() && !document.body.classList.contains('coarse') && performance.now() - lastTouchT > 1500) {
@@ -7064,6 +7763,7 @@ invGrid.onpointerup = e => {
   }
   if (dragI < 0) { drawInv(); return; }
   let n = document.elementFromPoint(e.clientX, e.clientY);
+  if (n === invEl) { const i = dragI; dragI = -1; throwSlot(i, true); return; }   // let go over the dim area: thrown out
   n = n && n.closest && n.closest('.slot');
   const j = n && invGrid.contains(n) ? +n.dataset.i : -1;
   if (j >= 0 && j !== dragI) {
@@ -7197,8 +7897,9 @@ function frame(tm) {
   const spd = (flying ? (sprinting ? 14 : 8) : (sprinting ? 7 : 5)) * (buffs.run > 0 ? 1.35 : 1);
   const lift = flying && !handsOff ? (K[' '] || upHold ? 1 : 0) - (K.shift || downHold ? 1 : 0) : 0;
   const px0 = P.x, pz0 = P.z;
-  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); if (guest) tickSelf(h); else { tickEntities(h); tickPets(h); } }
-  if (!guest) tickGrass(dt);
+  for (let i = 0; i < steps; i++) { movePlayer(h, mu, mv, spd, lift); if (guest) tickSelf(h); else { tickEntities(h); tickPets(h); tickDrops(h); } }
+  if (!guest) tickGrass(dt); else guestPicks();
+  chestTick();
   netTick(dt);
   if (P.y < -10) { placeAtSpawn(); hurtPlayer(4); }
   touchAimTick(dt, handsOff);                 // 點畫面: the finger aims; held still, it digs (or fights)
@@ -7264,8 +7965,8 @@ const tutSeen = tutLoad();
 makeTextures(); makeIcons(); makeIconCSS(); loadCreative();
 initGL(1000);                                 // for a second nothing draws (cached shaders are ready by then), then the CPU until the GPU can
 newKit();
-let jpNews = false;                           // this browser hasn't been told about the Japanese buildings yet
-try { jpNews = !localStorage.voxelJP; localStorage.voxelJP = '1'; } catch (e) {}
+let jpNews = false, boxNews = false;          // this browser hasn't been told about the Japanese buildings / chests yet
+try { jpNews = !localStorage.voxelJP; localStorage.voxelJP = '1'; boxNews = !localStorage.voxelBox; localStorage.voxelBox = '1'; } catch (e) {}
 if (!loadGame()) {
   generateWorld(); placeAtSpawn();
   bootMsg = '🌱 出生點附近有池塘和一小塊菜園:鋤頭翻土、右鍵播種、成熟後右鍵收成\n🐾 草地上的動物可以馴服:拿牠最愛的食物對牠右鍵(狗最愛背包裡的麵包)\n' +
@@ -7275,7 +7976,9 @@ if (!loadGame()) {
   if (!tutSeen && !isTouch()) tutDone = null;  // a computer player with a world already knows the keys (touch players get the new controls shown)
   bootMsg = [loadNote, needStarter ? '🌱 新功能:種菜!鋤頭、澆水壺和種子已經放進背包' : '',
              petNews ? '🐾 新功能:寵物!拿野生動物最愛的食物對牠右鍵就能馴服 · P 看寵物和圖鑑' : '',
-             jpNews ? '🏯 新功能:日式建築!屋瓦斜坡能蓋出斜屋頂;市集有藍圖,一次蓋好鳥居、民家、神社、五重塔' : ''].filter(Boolean).join('\n');
+             jpNews ? '🏯 新功能:日式建築!屋瓦斜坡能蓋出斜屋頂;市集有藍圖,一次蓋好鳥居、民家、神社、五重塔' : '',
+             boxNews ? '📦 新功能:箱子!木板×8 合成,放下後右鍵打開來放東西 · 背包裡的東西可以丟出來(' +
+                       (isTouch() ? '在背包點物品按「丟出」' : 'Q,或在背包點物品按「丟出」') + '),走過去就撿回來' : ''].filter(Boolean).join('\n');
 }
 relight();
 applySettings();
